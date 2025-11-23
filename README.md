@@ -293,22 +293,26 @@ See the `examples/` directory for complete examples:
 This package includes a comprehensive test suite:
 
 **Unit Tests** (Vitest - 64 tests)
+
 ```bash
 npm test              # Run unit tests
 npm run test:watch    # Run in watch mode
 ```
 
 Tests cover:
+
 - Configuration validation (18 tests)
 - Dataset types and loading (24 tests)
 - Expectations (exact, schema) (22 tests)
 
 **Integration Tests** (Playwright - 5 tests)
+
 ```bash
 npm run test:playwright
 ```
 
 Integration tests use a mock MCP server and cover:
+
 - MCP server connection and info
 - Tool listing and conformance checks
 - Eval dataset execution
@@ -338,15 +342,6 @@ npm run lint:fix
 npm run format
 npm run format:check
 ```
-
-## Architecture
-
-Built on official MCP SDK types:
-
-- Uses `@modelcontextprotocol/sdk` for all MCP interactions
-- No shadow types - direct SDK type usage
-- Idiomatic Playwright patterns (`test.extend`, project config)
-- Zod for runtime validation
 
 ## License
 
