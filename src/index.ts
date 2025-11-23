@@ -30,6 +30,7 @@ export type {
   EvalCase,
   EvalDataset,
   SerializedEvalDataset,
+  EvalMode,
 } from './evals/datasetTypes.js';
 export {
   EvalCaseSchema,
@@ -74,6 +75,23 @@ export {
   findMissingSubstrings,
   findFailedPatterns,
 } from './evals/expectations/textUtils.js';
+
+// LLM Host Simulation
+export type {
+  LLMProvider,
+  LLMHostConfig,
+  LLMToolCall,
+  LLMHostSimulationResult,
+  LLMHostSimulator,
+  ExpectedToolCall,
+  ToolCallValidationResult,
+} from './evals/llmHost/index.js';
+export {
+  simulateLLMHost,
+  isProviderAvailable,
+  getMissingDependencyMessage,
+} from './evals/llmHost/index.js';
+export { createToolCallExpectation } from './evals/llmHost/index.js';
 
 // Judge
 export type {

@@ -1,7 +1,16 @@
 import { z } from 'zod';
+import type { LLMHostConfig } from './llmHost/llmHostTypes.js';
+
+/**
+ * Evaluation mode
+ */
+export type EvalMode = 'direct' | 'llm_host';
 
 /**
  * A single eval test case
+ *
+ * Note: toolName and args are required for backward compatibility
+ * and for 'direct' mode. For 'llm_host' mode, use scenario instead.
  */
 export interface EvalCase {
   /**
@@ -15,14 +24,37 @@ export interface EvalCase {
   description?: string;
 
   /**
-   * Name of the MCP tool to call
+   * Evaluation mode
+   * - 'direct': Direct API calls to MCP tools (default)
+   * - 'llm_host': LLM-driven tool selection via natural language
+   *
+   * @default 'direct'
+   */
+  mode?: EvalMode;
+
+  /**
+   * Name of the MCP tool to call (required for 'direct' mode)
    */
   toolName: string;
 
   /**
-   * Arguments to pass to the tool
+   * Arguments to pass to the tool (required for 'direct' mode)
    */
   args: Record<string, unknown>;
+
+  /**
+   * Natural language scenario for LLM to execute (optional, required for 'llm_host' mode)
+   *
+   * @example "Get the weather for London and tell me if I need an umbrella"
+   */
+  scenario?: string;
+
+  /**
+   * LLM host configuration (optional for 'llm_host' mode)
+   *
+   * If not specified, uses default configuration from test environment
+   */
+  llmHostConfig?: LLMHostConfig;
 
   /**
    * Expected exact response (for strict equality checks)
@@ -53,6 +85,8 @@ export interface EvalCase {
 
   /**
    * Additional metadata for this test case
+   *
+   * For 'llm_host' mode, can include 'expectedToolCalls' for validation
    */
   metadata?: Record<string, unknown>;
 }
@@ -88,13 +122,31 @@ export interface EvalDataset {
 }
 
 /**
+ * Zod schema for LLMHostConfig (simplified for serialization)
+ */
+const LLMHostConfigSchema = z.object({
+  provider: z.enum(['openai', 'anthropic']),
+  apiKeyEnvVar: z.string().optional(),
+  model: z.string().optional(),
+  maxTokens: z.number().optional(),
+  temperature: z.number().optional(),
+  maxToolCalls: z.number().optional(),
+});
+
+/**
  * Zod schema for EvalCase
+ *
+ * Note: For backward compatibility, toolName and args are always required.
+ * For llm_host mode, you can use placeholder values for toolName/args.
  */
 export const EvalCaseSchema = z.object({
   id: z.string().min(1, 'id must not be empty'),
   description: z.string().optional(),
+  mode: z.enum(['direct', 'llm_host']).optional(),
   toolName: z.string().min(1, 'toolName must not be empty'),
   args: z.record(z.unknown()),
+  scenario: z.string().optional(),
+  llmHostConfig: LLMHostConfigSchema.optional(),
   expectedExact: z.unknown().optional(),
   expectedSchemaName: z.string().optional(),
   judgeConfigId: z.string().optional(),
