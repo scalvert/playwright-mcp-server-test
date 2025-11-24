@@ -235,7 +235,7 @@ See [Transports Guide](./docs/transports.md) for configuration.
 
 ## UI Reporter
 
-Beautiful web UI for visualizing test results:
+Interactive web UI for visualizing test results:
 
 ![MCP Test Reporter UI](./ui.png)
 

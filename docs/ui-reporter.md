@@ -1,6 +1,6 @@
 # UI Reporter Guide
 
-`playwright-mcp-server-test` includes a custom Playwright reporter with a beautiful, interactive web UI for visualizing test results.
+`playwright-mcp-server-test` includes a custom Playwright reporter with an interactive web UI for visualizing test results.
 
 ![MCP Test Reporter UI](../ui.png)
 

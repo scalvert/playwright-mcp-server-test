@@ -210,4 +210,4 @@ See the [Expectations Guide](./expectations.md) for all available expectation ty
 - Explore [Expectation Types](./expectations.md) for validation options
 - Learn about [Transport Configuration](./transports.md)
 - Check out the [Examples](../examples) for real-world usage
-- Set up the [UI Reporter](./ui-reporter.md) for beautiful test results
+- Set up the [UI Reporter](./ui-reporter.md) for interactive test results
