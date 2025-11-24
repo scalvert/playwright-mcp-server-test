@@ -11,7 +11,6 @@
 - 🤖 **LLM-as-a-Judge** - Optional semantic evaluation using OpenAI or Anthropic
 - 🔌 **Multiple Transports** - Support for both stdio (local) and HTTP (remote) connections
 - ✅ **Protocol Conformance** - Built-in checks for MCP spec compliance
-- 📝 **Type-Safe** - Full TypeScript support using official MCP SDK types
 
 ## Installation
 
