@@ -1,17 +1,14 @@
 import React, { useState, useMemo } from 'react';
+import { BarChart3, FlaskConical } from 'lucide-react';
 import type { MCPEvalResult } from '../../types';
 
 interface ResultsTableProps {
   results: MCPEvalResult[];
-  searchQuery?: string;
-  selectedGroup?: string;
   onSelectResult?: (result: MCPEvalResult) => void;
 }
 
 export function ResultsTable({
   results,
-  searchQuery = '',
-  selectedGroup,
   onSelectResult,
 }: ResultsTableProps) {
   const [sortColumn, setSortColumn] = useState<
@@ -19,6 +16,8 @@ export function ResultsTable({
   >(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filter, setFilter] = useState<'all' | 'pass' | 'fail'>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'eval' | 'test'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Filter and sort results
   const filteredResults = useMemo(() => {
@@ -31,9 +30,12 @@ export function ResultsTable({
       filtered = filtered.filter((r) => !r.pass);
     }
 
-    // Apply group filter (by dataset name)
-    if (selectedGroup && selectedGroup !== 'All Tests') {
-      filtered = filtered.filter((r) => r.datasetName === selectedGroup);
+    // Apply source filter (tabs)
+    if (sourceFilter !== 'all') {
+      filtered = filtered.filter((r) => {
+        const source = r.source || 'eval';
+        return source === sourceFilter;
+      });
     }
 
     // Apply search query
@@ -76,7 +78,7 @@ export function ResultsTable({
     }
 
     return filtered;
-  }, [results, filter, selectedGroup, searchQuery, sortColumn, sortDirection]);
+  }, [results, filter, sourceFilter, searchQuery, sortColumn, sortDirection]);
 
   const handleSort = (column: 'status' | 'id' | 'duration') => {
     if (sortColumn === column) {
@@ -87,15 +89,64 @@ export function ResultsTable({
     }
   };
 
+  const evalCount = results.filter(r => (r.source || 'eval') === 'eval').length;
+  const testCount = results.filter(r => r.source === 'test').length;
+
   return (
     <div className="flex flex-col h-full">
+      {/* Tabs */}
+      <div className="flex border-b bg-card">
+        <button
+          onClick={() => setSourceFilter('all')}
+          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+            sourceFilter === 'all'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
+          }`}
+        >
+          All Results
+          <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+            {results.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setSourceFilter('eval')}
+          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+            sourceFilter === 'eval'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
+          }`}
+        >
+          <BarChart3 size={16} />
+          Eval Datasets
+          <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+            {evalCount}
+          </span>
+        </button>
+        <button
+          onClick={() => setSourceFilter('test')}
+          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+            sourceFilter === 'test'
+              ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
+          }`}
+        >
+          <FlaskConical size={16} />
+          Test Suites
+          <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+            {testCount}
+          </span>
+        </button>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-wrap gap-4 items-center p-4 bg-card border-b">
         <input
           type="text"
           placeholder="Search by case ID or response content..."
           className="flex-1 min-w-[250px] px-3 py-2 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-          defaultValue={searchQuery}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <div className="flex gap-2">
           <button
@@ -147,6 +198,9 @@ export function ResultsTable({
                 >
                   Status
                 </th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide">
+                  Type
+                </th>
                 <th
                   className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide cursor-pointer hover:bg-muted/80"
                   onClick={() => handleSort('id')}
@@ -165,20 +219,22 @@ export function ResultsTable({
                 >
                   Duration
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
-                  Expectations
-                </th>
               </tr>
             </thead>
             <tbody>
               {filteredResults.map((result) => {
-                const expectations = Object.keys(result.expectations);
+                const source = result.source || 'eval';
+                const isEval = source === 'eval';
 
                 return (
                   <tr
                     key={result.id}
                     onClick={() => onSelectResult?.(result)}
-                    className="border-b cursor-pointer hover:bg-accent/50 transition-colors"
+                    className={`border-b cursor-pointer hover:bg-accent/50 transition-colors ${
+                      isEval
+                        ? 'border-l-4 border-l-blue-500/30 bg-blue-500/5'
+                        : 'border-l-4 border-l-purple-500/30 bg-purple-500/5'
+                    }`}
                   >
                     <td className="px-4 py-3">
                       <span
@@ -191,7 +247,19 @@ export function ResultsTable({
                         {result.pass ? '✓ Pass' : '✗ Fail'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm">{result.id}</td>
+                    <td className="px-4 py-3 text-center">
+                      {isEval ? (
+                        <BarChart3 size={18} className="inline-block text-blue-600 dark:text-blue-400" title="Eval Dataset" />
+                      ) : (
+                        <FlaskConical size={18} className="inline-block text-purple-600 dark:text-purple-400" title="Test Suite" />
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium">{result.id}</span>
+                        <span className="text-xs text-muted-foreground">{result.datasetName}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <code className="text-xs bg-muted px-2 py-1 rounded">
                         {result.toolName}
@@ -204,18 +272,6 @@ export function ResultsTable({
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {result.durationMs.toFixed(0)}ms
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {expectations.map((exp) => (
-                          <span
-                            key={exp}
-                            className="px-2 py-0.5 text-xs bg-muted rounded"
-                          >
-                            {exp}
-                          </span>
-                        ))}
-                      </div>
                     </td>
                   </tr>
                 );

@@ -80,6 +80,13 @@ export interface EvalCaseResult {
   mode: 'direct' | 'llm_host';
 
   /**
+   * Source of this result
+   * - 'eval': From runEvalDataset() using JSON eval datasets
+   * - 'test': From direct API test tracking (MCP fixture calls)
+   */
+  source: 'eval' | 'test';
+
+  /**
    * Overall pass/fail status
    */
   pass: boolean;
@@ -394,6 +401,7 @@ export async function runEvalDataset(
       datasetName: dataset.name,
       toolName: evalCase.toolName,
       mode,
+      source: 'eval',
       pass,
       response,
       error,

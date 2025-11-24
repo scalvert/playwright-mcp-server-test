@@ -100,11 +100,15 @@ export default class MCPEvalReporter implements Reporter {
         };
 
         // Create a synthetic EvalCaseResult from the MCP call data
+        // For test results, use the describe block name as the suite identifier
+        const suiteName = test.parent?.title || 'Uncategorized Tests';
+
         const syntheticResult: EvalCaseResult = {
           id: `${test.title}-${callData.toolName}`,
-          datasetName: test.parent?.title || 'Direct API Tests',
+          datasetName: suiteName,
           toolName: callData.toolName,
           mode: 'direct',
+          source: 'test',
           pass: !callData.isError,
           response: callData.result,
           error: callData.isError ? 'Tool call returned error' : undefined,
