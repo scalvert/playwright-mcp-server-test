@@ -1,5 +1,5 @@
 /**
- * Types for MCP Eval Reporter UI
+ * Types for MCP Test Reporter UI
  * These match the types from src/reporters/types.ts
  */
 

@@ -19,7 +19,7 @@ export function Layout({ timestamp, platform, durationMs, children }: LayoutProp
             <div className="relative top-[5px]">
               <Logo size={40} className="text-primary" />
             </div>
-            <h1 className="text-xl font-bold">MCP Evals</h1>
+            <h1 className="text-xl font-bold">MCP Test Reporter</h1>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex flex-col text-right">

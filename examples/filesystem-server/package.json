@@ -20,7 +20,7 @@
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.2",
     "fixturify-project": "^7.0.0",
-    "playwright-mcp-evals": "file:../..",
+    "playwright-mcp-server-test": "file:../..",
     "typescript": "^5.7.2",
     "zod": "^3.24.1"
   }
