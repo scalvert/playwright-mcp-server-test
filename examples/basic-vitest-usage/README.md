@@ -14,6 +14,7 @@ npm install
 import { describe, it, expect } from 'vitest';
 import {
   createMCPClientForConfig,
+  createMCPFixture,
   loadEvalDataset,
   runEvalDataset,
   createExactExpectation,
@@ -39,7 +40,7 @@ describe('MCP Eval Tests', () => {
           exact: createExactExpectation(),
         },
       },
-      { mcp: createMCPFixtureApi(client) }
+      { mcp: createMCPFixture(client) }
     );
 
     expect(result.passed).toBe(result.total);

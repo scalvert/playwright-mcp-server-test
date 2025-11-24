@@ -86,7 +86,7 @@ See the [CLI Guide](./docs/cli.md) for all options.
 
 ### Example: Testing in Action
 
-Here's what a complete test suite looks like:
+Here's what a complete test suite looks like (following the **layered testing pattern**):
 
 ```typescript
 // tests/mcp.spec.ts
@@ -98,13 +98,47 @@ import {
 } from 'playwright-mcp-server-test';
 import { z } from 'zod';
 
-// Pattern 1: Direct tool testing
-test('read a file', async ({ mcp }) => {
-  const result = await mcp.callTool('read_file', { path: '/tmp/test.txt' });
-  expect(result.content).toContain('Hello');
+// ============================================================================
+// Layer 1: MCP Protocol Conformance (Standard baseline for ALL servers)
+// ============================================================================
+
+test.describe('MCP Protocol Conformance', () => {
+  test('should return valid server info', async ({ mcp }) => {
+    const info = mcp.getServerInfo();
+    expect(info).toBeTruthy();
+    expect(info?.name).toBeTruthy();
+    expect(info?.version).toBeTruthy();
+  });
+
+  test('should list available tools', async ({ mcp }) => {
+    const tools = await mcp.listTools();
+    expect(Array.isArray(tools)).toBe(true);
+    expect(tools.length).toBeGreaterThan(0);
+  });
+
+  test('should handle invalid tool gracefully', async ({ mcp }) => {
+    const result = await mcp.callTool('nonexistent_tool', {});
+    expect(result.isError).toBe(true);
+  });
 });
 
-// Pattern 2: Dataset-driven evals
+// ============================================================================
+// Layer 2: Direct Tool Testing (Server-specific functionality)
+// ============================================================================
+
+test.describe('File Operations', () => {
+  test('should read a file', async ({ mcp }) => {
+    const result = await mcp.callTool('read_file', {
+      path: '/tmp/test.txt'
+    });
+    expect(result.content).toContain('Hello');
+  });
+});
+
+// ============================================================================
+// Layer 3: Eval Datasets (Comprehensive validation)
+// ============================================================================
+
 test('file operations eval', async ({ mcp }) => {
   const FileContentSchema = z.object({
     content: z.string(),

@@ -23,10 +23,13 @@ export {
 
 // Fixtures
 export type { MCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
-export {
-  createMCPFixtureApi,
-  createMCPFixtureApiWithTracking,
-} from './mcp/fixtures/mcpFixture.js';
+export { createMCPFixture } from './mcp/fixtures/mcpFixture.js';
+
+// Backwards compatibility (deprecated)
+/** @deprecated Use createMCPFixture instead */
+export { createMCPFixture as createMCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
+/** @deprecated Use createMCPFixture instead */
+export { createMCPFixture as createMCPFixtureApiWithTracking } from './mcp/fixtures/mcpFixture.js';
 
 // Eval Dataset
 export type {

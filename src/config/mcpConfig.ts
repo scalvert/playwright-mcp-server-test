@@ -37,6 +37,11 @@ export interface MCPConfig {
   serverUrl?: string;
 
   /**
+   * HTTP headers (optional for http transport, e.g., Authorization)
+   */
+  headers?: Record<string, string>;
+
+  /**
    * Command to execute (required when transport === 'stdio')
    */
   command?: string;
@@ -104,6 +109,7 @@ const StdioConfigSchema = z.object({
 const HttpConfigSchema = z.object({
   transport: z.literal('http'),
   serverUrl: z.string().url('serverUrl must be a valid URL'),
+  headers: z.record(z.string()).optional(),
   capabilities: MCPHostCapabilitiesSchema.optional(),
   connectTimeoutMs: z.number().positive().optional(),
   requestTimeoutMs: z.number().positive().optional(),

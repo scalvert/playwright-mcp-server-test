@@ -6,7 +6,7 @@ import {
   closeMCPClient,
 } from '../../src/mcp/clientFactory.js';
 import {
-  createMCPFixtureApi,
+  createMCPFixture,
   type MCPFixtureApi,
 } from '../../src/mcp/fixtures/mcpFixture.js';
 
@@ -75,9 +75,10 @@ export const test = base.extend<MCPFixtures>({
    * mcp fixture: High-level test API built on mcpClient
    *
    * Depends on mcpClient fixture
+   * Automatically tracks all MCP operations for the reporter
    */
-  mcp: async ({ mcpClient }, use) => {
-    const api = createMCPFixtureApi(mcpClient);
+  mcp: async ({ mcpClient }, use, testInfo) => {
+    const api = createMCPFixture(mcpClient, testInfo);
     await use(api);
   },
 });

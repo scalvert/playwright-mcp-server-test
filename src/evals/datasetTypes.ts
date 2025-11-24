@@ -33,14 +33,14 @@ export interface EvalCase {
   mode?: EvalMode;
 
   /**
-   * Name of the MCP tool to call (required for 'direct' mode)
+   * Name of the MCP tool to call (required for 'direct' mode, optional for 'llm_host' mode)
    */
-  toolName: string;
+  toolName?: string;
 
   /**
-   * Arguments to pass to the tool (required for 'direct' mode)
+   * Arguments to pass to the tool (required for 'direct' mode, optional for 'llm_host' mode)
    */
-  args: Record<string, unknown>;
+  args?: Record<string, unknown>;
 
   /**
    * Natural language scenario for LLM to execute (optional, required for 'llm_host' mode)
@@ -143,15 +143,14 @@ const LLMHostConfigSchema = z.object({
 /**
  * Zod schema for EvalCase
  *
- * Note: For backward compatibility, toolName and args are always required.
- * For llm_host mode, you can use placeholder values for toolName/args.
+ * toolName and args are optional for llm_host mode (which uses scenario instead)
  */
 export const EvalCaseSchema = z.object({
   id: z.string().min(1, 'id must not be empty'),
   description: z.string().optional(),
   mode: z.enum(['direct', 'llm_host']).optional(),
-  toolName: z.string().min(1, 'toolName must not be empty'),
-  args: z.record(z.unknown()),
+  toolName: z.string().min(1, 'toolName must not be empty').optional(),
+  args: z.record(z.unknown()).optional(),
   scenario: z.string().optional(),
   llmHostConfig: LLMHostConfigSchema.optional(),
   expectedExact: z.unknown().optional(),

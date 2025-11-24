@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { MCPConfig, MCPFixtureApi } from 'playwright-mcp-server-test';
 import {
   createMCPClientForConfig,
-  createMCPFixtureApiWithTracking,
+  createMCPFixture,
   closeMCPClient,
   loadEvalDataset,
   runEvalDataset,
@@ -132,7 +132,7 @@ const test = base.extend<SQLiteFixtures>({
     };
 
     const client = await createMCPClientForConfig(config);
-    const mcpApi = createMCPFixtureApiWithTracking(client, testInfo);
+    const mcpApi = createMCPFixture(client, testInfo);
 
     await use(mcpApi);
 

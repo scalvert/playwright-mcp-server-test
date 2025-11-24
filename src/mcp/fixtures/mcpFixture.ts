@@ -60,81 +60,77 @@ export interface MCPFixtureApi {
 }
 
 /**
- * Creates an MCPFixtureApi wrapper around a Client
+ * Creates an MCP fixture wrapper around a Client
+ *
+ * When testInfo is provided, automatically tracks all MCP operations with test.step()
+ * and creates attachments for the MCP Test Reporter.
  *
  * @param client - The MCP client to wrap
+ * @param testInfo - Optional Playwright TestInfo for auto-tracking
  * @returns MCPFixtureApi instance
- */
-export function createMCPFixtureApi(client: Client): MCPFixtureApi {
-  return {
-    client,
-
-    async listTools(): Promise<Array<Tool>> {
-      const result = (await client.listTools()) as ListToolsResult;
-      return result.tools;
-    },
-
-    async callTool<TArgs extends Record<string, unknown>>(
-      name: string,
-      args: TArgs
-    ): Promise<CallToolResult> {
-      const result = (await client.callTool({
-        name,
-        arguments: args,
-      })) as CallToolResult;
-      return result;
-    },
-
-    getServerInfo() {
-      const serverVersion = client.getServerVersion();
-      if (!serverVersion) {
-        return null;
-      }
-      return {
-        name: serverVersion.name,
-        version: serverVersion.version,
-      };
-    },
-  };
-}
-
-/**
- * Creates an MCPFixtureApi wrapper with automatic test.step() tracking
- *
- * This version wraps all MCP operations with test.step() calls for better
- * visibility in test reports and the MCP Eval Reporter UI.
- *
- * All MCP operations are automatically tracked and appear as distinct steps
- * in Playwright's test output and the MCP Eval Reporter.
- *
- * @param client - The MCP client to wrap
- * @param testInfo - Playwright TestInfo for creating attachments
- * @returns MCPFixtureApi instance with auto-tracking
  *
  * @example
  * ```typescript
+ * // With tracking (recommended)
  * const test = base.extend<{ mcp: MCPFixtureApi }>({
  *   mcp: async ({}, use, testInfo) => {
  *     const client = await createMCPClientForConfig(config);
- *     const api = createMCPFixtureApiWithTracking(client, testInfo);
+ *     const api = createMCPFixture(client, testInfo);
  *     await use(api);
  *     await closeMCPClient(client);
  *   }
  * });
+ *
+ * // Without tracking
+ * const api = createMCPFixture(client);
  * ```
  */
-export function createMCPFixtureApiWithTracking(
+export function createMCPFixture(
   client: Client,
-  testInfo: TestInfo
+  testInfo?: TestInfo
 ): MCPFixtureApi {
-  const baseApi = createMCPFixtureApi(client);
+  // If no testInfo, return basic API without tracking
+  if (!testInfo) {
+    return {
+      client,
 
+      async listTools(): Promise<Array<Tool>> {
+        const result = (await client.listTools()) as ListToolsResult;
+        return result.tools;
+      },
+
+      async callTool<TArgs extends Record<string, unknown>>(
+        name: string,
+        args: TArgs
+      ): Promise<CallToolResult> {
+        const result = (await client.callTool({
+          name,
+          arguments: args,
+        })) as CallToolResult;
+        return result;
+      },
+
+      getServerInfo() {
+        const serverVersion = client.getServerVersion();
+        if (!serverVersion) {
+          return null;
+        }
+        return {
+          name: serverVersion.name,
+          version: serverVersion.version,
+        };
+      },
+    };
+  }
+
+  // With testInfo, return tracked API
   return {
     client,
 
     async listTools(): Promise<Array<Tool>> {
       const execute = async () => {
-        const result = await baseApi.listTools();
+        const result = (await client.listTools()) as ListToolsResult;
+        const tools = result.tools;
 
         // Auto-attach for reporter
         await testInfo.attach('mcp-list-tools', {
@@ -142,8 +138,8 @@ export function createMCPFixtureApiWithTracking(
           body: JSON.stringify(
             {
               operation: 'listTools',
-              toolCount: result.length,
-              tools: result.map((t) => ({
+              toolCount: tools.length,
+              tools: tools.map((t) => ({
                 name: t.name,
                 description: t.description,
               })),
@@ -153,7 +149,7 @@ export function createMCPFixtureApiWithTracking(
           ),
         });
 
-        return result;
+        return tools;
       };
 
       // Wrap in test.step if available
@@ -166,7 +162,10 @@ export function createMCPFixtureApiWithTracking(
     ): Promise<CallToolResult> {
       const execute = async () => {
         const startTime = Date.now();
-        const result = await baseApi.callTool(name, args);
+        const result = (await client.callTool({
+          name,
+          arguments: args,
+        })) as CallToolResult;
         const durationMs = Date.now() - startTime;
 
         // Auto-attach for reporter
@@ -194,9 +193,13 @@ export function createMCPFixtureApiWithTracking(
     },
 
     getServerInfo() {
-      // getServerInfo is synchronous, so we can't wrap it in test.step
-      // We'll attach the info asynchronously in the background
-      const result = baseApi.getServerInfo();
+      const serverVersion = client.getServerVersion();
+      const result = serverVersion
+        ? {
+            name: serverVersion.name,
+            version: serverVersion.version,
+          }
+        : null;
 
       // Fire-and-forget attachment (don't block synchronous call)
       testInfo

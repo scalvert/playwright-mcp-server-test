@@ -17,7 +17,7 @@ import {
 } from 'playwright-mcp-server-test';
 import {
   createMCPClientForConfig,
-  createMCPFixtureApiWithTracking,
+  createMCPFixture,
   closeMCPClient,
   type MCPConfig,
 } from 'playwright-mcp-server-test';
@@ -101,7 +101,7 @@ const test = base.extend<FilesystemFixtures>({
     };
 
     const client = await createMCPClientForConfig(config);
-    const mcpApi = createMCPFixtureApiWithTracking(client, testInfo);
+    const mcpApi = createMCPFixture(client, testInfo);
 
     await use(mcpApi);
 

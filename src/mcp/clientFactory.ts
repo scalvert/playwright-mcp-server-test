@@ -71,12 +71,18 @@ export async function createMCPClientForConfig(
     await client.connect(transport);
   } else if (isHttpConfig(validatedConfig)) {
     const transport = new StreamableHTTPClientTransport(
-      new URL(validatedConfig.serverUrl)
+      new URL(validatedConfig.serverUrl),
+      {
+        requestInit: validatedConfig.headers ? {
+          headers: validatedConfig.headers,
+        } : undefined,
+      }
     );
 
     if (validatedConfig.debugLogging) {
       console.log('[MCP] Connecting via HTTP:', {
         serverUrl: validatedConfig.serverUrl,
+        headers: validatedConfig.headers ? Object.keys(validatedConfig.headers) : undefined,
       });
     }
 

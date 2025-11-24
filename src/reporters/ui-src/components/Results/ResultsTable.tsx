@@ -32,10 +32,7 @@ export function ResultsTable({
 
     // Apply source filter (tabs)
     if (sourceFilter !== 'all') {
-      filtered = filtered.filter((r) => {
-        const source = r.source || 'eval';
-        return source === sourceFilter;
-      });
+      filtered = filtered.filter((r) => r.source === sourceFilter);
     }
 
     // Apply search query
@@ -89,7 +86,7 @@ export function ResultsTable({
     }
   };
 
-  const evalCount = results.filter(r => (r.source || 'eval') === 'eval').length;
+  const evalCount = results.filter(r => r.source === 'eval').length;
   const testCount = results.filter(r => r.source === 'test').length;
 
   return (

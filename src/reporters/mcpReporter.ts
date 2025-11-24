@@ -63,6 +63,8 @@ export default class MCPReporter implements Reporter {
       (a) => a.name === 'mcp-test-results' && a.contentType === 'application/json'
     );
 
+    let hasEvalDataset = false;
+
     if (evalAttachment && evalAttachment.body) {
       try {
         const evalResults = JSON.parse(
@@ -72,6 +74,7 @@ export default class MCPReporter implements Reporter {
         };
 
         this.allResults.push(...evalResults.caseResults);
+        hasEvalDataset = true;
       } catch (error) {
         console.error(
           `[MCP Reporter] Failed to parse eval results from test "${test.title}":`,
@@ -81,7 +84,12 @@ export default class MCPReporter implements Reporter {
     }
 
     // Strategy 2: Extract MCP tool calls from auto-tracking attachments
-    // These are created by createMCPFixtureApiWithTracking()
+    // These are created by createMCPFixture()
+    // Skip if this test already has eval dataset results to avoid duplicates
+    if (hasEvalDataset) {
+      return;
+    }
+
     const mcpCallAttachments = result.attachments.filter(
       (a) => a.name && a.name.startsWith('mcp-call-') && a.contentType === 'application/json'
     );

@@ -278,6 +278,17 @@ export async function runEvalDataset(
         response = simulationResult;
       } else {
         // Direct mode - call tool directly
+        if (!evalCase.toolName) {
+          throw new Error(
+            `Eval case ${evalCase.id}: toolName is required for direct mode`
+          );
+        }
+        if (!evalCase.args) {
+          throw new Error(
+            `Eval case ${evalCase.id}: args is required for direct mode`
+          );
+        }
+
         const result = await context.mcp.callTool(
           evalCase.toolName,
           evalCase.args
@@ -399,7 +410,7 @@ export async function runEvalDataset(
     const caseResult: EvalCaseResult = {
       id: evalCase.id,
       datasetName: dataset.name,
-      toolName: evalCase.toolName,
+      toolName: evalCase.toolName || evalCase.scenario || 'llm_host',
       mode,
       source: 'eval',
       pass,
