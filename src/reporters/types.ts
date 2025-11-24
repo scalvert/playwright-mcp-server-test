@@ -71,9 +71,9 @@ export interface MCPEvalRunData {
     passRate: number;
 
     /**
-     * Tool breakdown: tool name -> count
+     * Dataset breakdown: dataset name -> count
      */
-    toolBreakdown: Record<string, number>;
+    datasetBreakdown: Record<string, number>;
 
     /**
      * Expectation type breakdown: type -> count
@@ -83,6 +83,7 @@ export interface MCPEvalRunData {
       schema: number;
       textContains: number;
       regex: number;
+      snapshot: number;
       judge: number;
     };
   };

@@ -23,7 +23,10 @@ export {
 
 // Fixtures
 export type { MCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
-export { createMCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
+export {
+  createMCPFixtureApi,
+  createMCPFixtureApiWithTracking,
+} from './mcp/fixtures/mcpFixture.js';
 
 // Eval Dataset
 export type {
@@ -69,6 +72,7 @@ export {
   type TextContainsExpectationOptions,
 } from './evals/expectations/textContainsExpectation.js';
 export { createRegexExpectation } from './evals/expectations/regexExpectation.js';
+export { createSnapshotExpectation } from './evals/expectations/snapshotExpectation.js';
 export {
   extractTextFromResponse,
   normalizeWhitespace,

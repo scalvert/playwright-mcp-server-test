@@ -84,6 +84,13 @@ export interface EvalCase {
   expectedRegex?: string | string[];
 
   /**
+   * Snapshot name for Playwright snapshot testing
+   * When specified, uses expect(response).toMatchSnapshot(snapshotName)
+   * Use --update-snapshots flag to update snapshots
+   */
+  expectedSnapshot?: string;
+
+  /**
    * Additional metadata for this test case
    *
    * For 'llm_host' mode, can include 'expectedToolCalls' for validation
@@ -152,6 +159,7 @@ export const EvalCaseSchema = z.object({
   judgeConfigId: z.string().optional(),
   expectedTextContains: z.union([z.string(), z.array(z.string())]).optional(),
   expectedRegex: z.union([z.string(), z.array(z.string())]).optional(),
+  expectedSnapshot: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 

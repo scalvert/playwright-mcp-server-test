@@ -23,6 +23,12 @@ export interface EvalExpectationContext {
    * When provided, eval results will be attached to the test for the MCP reporter
    */
   testInfo?: TestInfo;
+
+  /**
+   * Optional Playwright expect function for snapshot testing
+   * Required for snapshot expectations to work properly
+   */
+  expect?: typeof import('@playwright/test').expect;
 }
 
 /**
@@ -59,6 +65,21 @@ export interface EvalCaseResult {
   id: string;
 
   /**
+   * Dataset name this case belongs to
+   */
+  datasetName: string;
+
+  /**
+   * MCP tool name that was called
+   */
+  toolName: string;
+
+  /**
+   * Evaluation mode (direct or llm_host)
+   */
+  mode: 'direct' | 'llm_host';
+
+  /**
    * Overall pass/fail status
    */
   pass: boolean;
@@ -81,6 +102,7 @@ export interface EvalCaseResult {
     schema?: EvalExpectationResult;
     textContains?: EvalExpectationResult;
     regex?: EvalExpectationResult;
+    snapshot?: EvalExpectationResult;
     judge?: EvalExpectationResult;
   };
 
@@ -137,6 +159,7 @@ export interface EvalRunnerOptions {
     schema?: EvalExpectation;
     textContains?: EvalExpectation;
     regex?: EvalExpectation;
+    snapshot?: EvalExpectation;
     judge?: EvalExpectation;
   };
 
@@ -326,6 +349,22 @@ export async function runEvalDataset(
         }
       }
 
+      // Run snapshot expectation
+      if (expectations.snapshot) {
+        try {
+          expectationResults.snapshot = await expectations.snapshot(
+            enrichedContext,
+            evalCase,
+            response
+          );
+        } catch (err) {
+          expectationResults.snapshot = {
+            pass: false,
+            details: `Snapshot expectation threw error: ${String(err)}`,
+          };
+        }
+      }
+
       // Run judge expectation
       if (expectations.judge) {
         try {
@@ -352,6 +391,9 @@ export async function runEvalDataset(
 
     const caseResult: EvalCaseResult = {
       id: evalCase.id,
+      datasetName: dataset.name,
+      toolName: evalCase.toolName,
+      mode,
       pass,
       response,
       error,

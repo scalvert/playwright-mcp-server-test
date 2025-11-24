@@ -5,12 +5,16 @@ import path from 'node:path';
 import type { MCPConfig, MCPFixtureApi } from 'playwright-mcp-evals';
 import {
   createMCPClientForConfig,
-  createMCPFixtureApi,
+  createMCPFixtureApiWithTracking,
   closeMCPClient,
   loadEvalDataset,
   runEvalDataset,
   createTextContainsExpectation,
+  createSnapshotExpectation,
   createToolCallExpectation,
+  runConformanceChecks,
+  formatConformanceResult,
+  extractTextFromResponse,
 } from 'playwright-mcp-evals';
 import {
   QueryResultSchema,
@@ -120,7 +124,7 @@ const test = base.extend<SQLiteFixtures>({
   /**
    * Create and connect MCP client to SQLite server
    */
-  mcp: async ({ dbPath }, use) => {
+  mcp: async ({ dbPath }, use, testInfo) => {
     const config: MCPConfig = {
       transport: 'stdio',
       command: 'npx',
@@ -128,13 +132,74 @@ const test = base.extend<SQLiteFixtures>({
     };
 
     const client = await createMCPClientForConfig(config);
-    const mcpApi = createMCPFixtureApi(client);
+    const mcpApi = createMCPFixtureApiWithTracking(client, testInfo);
 
     await use(mcpApi);
 
     // Cleanup: Close MCP client connection
     await closeMCPClient(client);
   },
+});
+
+/**
+ * Protocol Conformance Tests
+ *
+ * Validates that the SQLite MCP server conforms to the MCP protocol specification
+ */
+test.describe('Protocol Conformance', () => {
+  test('should pass all conformance checks', async ({ mcp }) => {
+    const result = await runConformanceChecks(mcp, {
+      requiredTools: ['read_query', 'list_tables', 'describe_table'],
+      validateSchemas: true,
+      checkServerInfo: true,
+    });
+
+    // Log detailed conformance results
+    console.log('\n' + formatConformanceResult(result));
+
+    // SQLite server should pass all conformance checks
+    const passedChecks = result.checks.filter(c => c.pass);
+    expect(passedChecks.length).toBeGreaterThanOrEqual(4); // At least 4 of 5 checks should pass
+
+    // Verify specific checks exist
+    const checkNames = result.checks.map(c => c.name);
+    expect(checkNames).toContain('server_info_present');
+    expect(checkNames).toContain('invalid_tool_returns_error');
+  });
+
+  test('should have valid server info', async ({ mcp }) => {
+    const serverInfo = mcp.getServerInfo();
+
+    expect(serverInfo).not.toBeNull();
+    expect(serverInfo?.name).toBeDefined();
+    expect(serverInfo?.version).toBeDefined();
+
+    console.log(`Server: ${serverInfo?.name} v${serverInfo?.version}`);
+  });
+
+  test('should list all available tools', async ({ mcp }) => {
+    const tools = await mcp.listTools();
+
+    expect(tools.length).toBeGreaterThan(0);
+
+    // Log all available tools
+    console.log('\nAvailable tools:');
+    for (const tool of tools) {
+      console.log(`  - ${tool.name}: ${tool.description || 'No description'}`);
+    }
+
+    // Verify expected SQLite tools are present
+    const toolNames = tools.map(t => t.name);
+    expect(toolNames).toContain('read_query');
+    expect(toolNames).toContain('list_tables');
+    expect(toolNames).toContain('describe_table');
+
+    // Verify all tools have valid schemas
+    for (const tool of tools) {
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.type).toBeDefined();
+    }
+  });
 });
 
 /**
@@ -158,6 +223,7 @@ test('Run SQLite MCP Server evaluation dataset', async ({ mcp }, testInfo) => {
       dataset,
       expectations: {
         textContains: createTextContainsExpectation(),
+        snapshot: createSnapshotExpectation(),
         toolCalls: createToolCallExpectation(),
 
         // Custom expectation: Validate record count for queries
@@ -173,7 +239,7 @@ test('Run SQLite MCP Server evaluation dataset', async ({ mcp }, testInfo) => {
         },
       },
     },
-    { mcp, testInfo }
+    { mcp, testInfo, expect }
   );
 
   // Assert overall results
@@ -337,5 +403,70 @@ test.describe('Error Handling', () => {
 
     const description = extractTableDescription(response);
     expect(description).toBe('[]');
+  });
+});
+
+/**
+ * Advanced Features: Schema Validation and Text Utilities
+ *
+ * Demonstrates direct API usage with custom Zod schemas and text utilities.
+ * These tests show how to use the library programmatically for custom validation.
+ */
+test.describe('Advanced Testing Features', () => {
+  test('should validate query results with custom Zod schema', async ({ mcp }) => {
+    const response = await mcp.callTool('read_query', {
+      query: 'SELECT * FROM users WHERE role = "admin"',
+    });
+
+    expect(response.isError).not.toBe(true);
+
+    // Extract and validate against custom Zod schema
+    const data = extractQueryData(response);
+
+    // Validate structure
+    expect(data).toHaveLength(1);
+    expect(data[0]).toHaveProperty('id');
+    expect(data[0]).toHaveProperty('name');
+    expect(data[0]).toHaveProperty('email');
+    expect(data[0]).toHaveProperty('role');
+
+    // Validate values
+    expect(data[0].name).toBe('Alice');
+    expect(data[0].role).toBe('admin');
+  });
+
+  test('should use text extraction utilities', async ({ mcp }) => {
+    const response = await mcp.callTool('list_tables', {});
+
+    expect(response.isError).not.toBe(true);
+
+    // Use utility to extract text from MCP response
+    const text = extractTextFromResponse(response);
+
+    // Verify tables are listed
+    expect(text).toContain('users');
+    expect(text).toContain('posts');
+  });
+
+  test('should validate table schema with custom helper', async ({ mcp }) => {
+    const response = await mcp.callTool('describe_table', {
+      table_name: 'users',
+    });
+
+    expect(response.isError).not.toBe(true);
+
+    // Use custom extraction helper
+    const description = extractTableDescription(response);
+
+    // Verify all expected columns are present
+    expect(description).toContain('id');
+    expect(description).toContain('name');
+    expect(description).toContain('email');
+    expect(description).toContain('role');
+    expect(description).toContain('created_at');
+
+    // Verify data types
+    expect(description).toContain('INTEGER');
+    expect(description).toContain('TEXT');
   });
 });

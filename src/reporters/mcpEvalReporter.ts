@@ -58,11 +58,7 @@ export default class MCPEvalReporter implements Reporter {
   }
 
   async onTestEnd(test: TestCase, result: TestResult): Promise<void> {
-    // Extract MCP eval results from test metadata
-    // Tests using runEvalDataset() should attach results via test.info().attach()
-    // or store in test annotations
-
-    // Check for attachments with eval results
+    // Strategy 1: Extract MCP eval results from runEvalDataset() attachments
     const evalAttachment = result.attachments.find(
       (a) => a.name === 'mcp-eval-results' && a.contentType === 'application/json'
     );
@@ -79,6 +75,47 @@ export default class MCPEvalReporter implements Reporter {
       } catch (error) {
         console.error(
           `[MCP Reporter] Failed to parse eval results from test "${test.title}":`,
+          error
+        );
+      }
+    }
+
+    // Strategy 2: Extract MCP tool calls from auto-tracking attachments
+    // These are created by createMCPFixtureApiWithTracking()
+    const mcpCallAttachments = result.attachments.filter(
+      (a) => a.name && a.name.startsWith('mcp-call-') && a.contentType === 'application/json'
+    );
+
+    for (const attachment of mcpCallAttachments) {
+      if (!attachment.body) continue;
+
+      try {
+        const callData = JSON.parse(attachment.body.toString('utf-8')) as {
+          operation: string;
+          toolName: string;
+          args: Record<string, unknown>;
+          result: unknown;
+          durationMs: number;
+          isError: boolean;
+        };
+
+        // Create a synthetic EvalCaseResult from the MCP call data
+        const syntheticResult: EvalCaseResult = {
+          id: `${test.title}-${callData.toolName}`,
+          datasetName: test.parent?.title || 'Direct API Tests',
+          toolName: callData.toolName,
+          mode: 'direct',
+          pass: !callData.isError,
+          response: callData.result,
+          error: callData.isError ? 'Tool call returned error' : undefined,
+          expectations: {}, // No expectations for direct API calls
+          durationMs: callData.durationMs,
+        };
+
+        this.allResults.push(syntheticResult);
+      } catch (error) {
+        console.error(
+          `[MCP Reporter] Failed to parse MCP call attachment "${attachment.name}":`,
           error
         );
       }
@@ -165,11 +202,11 @@ export default class MCPEvalReporter implements Reporter {
     const passed = this.allResults.filter((r) => r.pass).length;
     const failed = this.allResults.filter((r) => !r.pass).length;
 
-    // Extract tool names from result IDs (heuristic: first segment before -)
-    const toolBreakdown: Record<string, number> = {};
+    // Group by dataset name
+    const datasetBreakdown: Record<string, number> = {};
     this.allResults.forEach((r) => {
-      const toolName = r.id.split('-')[0] || 'unknown';
-      toolBreakdown[toolName] = (toolBreakdown[toolName] || 0) + 1;
+      const datasetName = r.datasetName || 'Unknown Dataset';
+      datasetBreakdown[datasetName] = (datasetBreakdown[datasetName] || 0) + 1;
     });
 
     // Count expectation types used
@@ -178,6 +215,7 @@ export default class MCPEvalReporter implements Reporter {
       schema: 0,
       textContains: 0,
       regex: 0,
+      snapshot: 0,
       judge: 0,
     };
 
@@ -186,6 +224,7 @@ export default class MCPEvalReporter implements Reporter {
       if (r.expectations.schema) expectationBreakdown.schema++;
       if (r.expectations.textContains) expectationBreakdown.textContains++;
       if (r.expectations.regex) expectationBreakdown.regex++;
+      if (r.expectations.snapshot) expectationBreakdown.snapshot++;
       if (r.expectations.judge) expectationBreakdown.judge++;
     });
 
@@ -202,7 +241,7 @@ export default class MCPEvalReporter implements Reporter {
         passed,
         failed,
         passRate: passed / this.allResults.length,
-        toolBreakdown,
+        datasetBreakdown,
         expectationBreakdown,
       },
       results: this.allResults,

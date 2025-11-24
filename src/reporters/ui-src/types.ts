@@ -16,7 +16,7 @@ export interface MCPEvalRunData {
     passed: number;
     failed: number;
     passRate: number;
-    toolBreakdown?: Record<string, number>;
+    datasetBreakdown?: Record<string, number>;
     expectationBreakdown?: Record<string, number>;
   };
   results: MCPEvalResult[];
@@ -24,6 +24,9 @@ export interface MCPEvalRunData {
 
 export interface MCPEvalResult {
   id: string;
+  datasetName: string;
+  toolName: string;
+  mode: 'direct' | 'llm_host';
   pass: boolean;
   response: unknown;
   error?: string;

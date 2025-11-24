@@ -186,6 +186,51 @@
           }
         ]
       }
+    },
+    {
+      "id": "direct-exact-readme",
+      "description": "Exact match validation for readme.txt content",
+      "mode": "direct",
+      "toolName": "read_file",
+      "args": {
+        "path": "readme.txt"
+      },
+      "expectedExact": [
+        {
+          "type": "text",
+          "text": "Hello World"
+        }
+      ]
+    },
+    {
+      "id": "snapshot-readme-content",
+      "description": "Snapshot test for readme.txt file content",
+      "mode": "direct",
+      "toolName": "read_file",
+      "args": {
+        "path": "readme.txt"
+      },
+      "expectedSnapshot": "readme-content.txt"
+    },
+    {
+      "id": "snapshot-config-json",
+      "description": "Snapshot test for config.json structure",
+      "mode": "direct",
+      "toolName": "read_file",
+      "args": {
+        "path": "config.json"
+      },
+      "expectedSnapshot": "config-structure.json"
+    },
+    {
+      "id": "snapshot-directory-tree",
+      "description": "Snapshot test for directory tree structure",
+      "mode": "direct",
+      "toolName": "directory_tree",
+      "args": {
+        "path": "."
+      },
+      "expectedSnapshot": "directory-tree.json"
     }
   ],
   "metadata": {

@@ -31,9 +31,9 @@ export function ResultsTable({
       filtered = filtered.filter((r) => !r.pass);
     }
 
-    // Apply group filter
-    if (selectedGroup) {
-      filtered = filtered.filter((r) => r.id.startsWith(selectedGroup));
+    // Apply group filter (by dataset name)
+    if (selectedGroup && selectedGroup !== 'All Tests') {
+      filtered = filtered.filter((r) => r.datasetName === selectedGroup);
     }
 
     // Apply search query
@@ -156,6 +156,9 @@ export function ResultsTable({
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
                   Tool Name
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                  Mode
+                </th>
                 <th
                   className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide cursor-pointer hover:bg-muted/80"
                   onClick={() => handleSort('duration')}
@@ -169,7 +172,6 @@ export function ResultsTable({
             </thead>
             <tbody>
               {filteredResults.map((result) => {
-                const toolName = result.id.split('-')[0] || 'unknown';
                 const expectations = Object.keys(result.expectations);
 
                 return (
@@ -192,8 +194,13 @@ export function ResultsTable({
                     <td className="px-4 py-3 text-sm">{result.id}</td>
                     <td className="px-4 py-3">
                       <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {toolName}
+                        {result.toolName}
                       </code>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-0.5 text-xs bg-muted rounded">
+                        {result.mode}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {result.durationMs.toFixed(0)}ms

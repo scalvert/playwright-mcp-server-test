@@ -14,22 +14,21 @@ export function TestGroups({
 }: TestGroupsProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Group results by tool name (extracted from ID)
+  // Group results by dataset name
   const groupResults = (results: MCPEvalResult[]) => {
     const groups: Record<string, { passed: number; failed: number }> = {};
 
     results.forEach((result) => {
-      // Extract tool name from ID (e.g., "weather-london" -> "weather")
-      const toolName = result.id.split('-')[0] || 'unknown';
+      const datasetName = result.datasetName || 'Unknown Dataset';
 
-      if (!groups[toolName]) {
-        groups[toolName] = { passed: 0, failed: 0 };
+      if (!groups[datasetName]) {
+        groups[datasetName] = { passed: 0, failed: 0 };
       }
 
       if (result.pass) {
-        groups[toolName].passed++;
+        groups[datasetName].passed++;
       } else {
-        groups[toolName].failed++;
+        groups[datasetName].failed++;
       }
     });
 
@@ -99,7 +98,7 @@ export function TestGroups({
                   }
                 `}
               >
-                <span className="font-mono text-xs">{groupName}</span>
+                <span className="text-xs">{groupName}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-green-600 dark:text-green-400">
                     {group.passed}

@@ -81,6 +81,104 @@
       "expectedTextContains": ["Bob", "Alice", "Charlie"]
     },
     {
+      "id": "direct-describe-posts-table",
+      "description": "Get schema for posts table",
+      "mode": "direct",
+      "toolName": "describe_table",
+      "args": {
+        "table_name": "posts"
+      },
+      "expectedTextContains": ["id", "user_id", "title", "published", "content"]
+    },
+    {
+      "id": "direct-query-published-posts",
+      "description": "Query only published posts",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT title, published FROM posts WHERE published = 1 ORDER BY id"
+      },
+      "expectedTextContains": ["Getting Started", "Database Best Practices", "Performance Tuning"]
+    },
+    {
+      "id": "direct-query-moderator-users",
+      "description": "Find users with moderator role",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT name, email FROM users WHERE role = 'moderator'"
+      },
+      "expectedTextContains": ["Bob", "bob@example.com"]
+    },
+    {
+      "id": "direct-query-alice-posts",
+      "description": "Get all posts by Alice",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT title, published FROM posts WHERE user_id = 1 ORDER BY id"
+      },
+      "expectedTextContains": ["Getting Started", "Draft: Advanced Topics"]
+    },
+    {
+      "id": "direct-aggregate-published-ratio",
+      "description": "Calculate published vs draft posts ratio",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT SUM(CASE WHEN published = 1 THEN 1 ELSE 0 END) as published, SUM(CASE WHEN published = 0 THEN 1 ELSE 0 END) as drafts FROM posts"
+      },
+      "expectedTextContains": ["published", "drafts"]
+    },
+    {
+      "id": "direct-error-invalid-syntax",
+      "description": "Handle invalid SQL syntax gracefully",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT * FORM users"
+      },
+      "expectedTextContains": "error"
+    },
+    {
+      "id": "direct-error-nonexistent-table",
+      "description": "Query non-existent table returns empty",
+      "mode": "direct",
+      "toolName": "describe_table",
+      "args": {
+        "table_name": "nonexistent_table"
+      },
+      "expectedTextContains": "[]"
+    },
+    {
+      "id": "direct-exact-user-count",
+      "description": "Exact match validation for user count",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT COUNT(*) as count FROM users"
+      },
+      "expectedTextContains": ["count", "4"]
+    },
+    {
+      "id": "direct-schema-list-tables",
+      "description": "Schema introspection - list all tables",
+      "mode": "direct",
+      "toolName": "list_tables",
+      "args": {},
+      "expectedTextContains": ["users", "posts"]
+    },
+    {
+      "id": "direct-schema-describe-users-detailed",
+      "description": "Schema introspection - detailed users table structure",
+      "mode": "direct",
+      "toolName": "describe_table",
+      "args": {
+        "table_name": "users"
+      },
+      "expectedTextContains": ["id", "name", "email", "role", "created_at", "INTEGER", "TEXT"]
+    },
+    {
       "id": "llm-count-users-openai",
       "description": "LLM (OpenAI) counts users in natural language",
       "mode": "llm_host",
@@ -216,6 +314,34 @@
           }
         ]
       }
+    },
+    {
+      "id": "snapshot-users-list",
+      "description": "Snapshot test for all users query result",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT * FROM users ORDER BY id"
+      },
+      "expectedSnapshot": "users-list.json"
+    },
+    {
+      "id": "snapshot-posts-with-users",
+      "description": "Snapshot test for posts with user information",
+      "mode": "direct",
+      "toolName": "read_query",
+      "args": {
+        "query": "SELECT posts.id, posts.title, users.name as author FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id"
+      },
+      "expectedSnapshot": "posts-with-users.json"
+    },
+    {
+      "id": "snapshot-table-list",
+      "description": "Snapshot test for database table listing",
+      "mode": "direct",
+      "toolName": "list_tables",
+      "args": {},
+      "expectedSnapshot": "table-list.json"
     }
   ],
   "metadata": {
