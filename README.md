@@ -2,7 +2,46 @@
 
 > Playwright-based testing framework for MCP servers
 
+⚠️ **Experimental Project** - This library is in active development. APIs may change, and we welcome contributions, feedback, and collaboration as we evolve the framework.
+
 `playwright-mcp-server-test` is a comprehensive testing and evaluation framework for [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers. It provides first-class Playwright fixtures, data-driven eval datasets, and optional LLM-as-a-judge scoring.
+
+## 🤝 Contributing
+
+We'd love your help! Whether it's bug reports, feature requests, documentation improvements, or code contributions - all are welcome. This is an experimental project and community input is essential to its evolution.
+
+See our [Development Guide](./docs/development.md) to get started.
+
+## What's Included
+
+This framework provides **two complementary approaches** for testing MCP servers:
+
+### 1. **Automated Testing** (Playwright Tests)
+Write deterministic, automated tests using standard Playwright patterns with MCP-specific fixtures. Perfect for:
+- Direct tool calls with expected outputs
+- Protocol conformance validation
+- Integration testing with your MCP server
+- CI/CD pipelines
+
+```typescript
+test('read a file', async ({ mcp }) => {
+  const result = await mcp.callTool('read_file', { path: '/tmp/test.txt' });
+  expect(result.content).toContain('Hello');
+});
+```
+
+### 2. **Evaluation Datasets** (Evals) ⚠️ Experimental
+Run deeper, more subjective analysis using dataset-driven evaluations. Includes:
+- Schema validation (deterministic)
+- Text and regex pattern matching (deterministic)
+- LLM-as-a-judge scoring (non-deterministic)
+
+**Note:** Evals, particularly those using LLM-as-a-judge, are highly experimental due to their non-deterministic nature. Results may vary between runs, and prompts may need tuning for your specific use case.
+
+```typescript
+const result = await runEvalDataset({ dataset, expectations }, { mcp });
+expect(result.passed).toBe(result.total);
+```
 
 ## Features
 
@@ -15,7 +54,16 @@
 ## Installation
 
 ```bash
-npm install --save-dev playwright-mcp-server-test @playwright/test @modelcontextprotocol/sdk zod
+npm install --save-dev playwright-mcp-server-test @playwright/test zod
+```
+
+**Note:** Additional dependencies for LLM-as-a-judge are optional and only needed if you plan to use semantic evaluation:
+```bash
+# For OpenAI judge (optional)
+npm install --save-dev openai @openai/agents
+
+# For Anthropic judge (optional)
+npm install --save-dev @anthropic-ai/sdk
 ```
 
 ## Quick Start
