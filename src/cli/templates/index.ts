@@ -45,8 +45,8 @@ export default defineConfig({
   // Reporters: HTML and MCP Eval Reporter
   reporter: [
     ['html'],
-    ['playwright-mcp-server-test/reporters/mcpEvalReporter', {
-      outputDir: '.mcp-eval-results',
+    ['playwright-mcp-server-test/reporters/mcpReporter', {
+      outputDir: '.mcp-test-results',
       autoOpen: true,
       historyLimit: 10
     }]
@@ -137,7 +137,7 @@ test.describe('MCP Server Tests', () => {
     );
 
     // Attach results for MCP Eval Reporter
-    await testInfo.attach('mcp-eval-results', {
+    await testInfo.attach('mcp-test-results', {
       body: JSON.stringify(result),
       contentType: 'application/json',
     });
@@ -183,7 +183,7 @@ node_modules/
 test-results/
 playwright-report/
 playwright/.cache/
-.mcp-eval-results/
+.mcp-test-results/
 
 # Build output
 dist/

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export function DarkModeToggle() {
   const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem('mcp-eval-theme');
+    const stored = localStorage.getItem('mcp-test-theme');
     if (stored) return stored === 'dark';
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -12,10 +12,10 @@ export function DarkModeToggle() {
     const root = document.documentElement;
     if (isDark) {
       root.classList.add('dark');
-      localStorage.setItem('mcp-eval-theme', 'dark');
+      localStorage.setItem('mcp-test-theme', 'dark');
     } else {
       root.classList.remove('dark');
-      localStorage.setItem('mcp-eval-theme', 'light');
+      localStorage.setItem('mcp-test-theme', 'light');
     }
   }, [isDark]);
 

@@ -86,7 +86,7 @@ export async function generate(options: GenerateOptions): Promise<void> {
             type: 'input',
             name: 'datasetName',
             message: 'Dataset name:',
-            default: 'my-mcp-evals',
+            default: 'my-mcp-tests',
           },
         ]);
         dataset = {

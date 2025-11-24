@@ -6,7 +6,7 @@ import type { EvalCaseResult } from '../evals/evalRunner.js';
 export interface MCPEvalReporterConfig {
   /**
    * Output directory for reports and historical data
-   * @default '.mcp-eval-results'
+   * @default '.mcp-test-results'
    */
   outputDir?: string;
 

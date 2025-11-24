@@ -27,8 +27,8 @@ import type { EvalCaseResult } from '../evals/evalRunner.js';
  * // playwright.config.ts
  * export default defineConfig({
  *   reporter: [
- *     ['playwright-mcp-server-test/reporters/mcpEvalReporter', {
- *       outputDir: '.mcp-eval-results',
+ *     ['playwright-mcp-server-test/reporters/mcpReporter', {
+ *       outputDir: '.mcp-test-results',
  *       autoOpen: true,
  *       historyLimit: 10
  *     }]
@@ -36,14 +36,14 @@ import type { EvalCaseResult } from '../evals/evalRunner.js';
  * });
  * ```
  */
-export default class MCPEvalReporter implements Reporter {
+export default class MCPReporter implements Reporter {
   private config: Required<MCPEvalReporterConfig>;
   private startTime: number = 0;
   private allResults: Array<EvalCaseResult> = [];
 
   constructor(options: MCPEvalReporterConfig = {}) {
     this.config = {
-      outputDir: options.outputDir ?? '.mcp-eval-results',
+      outputDir: options.outputDir ?? '.mcp-test-results',
       autoOpen: options.autoOpen ?? true,
       historyLimit: options.historyLimit ?? 10,
     };
@@ -60,7 +60,7 @@ export default class MCPEvalReporter implements Reporter {
   async onTestEnd(test: TestCase, result: TestResult): Promise<void> {
     // Strategy 1: Extract MCP eval results from runEvalDataset() attachments
     const evalAttachment = result.attachments.find(
-      (a) => a.name === 'mcp-eval-results' && a.contentType === 'application/json'
+      (a) => a.name === 'mcp-test-results' && a.contentType === 'application/json'
     );
 
     if (evalAttachment && evalAttachment.body) {

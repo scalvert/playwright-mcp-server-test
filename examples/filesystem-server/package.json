@@ -1,7 +1,7 @@
 {
   "name": "filesystem-server-example",
   "version": "1.0.0",
-  "description": "Example using playwright-mcp-evals with official Filesystem MCP server",
+  "description": "Example using playwright-mcp-server-test with official Filesystem MCP server",
   "type": "module",
   "scripts": {
     "test": "playwright test",

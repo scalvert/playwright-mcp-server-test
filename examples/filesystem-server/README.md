@@ -1,6 +1,6 @@
 # Filesystem MCP Server Example
 
-This example demonstrates testing the official [Filesystem MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) from Anthropic using `playwright-mcp-evals`.
+This example demonstrates testing the official [Filesystem MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) from Anthropic using `playwright-mcp-server-test`.
 
 ## What This Example Demonstrates
 
@@ -25,7 +25,7 @@ npm install
 
 This will install:
 - `@playwright/test` - Test framework
-- `playwright-mcp-evals` - Evaluation framework
+- `playwright-mcp-server-test` - Evaluation framework
 - `@modelcontextprotocol/server-filesystem` - Official MCP server
 - `fixturify-project` - Test fixture management
 - `zod` - Schema validation
@@ -185,7 +185,7 @@ filesystem-server/
 ## Learn More
 
 - [MCP Filesystem Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
-- [playwright-mcp-evals Documentation](../../README.md)
+- [playwright-mcp-server-test Documentation](../../README.md)
 - [fixturify-project](https://www.npmjs.com/package/fixturify-project)
 - [Playwright Test](https://playwright.dev/docs/test-intro)
 

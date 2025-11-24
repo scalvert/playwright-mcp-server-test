@@ -180,7 +180,7 @@ src/
 tests/
   fixtures/mcp.ts        - Playwright fixture entrypoint
   mocks/simpleMCPServer.ts  - Mock server for integration tests
-  mcp-evals.spec.ts      - Integration test suite
+  mcp-tests.spec.ts      - Integration test suite
 ```
 
 ## Adding New Features

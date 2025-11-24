@@ -32,7 +32,7 @@ export default defineConfig([
   },
   // Reporter build
   {
-    entry: ['src/reporters/mcpEvalReporter.ts'],
+    entry: ['src/reporters/mcpReporter.ts'],
     format: ['esm', 'cjs'],
     dts: true,
     splitting: false,

@@ -20,38 +20,85 @@ npm install --save-dev playwright-mcp-server-test @playwright/test @modelcontext
 
 ## Quick Start
 
-### 0. Initialize a Project (CLI)
+### Initialize with CLI
 
-The fastest way to get started is using the CLI:
+The fastest way to get started:
 
 ```bash
 npx playwright-mcp-server-test init
 
-# Follow the interactive prompts:
-? Project name: my-mcp-tests
-? MCP transport type: stdio (local server process)
-? Server command (for stdio): node server.js
-? Install dependencies now? Yes
-
-✓ Project initialized successfully!
-
-Next steps:
-  cd my-mcp-tests
-  npm test
+# Follow the interactive prompts to create:
+# - playwright.config.ts (configured for your MCP server)
+# - tests/mcp.spec.ts (example tests)
+# - data/example-dataset.json (sample eval dataset)
+# - package.json (with all dependencies)
 ```
 
-This creates:
+See the [CLI Guide](./docs/cli.md) for all options.
 
-- `playwright.config.ts` - Configured for your MCP server
-- `tests/mcp.spec.ts` - Example tests
-- `data/example-dataset.json` - Sample eval dataset
-- `package.json` - With all dependencies
+### Example: Testing in Action
 
-### 1. Configure Playwright (Manual Setup)
-
-Add MCP configuration to your `playwright.config.ts`:
+Here's what a complete test suite looks like:
 
 ```typescript
+// tests/mcp.spec.ts
+import { test, expect } from 'playwright-mcp-server-test/fixtures/mcp';
+import { loadEvalDataset, runEvalDataset, createSchemaExpectation } from 'playwright-mcp-server-test';
+import { z } from 'zod';
+
+// Pattern 1: Direct tool testing
+test('read a file', async ({ mcp }) => {
+  const result = await mcp.callTool('read_file', { path: '/tmp/test.txt' });
+  expect(result.content).toContain('Hello');
+});
+
+// Pattern 2: Dataset-driven evals
+test('file operations eval', async ({ mcp }) => {
+  const FileContentSchema = z.object({
+    content: z.string()
+  });
+
+  const dataset = await loadEvalDataset('./data/evals.json', {
+    schemas: { 'file-content': FileContentSchema }
+  });
+
+  const result = await runEvalDataset(
+    {
+      dataset,
+      expectations: {
+        schema: createSchemaExpectation(dataset)
+      }
+    },
+    { mcp }
+  );
+
+  expect(result.passed).toBe(result.total);
+});
+```
+
+```json
+// data/evals.json
+{
+  "name": "file-ops",
+  "cases": [
+    {
+      "id": "read-config",
+      "toolName": "read_file",
+      "args": { "path": "/tmp/config.json" },
+      "expectedSchemaName": "file-content"
+    },
+    {
+      "id": "read-readme",
+      "toolName": "read_file",
+      "args": { "path": "/tmp/README.md" },
+      "expectedTextContains": ["# Welcome", "## Installation"]
+    }
+  ]
+}
+```
+
+```typescript
+// playwright.config.ts
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
@@ -64,631 +111,93 @@ export default defineConfig({
           transport: 'stdio',
           command: 'node',
           args: ['path/to/your/server.js'],
-          capabilities: {
-            roots: { listChanged: true },
-          },
         },
       },
     },
-    // Add more projects for different transports/servers
   ],
 });
 ```
 
-### 2. Use MCP Fixtures in Tests
-
-```typescript
-import { test, expect } from 'playwright-mcp-server-test/fixtures/mcp';
-
-test('lists tools from MCP server', async ({ mcp }) => {
-  const tools = await mcp.listTools();
-  expect(tools.length).toBeGreaterThan(0);
-});
-
-test('calls a tool', async ({ mcp }) => {
-  const result = await mcp.callTool('get_weather', { city: 'London' });
-  expect(result).toBeTruthy();
-});
-```
-
-### 3. Generate Eval Datasets (CLI)
-
-The easiest way to create datasets is using the interactive generator:
-
-```bash
-npx playwright-mcp-server-test generate
-
-# Interactive workflow:
-? MCP transport type: stdio
-? Server command: node server.js
-✓ Connected to MCP server
-✓ Found 3 tools
-
-? Select tool to test: get_weather
-? Tool arguments (JSON): { "city": "London" }
-✓ Tool called successfully
-
-Response preview:
-{
-  "city": "London",
-  "temperature": 20,
-  "conditions": "Sunny"
-}
-
-📋 Suggested expectations:
-  Text contains:
-    - "London"
-    - "temperature"
-  Regex patterns:
-    - \d+
-
-? Test case ID: weather-london
-? Add text contains expectations? Yes
-? Add regex expectations? Yes
-✓ Added test case "weather-london"
-
-? Add another test case? No
-✓ Dataset saved to data/dataset.json
-```
-
-Or create datasets manually (`data/evals.json`):
-
-```json
-{
-  "name": "weather-tool-evals",
-  "cases": [
-    {
-      "id": "london-weather",
-      "toolName": "get_weather",
-      "args": { "city": "London" },
-      "expectedSchemaName": "weather-response"
-    }
-  ]
-}
-```
-
-Run evals in your test:
-
-```typescript
-import { test } from 'playwright-mcp-server-test/fixtures/mcp';
-import {
-  loadEvalDataset,
-  runEvalDataset,
-  createSchemaExpectation,
-} from 'playwright-mcp-server-test';
-import { z } from 'zod';
-
-test('run weather evals', async ({ mcp }) => {
-  const WeatherSchema = z.object({
-    city: z.string(),
-    temperature: z.number(),
-    conditions: z.string(),
-  });
-
-  const dataset = await loadEvalDataset('./data/evals.json', {
-    schemas: { 'weather-response': WeatherSchema },
-  });
-
-  const result = await runEvalDataset(
-    {
-      dataset,
-      expectations: {
-        schema: createSchemaExpectation(dataset),
-      },
-    },
-    { mcp }
-  );
-
-  expect(result.passed).toBe(result.total);
-});
-```
-
-## Configuration
-
-### Transport Types
-
-#### Stdio (Local Server)
-
-```typescript
-mcpConfig: {
-  transport: 'stdio',
-  command: 'node',
-  args: ['server.js'],
-  debugLogging: true,
-}
-```
-
-#### HTTP (Remote Server)
-
-```typescript
-mcpConfig: {
-  transport: 'http',
-  serverUrl: 'http://localhost:3000/mcp',
-  requestTimeoutMs: 5000,
-}
-```
-
-## Eval Expectations
-
-The framework supports multiple types of expectations to validate MCP tool responses:
-
-### Exact Match
-
-Validates exact equality of structured data (JSON):
-
-```typescript
-import { createExactExpectation } from 'playwright-mcp-server-test';
-
-const expectations = {
-  exact: createExactExpectation(),
-};
-
-// In your dataset:
-{
-  "id": "calc-test",
-  "toolName": "calculate",
-  "args": { "a": 2, "b": 3 },
-  "expectedExact": { "result": 5 }
-}
-```
-
-### Text Contains
-
-Validates that response text contains expected substrings (ideal for markdown/unstructured text):
-
-```typescript
-import { createTextContainsExpectation } from 'playwright-mcp-server-test';
-
-const expectations = {
-  textContains: createTextContainsExpectation(),
-  // Optional: case-insensitive matching
-  // textContains: createTextContainsExpectation({ caseSensitive: false }),
-};
-
-// In your dataset:
-{
-  "id": "markdown-response",
-  "toolName": "get_city_info",
-  "args": { "city": "London" },
-  "expectedTextContains": [
-    "## City Information",
-    "**City:** London",
-    "### Features",
-    "- Public Transportation"
-  ]
-}
-```
-
-### Regex Pattern Matching
-
-Validates that response text matches regex patterns (powerful for format validation):
-
-```typescript
-import { createRegexExpectation } from 'playwright-mcp-server-test';
-
-const expectations = {
-  regex: createRegexExpectation(),
-};
-
-// In your dataset:
-{
-  "id": "weather-format",
-  "toolName": "get_weather",
-  "args": { "city": "London" },
-  "expectedRegex": [
-    "^## Weather",
-    "Temperature: \\d+°[CF]",
-    "Conditions?: (Sunny|Cloudy|Rainy|Snowy)",
-    "\\d{4}-\\d{2}-\\d{2}"
-  ]
-}
-```
-
-**Note:** Regex patterns support multiline matching (^ and $ match line starts/ends).
-
-### Schema Validation
-
-Validates using Zod schemas:
-
-```typescript
-import { createSchemaExpectation } from 'playwright-mcp-server-test';
-import { z } from 'zod';
-
-const dataset = await loadEvalDataset('./evals.json', {
-  schemas: {
-    'user-response': z.object({
-      id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-    }),
-  },
-});
-
-const expectations = {
-  schema: createSchemaExpectation(dataset),
-};
-```
-
-### LLM-as-a-Judge
-
-Semantic evaluation using LLMs:
-
-```typescript
-import {
-  createJudgeExpectation,
-  createLLMJudgeClient,
-} from 'playwright-mcp-server-test';
-
-const judgeClient = createLLMJudgeClient({
-  provider: 'openai',
-  model: 'gpt-4',
-  temperature: 0.0,
-});
-
-const expectations = {
-  judge: createJudgeExpectation({
-    'search-relevance': {
-      rubric:
-        'Evaluate if the search results are relevant to the query. Score 0-1.',
-      passingThreshold: 0.7,
-    },
-  }),
-};
-
-const result = await runEvalDataset(
-  { dataset, expectations, judgeClient },
-  { mcp }
-);
-```
-
-Supported providers:
-
-- `openai` - Requires `OPENAI_API_KEY` env var
-- `anthropic` - Requires `ANTHROPIC_API_KEY` env var
-
-### Combining Multiple Expectations
-
-You can use multiple expectations together:
-
-```typescript
-const result = await runEvalDataset(
-  {
-    dataset,
-    expectations: {
-      exact: createExactExpectation(),
-      schema: createSchemaExpectation(dataset),
-      textContains: createTextContainsExpectation(),
-      regex: createRegexExpectation(),
-      judge: createJudgeExpectation(judgeConfigs),
-    },
-    judgeClient,
-  },
-  { mcp }
-);
-```
-
-Each eval case will use the appropriate expectation based on which fields are defined (`expectedExact`, `expectedSchemaName`, `expectedTextContains`, `expectedRegex`, `judgeConfigId`).
-
-## Protocol Conformance
-
-Check MCP spec compliance:
-
-```typescript
-import { runConformanceChecks } from 'playwright-mcp-server-test';
-
-test('MCP conformance', async ({ mcp }) => {
-  const result = await runConformanceChecks(mcp, {
-    requiredTools: ['get_weather', 'search_docs'],
-    validateSchemas: true,
-  });
-
-  expect(result.pass).toBe(true);
-});
-```
-
-## API Reference
-
-### Fixtures
-
-- `mcpClient: Client` - Raw MCP SDK client
-- `mcp: MCPFixtureApi` - High-level test API
-
-### MCPFixtureApi
-
-```typescript
-interface MCPFixtureApi {
-  client: Client;
-  listTools(): Promise<Array<Tool>>;
-  callTool<TArgs>(name: string, args: TArgs): Promise<CallToolResult>;
-  getServerInfo(): { name?: string; version?: string } | null;
-}
-```
-
-### Eval Functions
-
-- `loadEvalDataset(path, options)` - Load eval dataset from JSON
-- `runEvalDataset(options, context)` - Run eval dataset
-- `createExactExpectation()` - Create exact match expectation (for JSON)
-- `createTextContainsExpectation(options?)` - Create text contains expectation (for markdown/text)
-- `createRegexExpectation()` - Create regex pattern expectation (for format validation)
-- `createSchemaExpectation(dataset)` - Create schema validation expectation
-- `createJudgeExpectation(configs)` - Create LLM judge expectation
-
-### Text Utilities
-
-- `extractTextFromResponse(response)` - Extract text from various MCP response formats
-- `normalizeWhitespace(text)` - Normalize whitespace for comparison
-- `findMissingSubstrings(text, substrings, caseSensitive?)` - Check for missing substrings
-- `findFailedPatterns(text, patterns)` - Check which regex patterns failed
-
-### Judge Functions
-
-- `createLLMJudgeClient(config)` - Create LLM judge client
-- Providers: `openai`, `anthropic`, `custom-http`
-
-### Conformance
-
-- `runConformanceChecks(mcp, options)` - Run protocol conformance checks
-- `formatConformanceResult(result)` - Format check results
-
-## CLI Commands
-
-### `init` - Initialize Project
-
-```bash
-npx playwright-mcp-server-test init [options]
-
-Options:
-  -n, --name <name>      Project name
-  -d, --dir <directory>  Target directory (default: ".")
-  -h, --help             Display help
-```
-
-Creates a complete project structure with:
-
-- Playwright configuration
-- Example tests
-- Sample eval dataset
-- TypeScript setup
-- Dependencies
-
-### `generate` - Generate Eval Dataset
-
-```bash
-npx playwright-mcp-server-test generate [options]
-
-Options:
-  -c, --config <path>  Path to MCP config JSON file
-  -o, --output <path>  Output dataset path (default: "data/dataset.json")
-  -h, --help           Display help
-```
-
-Interactive workflow:
-
-1. Connects to your MCP server
-2. Lists available tools
-3. Lets you call tools with custom arguments
-4. Shows response preview
-5. **Auto-suggests expectations** based on response format
-6. Generates test cases
-7. Saves to JSON dataset
-
-Features:
-
-- ✅ Appends to existing datasets
-- ✅ Smart expectation suggestions (text contains, regex)
-- ✅ Response preview
-- ✅ Validation
+## Documentation
+
+- **[Quick Start Guide](./docs/quickstart.md)** - Detailed setup and configuration
+- **[Expectations](./docs/expectations.md)** - All validation types (exact, schema, regex, text contains, LLM judge)
+- **[API Reference](./docs/api-reference.md)** - Complete API documentation
+- **[CLI Commands](./docs/cli.md)** - `init` and `generate` command details
+- **[UI Reporter](./docs/ui-reporter.md)** - Interactive web UI for test results
+- **[Transports](./docs/transports.md)** - Stdio vs HTTP configuration
+- **[Development](./docs/development.md)** - Contributing and building
 
 ## Examples
 
-### Testing Markdown Responses
+The `examples/` directory contains complete working examples:
 
-Many MCP servers return markdown-formatted responses for better LLM readability. Here's a complete example:
-
-```typescript
-// Your MCP server returns markdown
-const response = `## City Information
-
-**City:** London
-**Population:** 8.9M
-
-### Features
-- Public Transportation
-- Cultural Attractions
-
-Temperature: 15°C
-Last updated: 2025-01-22`;
-
-// Validate with text contains
-{
-  "id": "city-info-text",
-  "toolName": "get_city_info",
-  "args": { "city": "London" },
-  "expectedTextContains": [
-    "## City Information",
-    "**City:** London",
-    "### Features"
-  ]
-}
-
-// Validate with regex patterns
-{
-  "id": "city-info-format",
-  "toolName": "get_city_info",
-  "args": { "city": "London" },
-  "expectedRegex": [
-    "^## City Information",      // Starts with heading
-    "\\*\\*City:\\*\\* \\w+",    // Has city field
-    "\\*\\*Population:\\*\\* [\\d.]+M",  // Population in millions
-    "Temperature: \\d+°C",       // Temperature format
-    "\\d{4}-\\d{2}-\\d{2}"      // Date format
-  ]
-}
-
-// In your test
-const result = await runEvalDataset(
-  {
-    dataset,
-    expectations: {
-      textContains: createTextContainsExpectation(),
-      regex: createRegexExpectation(),
-    },
-  },
-  { mcp }
-);
-```
-
-### More Examples
-
-See the `examples/` directory for complete working examples:
-
-**Real MCP Server Examples:**
-
-- `filesystem-server/` - Test suite for official Anthropic Filesystem MCP server
+**Real MCP Server Tests:**
+- [`filesystem-server/`](./examples/filesystem-server) - Test suite for Anthropic's Filesystem MCP server
   - Demonstrates `fixturify-project` for isolated test fixtures
   - Zod schema validation for JSON files
   - 5 Playwright tests, 11 eval dataset cases
-- `sqlite-server/` - Test suite for official SQLite MCP server
+
+- [`sqlite-server/`](./examples/sqlite-server) - Test suite for SQLite MCP server
   - Demonstrates `better-sqlite3` for database testing
   - Custom expectations for record count validation
   - 11 Playwright tests, 14 eval dataset cases
 
-**Basic Usage Examples:**
+**Basic Patterns:**
+- [`basic-playwright-usage/`](./examples/basic-playwright-usage) - Simple Playwright test patterns
+- [`basic-vitest-usage/`](./examples/basic-vitest-usage) - Vitest integration patterns
 
-- `basic-playwright-usage/` - Simple Playwright test patterns
-- `basic-vitest-usage/` - Vitest integration patterns
+Each example includes complete test suites, eval datasets, and npm scripts. See [`examples/README.md`](./examples/README.md) for detailed documentation.
 
-Each example includes:
+## Key Concepts
 
-- Complete test suite with fixtures
-- Eval dataset with direct and LLM modes
-- npm scripts for running tests (`npm test`, `npm run test:ui`)
-- HTML and UI reporters via Playwright
+### Fixtures
+Access MCP servers in tests via Playwright fixtures:
+- `mcpClient: Client` - Raw MCP SDK client
+- `mcp: MCPFixtureApi` - High-level test API with helper methods
 
-See `examples/README.md` for detailed documentation and best practices.
+### Expectations
+Validate tool responses with multiple expectation types:
+- **Exact Match** - Structured JSON equality
+- **Schema** - Zod validation
+- **Text Contains** - Substring matching (great for markdown)
+- **Regex** - Pattern matching
+- **LLM Judge** - Semantic evaluation
+
+See [Expectations Guide](./docs/expectations.md) for details.
+
+### Transports
+Connect to MCP servers via:
+- **stdio** - Local server processes
+- **HTTP** - Remote servers
+
+See [Transports Guide](./docs/transports.md) for configuration.
 
 ## UI Reporter
 
-`playwright-mcp-server-test` includes a custom Playwright reporter with a beautiful, interactive web UI for visualizing test results. The reporter automatically tracks both traditional Playwright tests and eval dataset results in a unified view.
+Beautiful web UI for visualizing test results:
 
 ![MCP Test Reporter UI](./ui.png)
 
-### Features
-
-- **📊 Dual Test Tracking** - Automatically captures both Playwright test results and eval dataset executions
-- **🎯 Tab-Based Filtering** - Switch between All Results, Eval Datasets, and Test Suites views
-- **📈 Real-Time Metrics** - Pass rate, total tests, duration, and expectation breakdowns
-- **🔍 Detailed Inspection** - Click any result to see full tool call details, responses, and validation results
-- **🌓 Dark Mode** - Automatic theme detection with manual toggle
-- **📱 Responsive Design** - Works on desktop and mobile browsers
-
-### Configuration
-
-Add the reporter to your `playwright.config.ts`:
+Add to your `playwright.config.ts`:
 
 ```typescript
-import { defineConfig } from '@playwright/test';
-
 export default defineConfig({
   reporter: [
-    ['list'], // Keep the terminal output
-    ['playwright-mcp-server-test/reporters/mcpEvalReporter'], // Add the UI reporter
+    ['list'],
+    ['playwright-mcp-server-test/reporters/mcpReporter'],
   ],
-  // ... rest of config
 });
 ```
 
-### Usage
+See [UI Reporter Guide](./docs/ui-reporter.md) for features and usage.
 
-The reporter automatically generates an HTML report after each test run:
+## Support
 
-```bash
-npm test
-
-# Report generated at: .mcp-eval-results/latest/index.html
-# Opens automatically in your default browser
-```
-
-The UI shows:
-
-- **Metrics Cards** - High-level summary (total, passed, failed, pass rate, duration)
-- **Results Table** - All test results with filtering, sorting, and search
-- **Detail Modal** - Full inspection of tool calls, responses, and expectations
-- **Visual Icons** - BarChart3 for eval datasets, FlaskConical for test suites
-
-### Results Organization
-
-Results are saved to `.mcp-eval-results/`:
-
-```
-.mcp-eval-results/
-├── latest/                    # Symlink to most recent run
-│   ├── index.html            # Main UI
-│   ├── data.js               # Test results data
-│   └── app.js, styles.css    # UI assets
-└── run-2025-01-24T12-00-00/  # Timestamped runs
-    └── ...
-```
-
-**Tip:** Add `.mcp-eval-results/` to your `.gitignore` to avoid committing generated reports.
-
-## Development
-
-### Running Tests
-
-This package includes a comprehensive test suite:
-
-**Unit Tests** (Vitest - 104 tests)
-
-```bash
-npm test              # Run unit tests
-npm run test:watch    # Run in watch mode
-```
-
-Tests cover:
-
-- Configuration validation (18 tests)
-- Dataset types and loading (24 tests)
-- Expectations (exact, schema, textContains, regex) (62 tests)
-
-**Integration Tests** (Playwright - 5 tests)
-
-```bash
-npm run test:playwright
-```
-
-Integration tests use a mock MCP server and cover:
-
-- MCP server connection and info
-- Tool listing and conformance checks
-- Eval dataset execution
-- Error handling
-
-### Building
-
-```bash
-# Build library (ESM + CJS + .d.ts)
-npm run build
-
-# Build in watch mode
-npm run dev
-
-# Type check
-npm run typecheck
-```
-
-### Code Quality
-
-```bash
-# Lint
-npm run lint
-npm run lint:fix
-
-# Format
-npm run format
-npm run format:check
-```
+- **Documentation**: See [`docs/`](./docs) directory
+- **Examples**: See [`examples/`](./examples) directory
+- **Issues**: [GitHub Issues](https://github.com/anthropics/claude-code/issues)
+- **Help**: Use `/help` in Claude Code CLI
 
 ## License
 
@@ -696,12 +205,11 @@ MIT
 
 ## Contributing
 
-Contributions welcome! Please open an issue or PR.
+Contributions welcome! See [Development Guide](./docs/development.md) for setup instructions.
 
 ## Credits
 
 Built with:
-
 - [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk)
 - [@playwright/test](https://playwright.dev)
 - [Zod](https://zod.dev)

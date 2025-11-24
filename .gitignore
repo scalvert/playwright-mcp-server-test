@@ -12,7 +12,7 @@ coverage/
 playwright-report/
 test-results/
 .preview-output/
-.mcp-eval-results/
+.mcp-test-results/
 
 # Environment variables
 .env

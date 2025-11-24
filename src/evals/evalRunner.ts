@@ -435,7 +435,7 @@ export async function runEvalDataset(
 
   // Attach results for MCP reporter if testInfo is provided
   if (context.testInfo) {
-    await context.testInfo.attach('mcp-eval-results', {
+    await context.testInfo.attach('mcp-test-results', {
       contentType: 'application/json',
       body: Buffer.from(JSON.stringify({ caseResults })),
     });

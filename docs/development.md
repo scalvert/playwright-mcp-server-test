@@ -1,0 +1,393 @@
+# Development Guide
+
+This guide covers contributing to `playwright-mcp-server-test`, running tests, and building the library.
+
+## Table of Contents
+
+- [Setup](#setup)
+- [Running Tests](#running-tests)
+- [Building](#building)
+- [Code Quality](#code-quality)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+
+## Setup
+
+### Prerequisites
+
+- Node.js 18 or higher
+- npm or yarn
+
+### Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/your-org/playwright-mcp-server-test.git
+cd playwright-mcp-server-test
+npm install
+```
+
+## Running Tests
+
+The project includes a comprehensive test suite with both unit tests and integration tests.
+
+### Unit Tests (Vitest)
+
+Unit tests cover core functionality with 104 tests:
+
+```bash
+# Run all unit tests
+npm test
+
+# Run in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+```
+
+**Test Coverage:**
+- Configuration validation (18 tests)
+- Dataset types and loading (24 tests)
+- Expectations (exact, schema, textContains, regex) (62 tests)
+
+### Integration Tests (Playwright)
+
+Integration tests use a mock MCP server (5 tests):
+
+```bash
+# Run integration tests
+npm run test:playwright
+
+# Run with UI mode
+npm run test:playwright:ui
+
+# Run in debug mode
+npm run test:playwright:debug
+```
+
+**Test Coverage:**
+- MCP server connection and info
+- Tool listing and conformance checks
+- Eval dataset execution
+- Error handling
+
+### Running All Tests
+
+```bash
+# Run both unit and integration tests
+npm test && npm run test:playwright
+```
+
+### Mock MCP Server
+
+The integration tests use a mock server located at `tests/mocks/simpleMCPServer.ts`.
+
+**Available Tools:**
+- `echo` - Echoes back the input
+- `calculate` - Performs basic math operations
+- `get_weather` - Returns mock weather data
+
+The mock server requires Zod schemas for MCP SDK compatibility.
+
+## Building
+
+### Build Commands
+
+```bash
+# Build library (ESM + CJS + .d.ts)
+npm run build
+
+# Build in watch mode
+npm run dev
+
+# Type check only (no build)
+npm run typecheck
+```
+
+### Build Output
+
+The build produces:
+
+```
+dist/
+├── index.js        # ESM build
+├── index.cjs       # CommonJS build
+└── index.d.ts      # TypeScript declarations
+```
+
+**Package Exports:**
+
+The `package.json` exports both ESM and CJS for maximum compatibility:
+
+```json
+{
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  }
+}
+```
+
+## Code Quality
+
+### Linting
+
+```bash
+# Run ESLint
+npm run lint
+
+# Auto-fix issues
+npm run lint:fix
+```
+
+### Formatting
+
+```bash
+# Format with Prettier
+npm run format
+
+# Check formatting
+npm run format:check
+```
+
+### Pre-commit Checks
+
+Before committing, ensure:
+
+```bash
+npm run typecheck  # TypeScript validation
+npm run lint       # No lint errors
+npm test           # All tests pass
+npm run build      # Build succeeds
+```
+
+## Project Structure
+
+```
+playwright-mcp-server-test/
+├── src/
+│   ├── config/       # MCPConfig types + Zod validation
+│   ├── mcp/          # Client factory, fixtures, MCPFixtureApi
+│   ├── evals/        # Dataset types, loader, runner, expectations
+│   ├── judge/        # LLM-as-a-judge (OpenAI, Anthropic)
+│   ├── spec/         # Protocol conformance checks
+│   └── index.ts      # Public API exports
+├── tests/
+│   ├── fixtures/mcp.ts           # Playwright fixture entrypoint
+│   ├── mocks/simpleMCPServer.ts  # Mock server for integration tests
+│   └── mcp-tests.spec.ts         # Integration test suite
+├── examples/         # Example projects
+├── docs/            # Documentation
+└── dist/            # Build output (generated)
+```
+
+### Key Files
+
+**Public API:**
+- `src/index.ts` - All exported functions and types
+
+**Fixtures:**
+- `tests/fixtures/mcp.ts` - Playwright fixture definitions
+- `src/mcp/fixtures.ts` - Fixture implementation
+
+**Configuration:**
+- `src/config/mcpConfig.ts` - Transport configuration types
+- `src/config/mcpConfigSchema.ts` - Zod validation schemas
+
+**Evaluations:**
+- `src/evals/evalTypes.ts` - Dataset and case types
+- `src/evals/evalRunner.ts` - Dataset execution logic
+- `src/evals/expectations/` - All expectation implementations
+
+## Contributing
+
+We welcome contributions! Here's how to get started:
+
+### Reporting Issues
+
+1. Check existing issues first
+2. Create a new issue with:
+   - Clear description
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Environment details (Node version, OS, etc.)
+
+### Submitting Pull Requests
+
+1. **Fork the repository**
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Make your changes**
+   - Follow existing code style
+   - Add tests for new functionality
+   - Update documentation as needed
+
+4. **Run quality checks**
+   ```bash
+   npm run typecheck
+   npm run lint
+   npm test
+   npm run test:playwright
+   npm run build
+   ```
+
+5. **Commit your changes**
+   ```bash
+   git commit -m "feat: add new feature"
+   ```
+
+   Use conventional commit format:
+   - `feat:` - New feature
+   - `fix:` - Bug fix
+   - `docs:` - Documentation changes
+   - `test:` - Test changes
+   - `refactor:` - Code refactoring
+   - `chore:` - Build/tooling changes
+
+6. **Push and create PR**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+   Then open a pull request on GitHub.
+
+### Code Style
+
+Follow these conventions:
+
+1. **Function declarations over expressions**
+   ```typescript
+   // ✓ Good
+   export function createClient() { }
+
+   // ✗ Avoid
+   export const createClient = () => { }
+   ```
+
+2. **Explicit null over short-circuit**
+   ```typescript
+   // ✓ Good
+   condition ? 'value' : null
+
+   // ✗ Avoid
+   condition && 'value'
+   ```
+
+3. **Descriptive type names**
+   ```typescript
+   // ✓ Good
+   EvalDataset, MCPFixtureApi, LLMJudgeClient
+
+   // ✗ Avoid
+   Data, Api, Client
+   ```
+
+4. **TypeScript strict mode**
+   - No `any` types
+   - Prefer type safety
+   - Use proper null checks
+
+5. **Async function style**
+   - Keep `async` keyword for consistency
+   - Even if no `await` currently used
+
+### Adding Features
+
+#### New Expectation Type
+
+1. Create `src/evals/expectations/myExpectation.ts`
+2. Export function returning `EvalExpectation`
+3. Add to `src/index.ts` exports
+4. Add unit tests in `*.test.ts`
+5. Update `docs/expectations.md`
+
+Example:
+
+```typescript
+// src/evals/expectations/myExpectation.ts
+import type { EvalExpectation } from '../evalTypes';
+
+export function createMyExpectation(): EvalExpectation {
+  return async (context, evalCase, response) => {
+    // Implementation
+    return { pass: true, details: 'Success' };
+  };
+}
+```
+
+#### New LLM Judge Provider
+
+1. Add provider to `LLMProviderKind` union in `src/judge/judgeTypes.ts`
+2. Create `src/judge/myProviderJudge.ts` implementing `LLMJudgeClient`
+3. Add case to `createLLMJudgeClient()` switch in `src/judge/index.ts`
+4. Use environment variables for API keys
+5. Add tests
+6. Update `docs/expectations.md`
+
+#### New Transport Type
+
+1. Add to `MCPConfig` discriminated union in `src/config/mcpConfig.ts`
+2. Update `createMCPClientForConfig()` in `src/mcp/createClient.ts` with SDK transport class
+3. Add Zod schema in `src/config/mcpConfigSchema.ts`
+4. Update type guards if needed
+5. Add tests
+6. Update `docs/transports.md`
+
+### Testing Guidelines
+
+- **Unit tests**: Mock MCP interactions, test logic in isolation
+- **Integration tests**: Use `simpleMCPServer.ts` mock with real MCP SDK
+- **Conformance tests**: Validate against MCP protocol spec
+- Never skip tests without marking them explicitly (`test.skip()`)
+
+### Documentation
+
+When adding features:
+
+1. Update relevant docs in `docs/`
+2. Add JSDoc comments to public APIs
+3. Include code examples
+4. Update `CHANGELOG.md` (if maintaining one)
+
+## Release Process
+
+(For maintainers)
+
+1. Update version in `package.json`
+2. Update `CHANGELOG.md`
+3. Run all tests and build
+4. Commit and tag
+5. Push to GitHub
+6. Publish to npm
+
+```bash
+npm version patch|minor|major
+npm test && npm run test:playwright
+npm run build
+git push && git push --tags
+npm publish
+```
+
+## Getting Help
+
+- **Documentation**: Check [`docs/`](../docs) directory
+- **Examples**: See [`examples/`](../examples) directory
+- **Issues**: [GitHub Issues](https://github.com/anthropics/claude-code/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/anthropics/claude-code/discussions)
+
+## License
+
+MIT - See LICENSE file for details

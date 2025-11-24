@@ -23,10 +23,10 @@
       "types": "./tests/fixtures/mcp.ts",
       "import": "./tests/fixtures/mcp.ts"
     },
-    "./reporters/mcpEvalReporter": {
-      "types": "./dist/reporters/mcpEvalReporter.d.ts",
-      "import": "./dist/reporters/mcpEvalReporter.js",
-      "require": "./dist/reporters/mcpEvalReporter.cjs"
+    "./reporters/mcpReporter": {
+      "types": "./dist/reporters/mcpReporter.d.ts",
+      "import": "./dist/reporters/mcpReporter.js",
+      "require": "./dist/reporters/mcpReporter.cjs"
     }
   },
   "main": "./dist/index.js",
