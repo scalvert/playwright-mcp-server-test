@@ -57,12 +57,14 @@ export async function createMCPClientForConfig(
     const transport = new StdioClientTransport({
       command: validatedConfig.command,
       args: validatedConfig.args ?? [],
+      ...(validatedConfig.cwd && { cwd: validatedConfig.cwd }),
     });
 
     if (validatedConfig.debugLogging) {
       console.log('[MCP] Connecting via stdio:', {
         command: validatedConfig.command,
         args: validatedConfig.args,
+        cwd: validatedConfig.cwd,
       });
     }
 

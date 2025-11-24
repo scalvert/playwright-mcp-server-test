@@ -1,6 +1,33 @@
 # MCP Eval Examples
 
-This directory contains example datasets demonstrating how to use `playwright-mcp-evals` for testing MCP servers.
+This directory contains complete working examples demonstrating how to use `playwright-mcp-evals` for testing real MCP servers.
+
+## Available Examples
+
+### 🗂️ filesystem-server
+
+Test suite for the official Anthropic Filesystem MCP Server (`@modelcontextprotocol/server-filesystem`).
+
+**Features:**
+- Creates isolated test fixtures with `fixturify-project`
+- Tests file operations (read, list, directory tree)
+- Demonstrates Zod schema validation for JSON files
+- 5 Playwright tests, 11 eval dataset cases (6 direct, 5 LLM)
+
+**Location:** `examples/filesystem-server/`
+
+### 🗄️ sqlite-server
+
+Test suite for the official Anthropic SQLite MCP Server (`mcp-server-sqlite-npx`).
+
+**Features:**
+- Creates temporary databases with `better-sqlite3`
+- Seeds test data (users and posts tables)
+- Tests SQL queries, JOINs, aggregations, and schema operations
+- Custom expectations for record count validation
+- 11 Playwright tests, 14 eval dataset cases (8 direct, 6 LLM)
+
+**Location:** `examples/sqlite-server/`
 
 ## Evaluation Modes
 
@@ -59,79 +86,182 @@ LLM host mode uses actual LLM providers (OpenAI or Anthropic) to test MCP server
 }
 ```
 
-## Running the Examples
+## Quick Start
 
-### Prerequisites
+Navigate to an example directory and run the tests:
 
-1. Install the package:
 ```bash
-npm install playwright-mcp-evals @playwright/test
+cd examples/filesystem-server
+npm install
+npm test
 ```
 
-2. For LLM host mode, set up API keys:
+or
+
 ```bash
+cd examples/sqlite-server
+npm install
+npm test
+```
+
+### Test Scripts
+
+Each example includes the following npm scripts:
+
+- `npm test` - Run all tests in headless mode
+- `npm run test:ui` - Launch Playwright's interactive UI mode
+- `npm run test:debug` - Run tests with debugging enabled
+- `npx playwright show-report` - View the HTML report from the last test run
+
+### UI Reporter
+
+Playwright provides a rich UI for running and debugging tests:
+
+```bash
+npm run test:ui
+```
+
+This opens an interactive interface where you can:
+- See all test cases and their status
+- Run individual tests or test suites
+- Watch tests execute in real-time
+- Inspect test results and errors
+- View traces and screenshots
+
+After running tests, view the HTML report:
+
+```bash
+npx playwright show-report
+```
+
+### LLM Host Mode Requirements
+
+For LLM host mode tests, install the required SDKs and set API keys:
+
+```bash
+# OpenAI (required for OpenAI provider tests)
+npm install openai @openai/agents
 export OPENAI_API_KEY="your-key-here"
+
+# Anthropic (required for Anthropic provider tests)
+npm install @anthropic-ai/sdk
 export ANTHROPIC_API_KEY="your-key-here"
 ```
 
-### Example Test File
+You only need to install the providers you plan to use. **All direct mode tests work without any LLM dependencies.**
 
-```typescript
-import { test, expect } from '@playwright/test';
-import { loadEvalDataset, runEvalDataset, createToolCallExpectation } from 'playwright-mcp-evals';
-import { mcp } from 'playwright-mcp-evals/fixtures/mcp';
+## Example Structure
 
-test.use({
-  mcpConfig: {
-    transport: 'stdio',
-    command: 'node',
-    args: ['path/to/your/weather-server.js']
-  }
-});
+Each example follows a consistent structure:
 
-test('Weather MCP Server Evaluation', async ({ mcp }) => {
-  // Load the dataset
-  const dataset = await loadEvalDataset('./examples/weather-eval-dataset.json');
-
-  // Run the evaluation
-  const result = await runEvalDataset(
-    {
-      dataset,
-      expectations: {
-        textContains: createTextContainsExpectation(),
-        regex: createRegexExpectation(),
-        // For llm_host mode cases
-        toolCalls: createToolCallExpectation()
-      }
-    },
-    { mcp }
-  );
-
-  // Assert results
-  expect(result.passed).toBe(result.total);
-  console.log(`Passed: ${result.passed}/${result.total}`);
-});
+```
+examples/[example-name]/
+├── tests/
+│   └── [example]-eval.spec.ts    # Playwright test file
+├── schemas/
+│   └── [schemas].ts               # Zod validation schemas
+├── eval-dataset.json              # Eval test cases
+├── package.json                   # Dependencies and scripts
+├── playwright.config.ts           # Playwright configuration
+└── README.md                      # Example-specific documentation
 ```
 
-## Example Datasets
+### filesystem-server Dataset
 
-### weather-eval-dataset.json
+Demonstrates filesystem operations:
 
-Comprehensive weather MCP server evaluation demonstrating:
+- **Direct mode**: Read files, list directories, get directory tree
+- **LLM host mode**: Natural language file discovery and content extraction
+- **Schema validation**: JSON file content validation with Zod
+- **Error handling**: Non-existent file and directory tests
 
-- **Direct mode tests**: Basic weather lookups with different validation strategies
-- **LLM host mode tests**: Natural language queries testing tool discovery
-- **Provider comparison**: Examples using both OpenAI and Anthropic
-- **Edge cases**: Ambiguous inputs, missing parameters, etc.
+### sqlite-server Dataset
 
-## Optional Dependencies
+Demonstrates database operations:
 
-LLM host mode requires installing the appropriate SDK:
+- **Direct mode**: SQL queries, JOINs, aggregations, schema introspection
+- **LLM host mode**: Natural language database querying
+- **Custom expectations**: Record count validation
+- **Complex scenarios**: Multi-table queries with sorting and grouping
 
-- **OpenAI**: `npm install openai @openai/agents`
-- **Anthropic**: `npm install @anthropic-ai/sdk`
+## Test Patterns
 
-You only need to install the providers you plan to use. Direct mode works without any LLM dependencies.
+Both examples demonstrate key testing patterns:
+
+### Fixture Management with fixturify-project
+
+```typescript
+fileProject: async ({}, use) => {
+  const project = new Project('test-name', '1.0.0', {
+    files: {
+      'readme.txt': 'Hello World',
+      'data.json': JSON.stringify({ key: 'value' })
+    }
+  });
+
+  await project.write();  // Create files on disk
+  await use(project);
+  project.dispose();      // Cleanup
+}
+```
+
+### Database Setup with better-sqlite3
+
+```typescript
+dbProject: async ({}, use) => {
+  const project = new Project('db-test', '1.0.0');
+  await project.write();
+
+  const db = new Database(path.join(project.baseDir, 'app.db'));
+  db.exec(`CREATE TABLE users (...)`);
+  db.close();
+
+  await use(project);
+  project.dispose();
+}
+```
+
+### Custom Expectations
+
+```typescript
+const result = await runEvalDataset(
+  {
+    dataset,
+    expectations: {
+      textContains: createTextContainsExpectation(),
+      toolCalls: createToolCallExpectation(),
+
+      // Custom expectation
+      recordCount: async (context, evalCase, response) => {
+        if (evalCase.metadata?.expectedRecordCount !== undefined) {
+          return validateRecordCount(response, evalCase.metadata.expectedRecordCount);
+        }
+        return { pass: true, details: 'N/A' };
+      },
+    },
+  },
+  { mcp }
+);
+```
+
+### Response Extraction Utilities
+
+```typescript
+export function extractQueryData(response: unknown): any[] {
+  // Handle both full MCP response and content array
+  let contentArray: Array<{ type: string; text: string }>;
+
+  if (Array.isArray(response)) {
+    contentArray = response;
+  } else {
+    const validated = QueryResultSchema.parse(response);
+    contentArray = validated.content;
+  }
+
+  const textContent = contentArray[0]?.text;
+  return JSON.parse(textContent);
+}
+```
 
 ## Best Practices
 

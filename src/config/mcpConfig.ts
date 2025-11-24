@@ -47,6 +47,11 @@ export interface MCPConfig {
   args?: Array<string>;
 
   /**
+   * Working directory for the command (optional for stdio)
+   */
+  cwd?: string;
+
+  /**
    * Host capabilities to register with the server
    */
   capabilities?: MCPHostCapabilities;
@@ -86,6 +91,7 @@ const StdioConfigSchema = z.object({
   transport: z.literal('stdio'),
   command: z.string().min(1, 'command is required for stdio transport'),
   args: z.array(z.string()).optional(),
+  cwd: z.string().optional(),
   capabilities: MCPHostCapabilitiesSchema.optional(),
   connectTimeoutMs: z.number().positive().optional(),
   requestTimeoutMs: z.number().positive().optional(),

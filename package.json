@@ -41,8 +41,9 @@
     "src/reporters/ui-dist"
   ],
   "scripts": {
-    "build": "npm run build:ui && tsup",
+    "build": "npm run build:ui && tsup && npm run build:copy-ui",
     "build:ui": "tsx src/reporters/build-ui.ts",
+    "build:copy-ui": "cp -r src/reporters/ui-dist dist/reporters/",
     "dev": "tsup --watch",
     "dev:ui": "tsx src/reporters/build-ui.ts --watch",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",

@@ -1,0 +1,121 @@
+
+> filesystem-server-example@1.0.0 test
+> playwright test
+
+
+Running 5 tests using 5 workers
+
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-88302BgM4rTCo0JJu'
+]
+  ✓  1 [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:206:3 › Filesystem MCP Server Evaluation › should list directory contents (735ms)
+Secure MCP Filesystem Server running on stdio
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-88300gSE705kK06Qa'
+]
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-88305rFxWE6S71XgS'
+]
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-883032Mzo3AyX85Yr'
+]
+
+Running 11 test cases against Filesystem MCP Server
+Test files located at: /private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-883032Mzo3AyX85Yr
+
+  ✓  5 [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:193:3 › Filesystem MCP Server Evaluation › should read files from temp directory (747ms)
+  ✓ direct-read-readme (direct mode) - 2ms
+  ✗ direct-read-config-json (direct mode) - 2ms
+    Error: undefined
+    schema: Schema validation failed: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "array",
+    "path": [],
+    "message": "Expected object, received array"
+  }
+]
+  ✘  2 [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:220:3 › Filesystem MCP Server Evaluation › should search for files by pattern (758ms)
+  ✓ direct-list-docs-directory (direct mode) - 1ms
+  ✗ direct-search-markdown-files (direct mode) - 2ms
+    Error: undefined
+    textContains: Missing 1 substring(s): ".md"
+
+Response text:
+No matches found
+    regex: Failed to match 2 pattern(s):
+  - Pattern: /docs/guide\.md/
+  - Pattern: /docs/api\.md/
+
+Response text:
+No matches found
+  ✓ direct-read-nested-file (direct mode) - 1ms
+  ✓ direct-list-root-directory (direct mode) - 0ms
+  ✗ llm-list-docs-openai (llm_host mode) - 1ms
+    Error: OpenAI Agents SDK is not installed. Install it with: npm install @openai/agents
+  ✗ llm-read-config-anthropic (llm_host mode) - 0ms
+    Error: Anthropic SDK is not installed. Install it with: npm install @anthropic-ai/sdk
+  ✗ llm-find-markdown-files (llm_host mode) - 0ms
+    Error: OpenAI Agents SDK is not installed. Install it with: npm install @openai/agents
+  ✗ llm-analyze-csv-data (llm_host mode) - 0ms
+    Error: Anthropic SDK is not installed. Install it with: npm install @anthropic-ai/sdk
+  ✗ llm-list-all-files (llm_host mode) - 0ms
+    Error: OpenAI Agents SDK is not installed. Install it with: npm install @openai/agents
+
+Results: 4/11 passed
+Total duration: 9ms
+
+  ✘  3 [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:116:3 › Filesystem MCP Server Evaluation › should pass all evaluation cases (771ms)
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/private/var/folders/bf/gf7n41qd65s3p9rxmv6d33d00000gn/T/tmp-88304juWllaLjlHZ0'
+]
+  ✓  4 [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:236:3 › Filesystem MCP Server Evaluation › should handle non-existent files gracefully (786ms)
+
+
+  1) [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:116:3 › Filesystem MCP Server Evaluation › should pass all evaluation cases 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m11[39m
+    Received: [31m4[39m
+
+      185 |     console.log(`Total duration: ${result.durationMs}ms\n`);
+      186 |
+    > 187 |     expect(result.passed).toBe(
+          |                           ^
+      188 |       result.total
+      189 |     );
+      190 |     expect(result.failed).toBe(0);
+        at /Users/steve.calvert/workspace/personal/playwright-mcp-evals/examples/filesystem-server/tests/filesystem-eval.spec.ts:187:27
+
+  2) [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:220:3 › Filesystem MCP Server Evaluation › should search for files by pattern 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m".md"[39m
+    Received string:    [31m"No matches found"[39m
+
+      229 |     const text = content[0]?.text || '';
+      230 |
+    > 231 |     expect(text).toContain('.md');
+          |                  ^
+      232 |     expect(text).toMatch(/docs\/guide\.md/);
+      233 |     expect(text).toMatch(/docs\/api\.md/);
+      234 |   });
+        at /Users/steve.calvert/workspace/personal/playwright-mcp-evals/examples/filesystem-server/tests/filesystem-eval.spec.ts:231:18
+
+  2 failed
+    [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:116:3 › Filesystem MCP Server Evaluation › should pass all evaluation cases 
+    [filesystem-mcp-direct] › tests/filesystem-eval.spec.ts:220:3 › Filesystem MCP Server Evaluation › should search for files by pattern 
+  3 passed (1.7s)
+[MCP Reporter] No MCP eval results found in test run
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

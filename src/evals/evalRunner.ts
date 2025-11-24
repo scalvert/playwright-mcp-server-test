@@ -1,6 +1,7 @@
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
 import type { LLMJudgeClient } from '../judge/judgeTypes.js';
 import type { EvalDataset, EvalCase } from './datasetTypes.js';
+import type { TestInfo } from '@playwright/test';
 import { simulateLLMHost } from './llmHost/llmHostSimulation.js';
 
 /**
@@ -16,6 +17,12 @@ export interface EvalExpectationContext {
    * Optional LLM judge client for semantic evaluation
    */
   judgeClient?: LLMJudgeClient | null;
+
+  /**
+   * Optional Playwright TestInfo for reporter integration
+   * When provided, eval results will be attached to the test for the MCP reporter
+   */
+  testInfo?: TestInfo;
 }
 
 /**
@@ -154,10 +161,11 @@ export interface EvalRunnerOptions {
  * Runs an eval dataset against an MCP server
  *
  * @param options - Eval runner options
- * @param context - Eval context (mcp fixture, judge client)
+ * @param context - Eval context (mcp fixture, optional judge client, optional testInfo)
  * @returns Eval results
  *
  * @example
+ * // Basic usage
  * const result = await runEvalDataset(
  *   {
  *     dataset,
@@ -168,6 +176,15 @@ export interface EvalRunnerOptions {
  *   },
  *   { mcp }
  * );
+ *
+ * @example
+ * // With MCP reporter integration
+ * test('eval dataset', async ({ mcp }, testInfo) => {
+ *   const result = await runEvalDataset(
+ *     { dataset, expectations },
+ *     { mcp, testInfo }  // testInfo enables MCP reporter
+ *   );
+ * });
  */
 export async function runEvalDataset(
   options: EvalRunnerOptions,
@@ -358,11 +375,21 @@ export async function runEvalDataset(
   const passed = caseResults.filter((r) => r.pass).length;
   const failed = caseResults.filter((r) => !r.pass).length;
 
-  return {
+  const result: EvalRunnerResult = {
     total: caseResults.length,
     passed,
     failed,
     caseResults,
     durationMs: Date.now() - startTime,
   };
+
+  // Attach results for MCP reporter if testInfo is provided
+  if (context.testInfo) {
+    await context.testInfo.attach('mcp-eval-results', {
+      contentType: 'application/json',
+      body: Buffer.from(JSON.stringify({ caseResults })),
+    });
+  }
+
+  return result;
 }

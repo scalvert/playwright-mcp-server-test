@@ -41,5 +41,6 @@ export default defineConfig([
     minify: false,
     outDir: 'dist/reporters',
     tsconfig: './tsconfig.build.json',
+    shims: true,  // Enable shims for __dirname/__filename in ESM
   },
 ]);

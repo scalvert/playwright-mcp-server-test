@@ -538,12 +538,29 @@ const result = await runEvalDataset(
 
 ### More Examples
 
-See the `examples/` directory for complete examples:
+See the `examples/` directory for complete working examples:
 
-- `basic-playwright-usage/` - Simple Playwright test examples
-- `basic-vitest-usage/` - Vitest integration examples
+**Real MCP Server Examples:**
+- `filesystem-server/` - Test suite for official Anthropic Filesystem MCP server
+  - Demonstrates `fixturify-project` for isolated test fixtures
+  - Zod schema validation for JSON files
+  - 5 Playwright tests, 11 eval dataset cases
+- `sqlite-server/` - Test suite for official SQLite MCP server
+  - Demonstrates `better-sqlite3` for database testing
+  - Custom expectations for record count validation
+  - 11 Playwright tests, 14 eval dataset cases
 
-See `data/eval_dataset.json` for examples of all expectation types.
+**Basic Usage Examples:**
+- `basic-playwright-usage/` - Simple Playwright test patterns
+- `basic-vitest-usage/` - Vitest integration patterns
+
+Each example includes:
+- Complete test suite with fixtures
+- Eval dataset with direct and LLM modes
+- npm scripts for running tests (`npm test`, `npm run test:ui`)
+- HTML and UI reporters via Playwright
+
+See `examples/README.md` for detailed documentation and best practices.
 
 ## Development
 

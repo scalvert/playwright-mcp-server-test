@@ -1,0 +1,27 @@
+{
+  "name": "filesystem-server-example",
+  "version": "1.0.0",
+  "description": "Example using playwright-mcp-evals with official Filesystem MCP server",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
+  },
+  "keywords": [
+    "mcp",
+    "playwright",
+    "testing",
+    "filesystem",
+    "evals"
+  ],
+  "devDependencies": {
+    "@modelcontextprotocol/server-filesystem": "^0.6.2",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.2",
+    "fixturify-project": "^7.0.0",
+    "playwright-mcp-evals": "file:../..",
+    "typescript": "^5.7.2",
+    "zod": "^3.24.1"
+  }
+}
