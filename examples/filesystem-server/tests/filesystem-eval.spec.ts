@@ -122,9 +122,6 @@ test.describe('Protocol Conformance', () => {
       checkServerInfo: true,
     });
 
-    // Log detailed conformance results
-    console.log('\n' + formatConformanceResult(result));
-
     // Note: The filesystem server currently has a schema validation issue with the MCP SDK
     // We check that most conformance tests pass, but list_tools may fail due to SDK validation
     const passedChecks = result.checks.filter(c => c.pass);
@@ -142,8 +139,6 @@ test.describe('Protocol Conformance', () => {
     expect(serverInfo).not.toBeNull();
     expect(serverInfo?.name).toBeDefined();
     expect(serverInfo?.version).toBeDefined();
-
-    console.log(`Server: ${serverInfo?.name} v${serverInfo?.version}`);
   });
 
   test('should list all available tools', async ({ mcp }) => {
@@ -151,12 +146,6 @@ test.describe('Protocol Conformance', () => {
       const tools = await mcp.listTools();
 
       expect(tools.length).toBeGreaterThan(0);
-
-      // Log all available tools
-      console.log('\nAvailable tools:');
-      for (const tool of tools) {
-        console.log(`  - ${tool.name}: ${tool.description || 'No description'}`);
-      }
 
       // Verify expected filesystem tools are present
       const toolNames = tools.map(t => t.name);
@@ -204,11 +193,6 @@ test.describe('Filesystem MCP Server Evaluation', () => {
       }
     );
 
-    console.log(
-      `\nRunning ${dataset.cases.length} test cases against Filesystem MCP Server`
-    );
-    console.log(`Test files located at: ${fileProject.baseDir}\n`);
-
     // Create custom schema expectation for config file
     const configSchemaExpectation = async (_context: any, evalCase: any, response: unknown) => {
       // Only validate if this case has an expectedSchemaName
@@ -242,39 +226,15 @@ test.describe('Filesystem MCP Server Evaluation', () => {
           schema: configSchemaExpectation,
           toolCalls: createToolCallExpectation(),
         },
-        onCaseComplete: (caseResult) => {
-          // Log progress as tests complete
-          const status = caseResult.pass ? '✓' : '✗';
-          const mode = dataset.cases.find((c) => c.id === caseResult.id)?.mode || 'direct';
-          console.log(`  ${status} ${caseResult.id} (${mode} mode) - ${caseResult.durationMs}ms`);
-
-          if (!caseResult.pass) {
-            console.log(`    Error: ${caseResult.error}`);
-            Object.entries(caseResult.expectations).forEach(([type, exp]) => {
-              if (exp && !exp.pass) {
-                console.log(`    ${type}: ${exp.details}`);
-              }
-            });
-          }
-        },
       },
       { mcp, testInfo, expect }
     );
 
-    // Assert overall results
-    console.log(`\nResults: ${result.passed}/${result.total} passed`);
-    console.log(`Total duration: ${result.durationMs}ms\n`);
-
     // Count direct mode tests (those without LLM dependencies)
     const directModeTests = dataset.cases.filter(c => c.mode === 'direct' || !c.mode);
-    const llmModeTests = dataset.cases.filter(c => c.mode === 'llm_host');
-
-    // For now, we expect all direct mode tests to pass
-    // LLM mode tests require OpenAI/Anthropic SDK installation
-    console.log(`Direct mode: ${directModeTests.length} tests`);
-    console.log(`LLM mode: ${llmModeTests.length} tests (requires API SDKs)\n`);
 
     // At minimum, all direct mode tests should pass
+    // LLM mode tests require OpenAI/Anthropic SDK installation
     expect(result.passed).toBeGreaterThanOrEqual(directModeTests.length);
   });
 

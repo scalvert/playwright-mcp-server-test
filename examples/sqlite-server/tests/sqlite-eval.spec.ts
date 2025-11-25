@@ -154,9 +154,6 @@ test.describe('Protocol Conformance', () => {
       checkServerInfo: true,
     });
 
-    // Log detailed conformance results
-    console.log('\n' + formatConformanceResult(result));
-
     // SQLite server should pass all conformance checks
     const passedChecks = result.checks.filter(c => c.pass);
     expect(passedChecks.length).toBeGreaterThanOrEqual(4); // At least 4 of 5 checks should pass
@@ -173,20 +170,12 @@ test.describe('Protocol Conformance', () => {
     expect(serverInfo).not.toBeNull();
     expect(serverInfo?.name).toBeDefined();
     expect(serverInfo?.version).toBeDefined();
-
-    console.log(`Server: ${serverInfo?.name} v${serverInfo?.version}`);
   });
 
   test('should list all available tools', async ({ mcp }) => {
     const tools = await mcp.listTools();
 
     expect(tools.length).toBeGreaterThan(0);
-
-    // Log all available tools
-    console.log('\nAvailable tools:');
-    for (const tool of tools) {
-      console.log(`  - ${tool.name}: ${tool.description || 'No description'}`);
-    }
 
     // Verify expected SQLite tools are present
     const toolNames = tools.map(t => t.name);
@@ -242,10 +231,6 @@ test('Run SQLite MCP Server evaluation dataset', async ({ mcp }, testInfo) => {
     { mcp, testInfo, expect }
   );
 
-  // Assert overall results
-  console.log(`\nResults: ${result.passed}/${result.total} passed`);
-  console.log(`Total duration: ${result.durationMs}ms\n`);
-
   // For now, we expect all direct mode tests to pass
   const directModeTests = dataset.cases.filter(c => c.mode === 'direct' || !c.mode);
   expect(result.passed).toBeGreaterThanOrEqual(directModeTests.length);
@@ -260,10 +245,6 @@ test.describe('Direct Mode: SQL Query Operations', () => {
     const response = await mcp.callTool('read_query', {
       query: 'SELECT * FROM users ORDER BY id',
     });
-
-    if (response.isError) {
-      console.log('ERROR:', response.content);
-    }
 
     expect(response.isError).not.toBe(true);
 
