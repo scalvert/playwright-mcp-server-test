@@ -1,38 +1,88 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { BarChart3, FlaskConical } from 'lucide-react';
+import type { MCPEvalResult } from '../../types';
 
 interface MetricsCardsProps {
-  metrics: {
-    total: number;
-    passed: number;
-    failed: number;
-    passRate: number;
-  };
-  durationMs: number;
+  results: MCPEvalResult[];
 }
 
-export function MetricsCards({ metrics, durationMs }: MetricsCardsProps) {
+interface MetricsSummary {
+  total: number;
+  passed: number;
+  failed: number;
+  passRate: number;
+}
+
+function computeMetrics(results: MCPEvalResult[]): MetricsSummary {
+  const passed = results.filter((r) => r.pass).length;
+  const failed = results.filter((r) => !r.pass).length;
+  const total = results.length;
+  return {
+    total,
+    passed,
+    failed,
+    passRate: total > 0 ? passed / total : 0,
+  };
+}
+
+export function MetricsCards({ results }: MetricsCardsProps) {
+  const { overall, evals, tests } = useMemo(() => {
+    const evalResults = results.filter((r) => r.source === 'eval');
+    const testResults = results.filter((r) => r.source === 'test');
+    return {
+      overall: computeMetrics(results),
+      evals: computeMetrics(evalResults),
+      tests: computeMetrics(testResults),
+    };
+  }, [results]);
+
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <MetricCard
-        title="Pass Rate"
-        value={`${(metrics.passRate * 100).toFixed(1)}%`}
-        variant={metrics.passRate >= 0.8 ? 'success' : 'error'}
-      />
-      <MetricCard
-        title="Total Tests"
-        value={metrics.total.toString()}
-        variant="neutral"
-      />
-      <MetricCard
-        title="Passed"
-        value={metrics.passed.toString()}
-        variant="success"
-      />
-      <MetricCard
-        title="Failed"
-        value={metrics.failed.toString()}
-        variant={metrics.failed === 0 ? 'neutral' : 'error'}
-      />
+    <div className="space-y-4">
+      {/* Overall Summary */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <MetricCard
+          title="Pass Rate"
+          value={`${(overall.passRate * 100).toFixed(1)}%`}
+          variant={overall.passRate >= 0.8 ? 'success' : 'error'}
+        />
+        <MetricCard
+          title="Total Tests"
+          value={overall.total.toString()}
+          variant="neutral"
+        />
+        <MetricCard
+          title="Passed"
+          value={overall.passed.toString()}
+          variant="success"
+        />
+        <MetricCard
+          title="Failed"
+          value={overall.failed.toString()}
+          variant={overall.failed === 0 ? 'neutral' : 'error'}
+        />
+      </div>
+
+      {/* Breakdown by Source */}
+      {(evals.total > 0 || tests.total > 0) && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {evals.total > 0 && (
+            <SourceBreakdownCard
+              title="Eval Datasets"
+              icon={<BarChart3 size={18} />}
+              metrics={evals}
+              accentColor="blue"
+            />
+          )}
+          {tests.total > 0 && (
+            <SourceBreakdownCard
+              title="Test Suites"
+              icon={<FlaskConical size={18} />}
+              metrics={tests}
+              accentColor="purple"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -59,6 +109,94 @@ function MetricCard({ title, value, variant }: MetricCardProps) {
         <span className={`mt-2 text-3xl font-bold ${colors[variant]}`}>
           {value}
         </span>
+      </div>
+    </div>
+  );
+}
+
+interface SourceBreakdownCardProps {
+  title: string;
+  icon: React.ReactNode;
+  metrics: MetricsSummary;
+  accentColor: 'blue' | 'purple';
+}
+
+function SourceBreakdownCard({
+  title,
+  icon,
+  metrics,
+  accentColor,
+}: SourceBreakdownCardProps) {
+  const colorClasses = {
+    blue: {
+      border: 'border-l-blue-500',
+      bg: 'bg-blue-500/5',
+      icon: 'text-blue-600 dark:text-blue-400',
+      title: 'text-blue-700 dark:text-blue-300',
+    },
+    purple: {
+      border: 'border-l-purple-500',
+      bg: 'bg-purple-500/5',
+      icon: 'text-purple-600 dark:text-purple-400',
+      title: 'text-purple-700 dark:text-purple-300',
+    },
+  };
+
+  const colors = colorClasses[accentColor];
+
+  return (
+    <div
+      className={`rounded-lg border border-l-4 ${colors.border} ${colors.bg} p-4 shadow-sm`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={colors.icon}>{icon}</span>
+          <span className={`font-semibold ${colors.title}`}>{title}</span>
+        </div>
+        <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground uppercase">
+              Pass Rate
+            </span>
+            <span
+              className={`font-bold ${
+                metrics.passRate >= 0.8
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
+              }`}
+            >
+              {(metrics.passRate * 100).toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground uppercase">
+              Total
+            </span>
+            <span className="font-bold">{metrics.total}</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground uppercase">
+              Passed
+            </span>
+            <span className="font-bold text-green-600 dark:text-green-400">
+              {metrics.passed}
+            </span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground uppercase">
+              Failed
+            </span>
+            <span
+              className={`font-bold ${
+                metrics.failed === 0
+                  ? 'text-muted-foreground'
+                  : 'text-red-600 dark:text-red-400'
+              }`}
+            >
+              {metrics.failed}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

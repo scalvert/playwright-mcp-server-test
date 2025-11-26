@@ -36,7 +36,7 @@ export function Layout({ timestamp, platform, durationMs, children }: LayoutProp
       </div>
 
       {/* Page content */}
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-hidden">{children}</main>
     </div>
   );
 }

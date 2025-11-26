@@ -34,15 +34,14 @@ function App() {
         platform={data.runData.environment.platform}
         durationMs={data.runData.durationMs}
       >
-        <div className="max-w-[1600px] mx-auto p-6 space-y-6">
+        <div className="max-w-[1600px] mx-auto p-6 h-full flex flex-col gap-6">
           {/* Dashboard */}
           <MetricsCards
-            metrics={data.runData.metrics}
-            durationMs={data.runData.durationMs}
+            results={data.runData.results}
           />
 
           {/* Results Table */}
-          <div className="rounded-lg border bg-card shadow-sm overflow-hidden h-[600px]">
+          <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex-1 min-h-0">
             <ResultsTable
               results={data.runData.results}
               onSelectResult={setSelectedResult}

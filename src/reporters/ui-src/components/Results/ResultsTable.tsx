@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart3, FlaskConical } from 'lucide-react';
+import { BarChart3, FlaskConical, ChevronDown, ChevronRight } from 'lucide-react';
 import type { MCPEvalResult } from '../../types';
 
 interface ResultsTableProps {
@@ -7,83 +7,83 @@ interface ResultsTableProps {
   onSelectResult?: (result: MCPEvalResult) => void;
 }
 
+interface ResultGroup {
+  name: string;
+  results: MCPEvalResult[];
+  passed: number;
+  failed: number;
+}
+
 export function ResultsTable({
   results,
   onSelectResult,
 }: ResultsTableProps) {
-  const [sortColumn, setSortColumn] = useState<
-    'status' | 'id' | 'duration' | null
-  >(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filter, setFilter] = useState<'all' | 'pass' | 'fail'>('all');
   const [sourceFilter, setSourceFilter] = useState<'all' | 'eval' | 'test'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
-  // Filter and sort results
   const filteredResults = useMemo(() => {
     let filtered = [...results];
 
-    // Apply status filter
     if (filter === 'pass') {
       filtered = filtered.filter((r) => r.pass);
     } else if (filter === 'fail') {
       filtered = filtered.filter((r) => !r.pass);
     }
 
-    // Apply source filter (tabs)
     if (sourceFilter !== 'all') {
       filtered = filtered.filter((r) => r.source === sourceFilter);
     }
 
-    // Apply search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((r) => {
         return (
           r.id.toLowerCase().includes(query) ||
+          r.datasetName.toLowerCase().includes(query) ||
           JSON.stringify(r.response).toLowerCase().includes(query)
         );
       });
     }
 
-    // Apply sorting
-    if (sortColumn) {
-      filtered.sort((a, b) => {
-        let aVal, bVal;
+    return filtered;
+  }, [results, filter, sourceFilter, searchQuery]);
 
-        switch (sortColumn) {
-          case 'status':
-            aVal = a.pass ? 1 : 0;
-            bVal = b.pass ? 1 : 0;
-            break;
-          case 'id':
-            aVal = a.id;
-            bVal = b.id;
-            break;
-          case 'duration':
-            aVal = a.durationMs;
-            bVal = b.durationMs;
-            break;
-          default:
-            return 0;
-        }
+  const groupedResults = useMemo(() => {
+    const groups = new Map<string, MCPEvalResult[]>();
 
-        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
+    for (const result of filteredResults) {
+      const key = result.datasetName || 'Uncategorized';
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(result);
+    }
+
+    const resultGroups: ResultGroup[] = [];
+    for (const [name, groupResults] of groups) {
+      resultGroups.push({
+        name,
+        results: groupResults,
+        passed: groupResults.filter((r) => r.pass).length,
+        failed: groupResults.filter((r) => !r.pass).length,
       });
     }
 
-    return filtered;
-  }, [results, filter, sourceFilter, searchQuery, sortColumn, sortDirection]);
+    return resultGroups;
+  }, [filteredResults]);
 
-  const handleSort = (column: 'status' | 'id' | 'duration') => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
+  const toggleGroup = (groupName: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupName)) {
+        next.delete(groupName);
+      } else {
+        next.add(groupName);
+      }
+      return next;
+    });
   };
 
   const evalCount = results.filter(r => r.source === 'eval').length;
@@ -179,102 +179,119 @@ export function ResultsTable({
         </div>
       </div>
 
-      {/* Table */}
+      {/* Grouped Results */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        {filteredResults.length === 0 ? (
+        {groupedResults.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             No results found
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="sticky top-0 bg-muted border-b-2">
-              <tr>
-                <th
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide cursor-pointer hover:bg-muted/80"
-                  onClick={() => handleSort('status')}
-                >
-                  Status
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide">
-                  Type
-                </th>
-                <th
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide cursor-pointer hover:bg-muted/80"
-                  onClick={() => handleSort('id')}
-                >
-                  Case ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
-                  Tool Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
-                  Mode
-                </th>
-                <th
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide cursor-pointer hover:bg-muted/80"
-                  onClick={() => handleSort('duration')}
-                >
-                  Duration
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredResults.map((result) => {
-                const source = result.source || 'eval';
-                const isEval = source === 'eval';
+          <div className="divide-y">
+            {groupedResults.map((group) => {
+              const isCollapsed = collapsedGroups.has(group.name);
+              const allPassed = group.failed === 0;
 
-                return (
-                  <tr
-                    key={result.id}
-                    onClick={() => onSelectResult?.(result)}
-                    className={`border-b cursor-pointer hover:bg-accent/50 transition-colors ${
-                      isEval
-                        ? 'border-l-4 border-l-blue-500/30 bg-blue-500/5'
-                        : 'border-l-4 border-l-purple-500/30 bg-purple-500/5'
-                    }`}
+              return (
+                <div key={group.name}>
+                  {/* Group Header */}
+                  <button
+                    onClick={() => toggleGroup(group.name)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-muted/50 hover:bg-muted transition-colors"
                   >
-                    <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      {isCollapsed ? (
+                        <ChevronRight size={18} className="text-muted-foreground" />
+                      ) : (
+                        <ChevronDown size={18} className="text-muted-foreground" />
+                      )}
+                      <span className="font-medium">{group.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({group.results.length} {group.results.length === 1 ? 'test' : 'tests'})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          result.pass
-                            ? 'bg-green-500/20 text-green-700 dark:text-green-400'
-                            : 'bg-red-500/20 text-red-700 dark:text-red-400'
+                        className={`text-sm font-medium ${
+                          allPassed
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-red-600 dark:text-red-400'
                         }`}
                       >
-                        {result.pass ? '✓ Pass' : '✗ Fail'}
+                        {group.passed}/{group.results.length} passed
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {isEval ? (
-                        <BarChart3 size={18} className="inline-block text-blue-600 dark:text-blue-400" title="Eval Dataset" />
-                      ) : (
-                        <FlaskConical size={18} className="inline-block text-purple-600 dark:text-purple-400" title="Test Suite" />
+                      {group.failed > 0 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-700 dark:text-red-400">
+                          {group.failed} failed
+                        </span>
                       )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium">{result.id}</span>
-                        <span className="text-xs text-muted-foreground">{result.datasetName}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {result.toolName}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 text-xs bg-muted rounded">
-                        {result.mode}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {result.durationMs.toFixed(0)}ms
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  </button>
+
+                  {/* Group Results */}
+                  {!isCollapsed && (
+                    <div>
+                      {group.results.map((result) => {
+                        const source = result.source || 'eval';
+                        const isEval = source === 'eval';
+
+                        return (
+                          <div
+                            key={result.id}
+                            onClick={() => onSelectResult?.(result)}
+                            className={`flex items-center gap-4 px-4 py-3 border-b cursor-pointer hover:bg-accent/50 transition-colors ${
+                              isEval
+                                ? 'border-l-4 border-l-blue-500/30 bg-blue-500/5'
+                                : 'border-l-4 border-l-purple-500/30 bg-purple-500/5'
+                            }`}
+                          >
+                            {/* Status */}
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${
+                                result.pass
+                                  ? 'bg-green-500/20 text-green-700 dark:text-green-400'
+                                  : 'bg-red-500/20 text-red-700 dark:text-red-400'
+                              }`}
+                            >
+                              {result.pass ? '✓ Pass' : '✗ Fail'}
+                            </span>
+
+                            {/* Type Icon */}
+                            <span className="shrink-0">
+                              {isEval ? (
+                                <BarChart3 size={16} className="text-blue-600 dark:text-blue-400" title="Eval Dataset" />
+                              ) : (
+                                <FlaskConical size={16} className="text-purple-600 dark:text-purple-400" title="Test Suite" />
+                              )}
+                            </span>
+
+                            {/* Case ID */}
+                            <span className="flex-1 text-sm font-medium truncate">
+                              {result.id}
+                            </span>
+
+                            {/* Tool Name */}
+                            <code className="text-xs bg-muted px-2 py-1 rounded shrink-0">
+                              {result.toolName}
+                            </code>
+
+                            {/* Mode */}
+                            <span className="px-2 py-0.5 text-xs bg-muted rounded shrink-0">
+                              {result.mode}
+                            </span>
+
+                            {/* Duration */}
+                            <span className="text-xs text-muted-foreground shrink-0 w-16 text-right">
+                              {result.durationMs.toFixed(0)}ms
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
