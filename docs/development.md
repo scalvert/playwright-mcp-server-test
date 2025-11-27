@@ -23,8 +23,8 @@ This guide covers contributing to `@mcp-testing/server-tester`, running tests, a
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-org/@mcp-testing/server-tester.git
-cd @mcp-testing/server-tester
+git clone https://github.com/mcp-testing/server-tester.git
+cd server-tester
 npm install
 ```
 
@@ -34,7 +34,7 @@ The project includes a comprehensive test suite with both unit tests and integra
 
 ### Unit Tests (Vitest)
 
-Unit tests cover core functionality with 104 tests:
+Unit tests cover core functionality:
 
 ```bash
 # Run all unit tests
@@ -42,15 +42,15 @@ npm test
 
 # Run in watch mode
 npm run test:watch
-
-# Run with coverage
-npm run test:coverage
 ```
 
 **Test Coverage:**
-- Configuration validation (18 tests)
-- Dataset types and loading (24 tests)
-- Expectations (exact, schema, textContains, regex) (62 tests)
+- Configuration validation
+- Dataset types and loading
+- Expectations (exact, schema, textContains, regex, snapshot, judge)
+- MCP client factory and fixtures
+- LLM host simulation
+- Judge implementations (OpenAI, Anthropic)
 
 ### Integration Tests (Playwright)
 
@@ -59,12 +59,6 @@ Integration tests use a mock MCP server (5 tests):
 ```bash
 # Run integration tests
 npm run test:playwright
-
-# Run with UI mode
-npm run test:playwright:ui
-
-# Run in debug mode
-npm run test:playwright:debug
 ```
 
 **Test Coverage:**
@@ -385,8 +379,7 @@ npm publish
 
 - **Documentation**: Check [`docs/`](../docs) directory
 - **Examples**: See [`examples/`](../examples) directory
-- **Issues**: [GitHub Issues](https://github.com/anthropics/claude-code/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/anthropics/claude-code/discussions)
+- **Issues**: [GitHub Issues](https://github.com/mcp-testing/server-tester/issues)
 
 ## License
 

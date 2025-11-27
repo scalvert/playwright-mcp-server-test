@@ -277,8 +277,7 @@ See [UI Reporter Guide](./docs/ui-reporter.md) for features and usage.
 
 - **Documentation**: See [`docs/`](./docs) directory
 - **Examples**: See [`examples/`](./examples) directory
-- **Issues**: [GitHub Issues](https://github.com/anthropics/claude-code/issues)
-- **Help**: Use `/help` in Claude Code CLI
+- **Issues**: [GitHub Issues](https://github.com/mcp-testing/server-tester/issues)
 
 ## License
 
