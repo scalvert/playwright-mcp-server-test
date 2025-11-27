@@ -125,6 +125,8 @@ export { createAnthropicJudge } from './judge/anthropicJudge.js';
 export type {
   MCPConformanceOptions,
   MCPConformanceResult,
+  MCPConformanceCheck,
+  MCPConformanceRaw,
 } from './spec/conformanceChecks.js';
 export {
   runConformanceChecks,

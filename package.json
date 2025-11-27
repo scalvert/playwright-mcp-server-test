@@ -12,11 +12,15 @@
     "server-testing"
   ],
   "license": "MIT",
-  "author": "",
+  "author": "MCP Testing Contributors",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mcp-testing/server-tester.git"
+  },
+  "homepage": "https://github.com/mcp-testing/server-tester#readme",
+  "bugs": {
+    "url": "https://github.com/mcp-testing/server-tester/issues"
   },
   "exports": {
     ".": {

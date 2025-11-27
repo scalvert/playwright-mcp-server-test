@@ -98,10 +98,7 @@ import {
 } from '@mcp-testing/server-tester';
 import { z } from 'zod';
 
-// ============================================================================
-// Layer 1: MCP Protocol Conformance (Standard baseline for ALL servers)
-// ============================================================================
-
+// Layer 1: MCP Protocol Conformance
 test.describe('MCP Protocol Conformance', () => {
   test('should return valid server info', async ({ mcp }) => {
     const info = mcp.getServerInfo();
@@ -122,10 +119,7 @@ test.describe('MCP Protocol Conformance', () => {
   });
 });
 
-// ============================================================================
-// Layer 2: Direct Tool Testing (Server-specific functionality)
-// ============================================================================
-
+// Layer 2: Direct Tool Testing
 test.describe('File Operations', () => {
   test('should read a file', async ({ mcp }) => {
     const result = await mcp.callTool('read_file', {
@@ -135,10 +129,7 @@ test.describe('File Operations', () => {
   });
 });
 
-// ============================================================================
-// Layer 3: Eval Datasets (Comprehensive validation)
-// ============================================================================
-
+// Layer 3: Eval Datasets
 test('file operations eval', async ({ mcp }) => {
   const FileContentSchema = z.object({
     content: z.string(),
@@ -233,7 +224,6 @@ The `examples/` directory contains complete working examples:
 **Basic Patterns:**
 
 - [`basic-playwright-usage/`](./examples/basic-playwright-usage) - Simple Playwright test patterns
-- [`basic-vitest-usage/`](./examples/basic-vitest-usage) - Vitest integration patterns
 
 Each example includes complete test suites, eval datasets, and npm scripts. See [`examples/README.md`](./examples/README.md) for detailed documentation.
 

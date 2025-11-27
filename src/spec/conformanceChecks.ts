@@ -1,4 +1,11 @@
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
+import type {
+  Tool,
+  Resource,
+  Prompt,
+  ServerCapabilities,
+  Implementation,
+} from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Options for conformance checks
@@ -20,6 +27,61 @@ export interface MCPConformanceOptions {
    * @default true
    */
   checkServerInfo?: boolean;
+
+  /**
+   * Whether to check resources capability (if declared by server)
+   * @default true
+   */
+  checkResources?: boolean;
+
+  /**
+   * Whether to check prompts capability (if declared by server)
+   * @default true
+   */
+  checkPrompts?: boolean;
+}
+
+/**
+ * Individual check result
+ */
+export interface MCPConformanceCheck {
+  name: string;
+  pass: boolean;
+  message: string;
+}
+
+/**
+ * Raw MCP responses for snapshotting
+ */
+export interface MCPConformanceRaw {
+  /**
+   * Server info (name, version)
+   * null if not available
+   */
+  serverInfo: Implementation | null;
+
+  /**
+   * Server capabilities
+   * null if not available
+   */
+  capabilities: ServerCapabilities | null;
+
+  /**
+   * List of tools from the server
+   */
+  tools: Tool[];
+
+  /**
+   * List of resources from the server
+   * null if server doesn't declare resources capability
+   */
+  resources: Resource[] | null;
+
+  /**
+   * List of prompts from the server
+   * null if server doesn't declare prompts capability
+   */
+  prompts: Prompt[] | null;
 }
 
 /**
@@ -34,29 +96,45 @@ export interface MCPConformanceResult {
   /**
    * List of check results
    */
-  checks: Array<{
-    name: string;
-    pass: boolean;
-    message: string;
-  }>;
+  checks: MCPConformanceCheck[];
+
+  /**
+   * Raw MCP responses for snapshotting
+   *
+   * @example
+   * ```typescript
+   * const result = await runConformanceChecks(mcp);
+   * expect(result.raw.tools).toMatchSnapshot();
+   * expect(result.raw.capabilities).toMatchSnapshot();
+   * ```
+   */
+  raw: MCPConformanceRaw;
 }
 
 /**
  * Runs MCP protocol conformance checks
  *
- * Validates that the MCP server conforms to expected protocol behavior
+ * Validates that the MCP server conforms to expected protocol behavior.
+ * Returns both assertion results and raw MCP responses for snapshotting.
  *
  * @param mcp - MCP fixture API
  * @param options - Conformance check options
- * @returns Conformance check results
+ * @returns Conformance check results with raw responses
  *
  * @example
+ * ```typescript
  * const result = await runConformanceChecks(mcp, {
  *   requiredTools: ['get_weather', 'search_docs'],
  *   validateSchemas: true,
  * });
  *
+ * // Check assertions
  * expect(result.pass).toBe(true);
+ *
+ * // Snapshot raw responses
+ * expect(result.raw.tools).toMatchSnapshot();
+ * expect(result.raw.capabilities).toMatchSnapshot();
+ * ```
  */
 export async function runConformanceChecks(
   mcp: MCPFixtureApi,
@@ -66,13 +144,27 @@ export async function runConformanceChecks(
     requiredTools = [],
     validateSchemas = true,
     checkServerInfo = true,
+    checkResources = true,
+    checkPrompts = true,
   } = options;
 
-  const checks: MCPConformanceResult['checks'] = [];
+  const checks: MCPConformanceCheck[] = [];
+  const raw: MCPConformanceRaw = {
+    serverInfo: null,
+    capabilities: null,
+    tools: [],
+    resources: null,
+    prompts: null,
+  };
+
+  // Get server info
+  const serverInfo = mcp.getServerInfo();
+  if (serverInfo) {
+    raw.serverInfo = serverInfo as Implementation;
+  }
 
   // Check 1: Server info is present
   if (checkServerInfo) {
-    const serverInfo = mcp.getServerInfo();
     checks.push({
       name: 'server_info_present',
       pass: serverInfo !== null,
@@ -82,10 +174,26 @@ export async function runConformanceChecks(
     });
   }
 
-  // Check 2: List tools returns valid response
-  let tools;
+  // Get capabilities from client
+  const capabilities = mcp.client.getServerCapabilities();
+  if (capabilities) {
+    raw.capabilities = capabilities;
+  }
+
+  // Check 2: Capabilities are valid
+  checks.push({
+    name: 'capabilities_valid',
+    pass: capabilities !== undefined,
+    message: capabilities
+      ? `Server capabilities: ${formatCapabilities(capabilities)}`
+      : 'Server capabilities not available',
+  });
+
+  // Check 3: List tools returns valid response
+  let tools: Tool[] = [];
   try {
     tools = await mcp.listTools();
+    raw.tools = tools;
     checks.push({
       name: 'list_tools_succeeds',
       pass: true,
@@ -97,10 +205,11 @@ export async function runConformanceChecks(
       pass: false,
       message: `listTools failed: ${error instanceof Error ? error.message : String(error)}`,
     });
-    return { pass: false, checks };
+    const pass = checks.every((check) => check.pass);
+    return { pass, checks, raw };
   }
 
-  // Check 3: Required tools are present
+  // Check 4: Required tools are present
   if (requiredTools.length > 0) {
     const toolNames = new Set(tools.map((t) => t.name));
     const missingTools = requiredTools.filter((name) => !toolNames.has(name));
@@ -115,7 +224,7 @@ export async function runConformanceChecks(
     });
   }
 
-  // Check 4: Tool schemas are valid
+  // Check 5: Tool schemas are valid
   if (validateSchemas && tools.length > 0) {
     const invalidTools: Array<string> = [];
 
@@ -149,7 +258,45 @@ export async function runConformanceChecks(
     });
   }
 
-  // Check 5: Calling invalid tool returns error
+  // Check 6: List resources (only if server declares resources capability)
+  if (checkResources && capabilities?.resources) {
+    try {
+      const resourcesResult = await mcp.client.listResources();
+      raw.resources = resourcesResult.resources;
+      checks.push({
+        name: 'list_resources_succeeds',
+        pass: true,
+        message: `listResources returned ${resourcesResult.resources.length} resources`,
+      });
+    } catch (error) {
+      checks.push({
+        name: 'list_resources_succeeds',
+        pass: false,
+        message: `listResources failed: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  }
+
+  // Check 7: List prompts (only if server declares prompts capability)
+  if (checkPrompts && capabilities?.prompts) {
+    try {
+      const promptsResult = await mcp.client.listPrompts();
+      raw.prompts = promptsResult.prompts;
+      checks.push({
+        name: 'list_prompts_succeeds',
+        pass: true,
+        message: `listPrompts returned ${promptsResult.prompts.length} prompts`,
+      });
+    } catch (error) {
+      checks.push({
+        name: 'list_prompts_succeeds',
+        pass: false,
+        message: `listPrompts failed: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  }
+
+  // Check 8: Calling invalid tool returns error
   try {
     const result = await mcp.callTool('__nonexistent_tool__', {});
     // MCP SDK may return isError: true instead of throwing
@@ -172,7 +319,21 @@ export async function runConformanceChecks(
 
   const pass = checks.every((check) => check.pass);
 
-  return { pass, checks };
+  return { pass, checks, raw };
+}
+
+/**
+ * Formats server capabilities for display
+ */
+function formatCapabilities(capabilities: ServerCapabilities): string {
+  const parts: string[] = [];
+  if (capabilities.tools) parts.push('tools');
+  if (capabilities.resources) parts.push('resources');
+  if (capabilities.prompts) parts.push('prompts');
+  if (capabilities.logging) parts.push('logging');
+  if (capabilities.completions) parts.push('completions');
+  if (capabilities.experimental) parts.push('experimental');
+  return parts.length > 0 ? parts.join(', ') : 'none declared';
 }
 
 /**

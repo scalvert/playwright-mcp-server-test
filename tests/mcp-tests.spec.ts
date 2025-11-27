@@ -44,6 +44,16 @@ test.describe('MCP Server Tests', () => {
     console.log(formatConformanceResult(result));
 
     expect(result.pass).toBe(true);
+
+    // Verify raw responses are returned for snapshotting
+    expect(result.raw).toBeDefined();
+    expect(result.raw.serverInfo).toBeTruthy();
+    expect(result.raw.serverInfo?.name).toBe('test-mcp-server');
+    expect(result.raw.capabilities).toBeTruthy();
+    expect(result.raw.tools).toHaveLength(4);
+    expect(result.raw.tools.map((t) => t.name)).toContain('echo');
+    expect(result.raw.tools.map((t) => t.name)).toContain('calculate');
+    expect(result.raw.tools.map((t) => t.name)).toContain('get_weather');
   });
 
   test('should run eval dataset', async ({ mcp }) => {
