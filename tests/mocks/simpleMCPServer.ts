@@ -80,7 +80,7 @@ server.registerTool(
         result = a / b;
         break;
       default:
-        throw new Error(`Unknown operation: ${operation}`);
+        throw new Error(`Unknown operation: ${String(operation)}`);
     }
 
     return {

@@ -74,7 +74,7 @@ export function findFailedPatterns(
       // Use multiline flag to allow ^ and $ to match line starts/ends
       const regex = new RegExp(pattern, 'm');
       return !regex.test(text);
-    } catch (error) {
+    } catch {
       // Invalid regex is treated as failed match
       return true;
     }

@@ -92,7 +92,7 @@ export function getMissingDependencyMessage(provider: LLMProvider): string {
     case 'anthropic':
       return 'Anthropic SDK is not installed. Install it with: npm install @anthropic-ai/sdk';
     default:
-      return `Unknown provider: ${provider}`;
+      return `Unknown provider: ${String(provider)}`;
   }
 }
 

@@ -197,9 +197,16 @@ function extractErrorMessage(error: unknown): string {
     if (typeof e.error === 'string') {
       return e.error;
     }
+    // Fallback to JSON for unknown object shapes
+    return JSON.stringify(error);
   }
 
-  return String(error);
+  // Primitives (number, boolean)
+  if (typeof error === 'number' || typeof error === 'boolean') {
+    return String(error);
+  }
+
+  return 'Unknown error';
 }
 
 /**

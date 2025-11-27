@@ -7,15 +7,17 @@ import type {
 } from '@modelcontextprotocol/sdk/types.js';
 
 // Dynamic import of test for conditional step tracking
-let testStep: ((name: string, fn: () => Promise<any>) => Promise<any>) | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let testStep: ((name: string, fn: () => Promise<unknown>) => Promise<unknown>) | null = null;
 
 // Try to load test.step() dynamically
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
   const playwright = require('@playwright/test');
   if (playwright && playwright.test && playwright.test.step) {
-    testStep = playwright.test.step.bind(playwright.test);
+    testStep = playwright.test.step.bind(playwright.test) as typeof testStep;
   }
+  /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 } catch {
   // Not in a test context, that's fine
 }
@@ -153,7 +155,7 @@ export function createMCPFixture(
       };
 
       // Wrap in test.step if available
-      return testStep ? testStep('MCP: listTools()', execute) : execute();
+      return (testStep ? testStep('MCP: listTools()', execute) : execute()) as Promise<Array<Tool>>;
     },
 
     async callTool<TArgs extends Record<string, unknown>>(
@@ -189,7 +191,7 @@ export function createMCPFixture(
       };
 
       // Wrap in test.step if available
-      return testStep ? testStep(`MCP: callTool("${name}")`, execute) : execute();
+      return (testStep ? testStep(`MCP: callTool("${name}")`, execute) : execute()) as Promise<CallToolResult>;
     },
 
     getServerInfo() {

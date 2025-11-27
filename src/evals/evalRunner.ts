@@ -1,7 +1,7 @@
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
 import type { LLMJudgeClient } from '../judge/judgeTypes.js';
 import type { EvalDataset, EvalCase } from './datasetTypes.js';
-import type { TestInfo } from '@playwright/test';
+import type { TestInfo, Expect } from '@playwright/test';
 import { simulateLLMHost } from './llmHost/llmHostSimulation.js';
 
 /**
@@ -28,7 +28,7 @@ export interface EvalExpectationContext {
    * Optional Playwright expect function for snapshot testing
    * Required for snapshot expectations to work properly
    */
-  expect?: typeof import('@playwright/test').expect;
+  expect?: Expect;
 }
 
 /**

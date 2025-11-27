@@ -119,7 +119,7 @@ export function createOpenAIAdapter(): LLMAdapter {
       if (message.tool_calls && message.tool_calls.length > 0) {
         const toolCalls: LLMToolCall[] = message.tool_calls.map((tc) => ({
           name: tc.function.name,
-          arguments: JSON.parse(tc.function.arguments),
+          arguments: JSON.parse(tc.function.arguments) as Record<string, unknown>,
           id: tc.id,
         }));
 

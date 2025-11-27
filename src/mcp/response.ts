@@ -40,7 +40,7 @@ export interface NormalizedToolResponse {
   /**
    * Structured content if present (parsed JSON or raw data)
    */
-  structuredContent: unknown | null;
+  structuredContent: unknown;
 }
 
 /**
@@ -97,7 +97,7 @@ export function normalizeToolResponse(result: CallToolResult): NormalizedToolRes
   }
 
   // Handle structuredContent
-  let structuredContent: unknown | null = null;
+  let structuredContent: unknown = null;
   if (result.structuredContent !== undefined) {
     structuredContent = result.structuredContent;
 
@@ -187,8 +187,13 @@ export function extractText(response: unknown): string {
     return JSON.stringify(r);
   }
 
-  // Primitives
-  return String(response);
+  // Primitives (number, boolean, bigint, symbol)
+  if (typeof response === 'number' || typeof response === 'boolean' || typeof response === 'bigint') {
+    return String(response);
+  }
+
+  // Symbol or other edge cases
+  return '';
 }
 
 /**

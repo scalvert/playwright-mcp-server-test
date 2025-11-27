@@ -98,7 +98,7 @@ export async function runSimulation(
           // Execute via MCP
           const mcpResult = await mcp.callTool(
             toolCall.name,
-            toolCall.arguments as Record<string, unknown>
+            toolCall.arguments
           );
 
           // Extract text from MCP response

@@ -4,7 +4,6 @@ import {
   runEvalDataset,
   type EvalExpectation,
   type EvalExpectationContext,
-  type EvalCaseResult,
 } from './evalRunner.js';
 import type { EvalCase, EvalDataset } from './datasetTypes.js';
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
@@ -58,6 +57,7 @@ describe('runEvalCase', () => {
 
       const result = await runEvalCase(evalCase, {}, context);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mcp.callTool).toHaveBeenCalledWith('test-tool', { input: 'test' });
       expect(result.id).toBe('test-case');
       expect(result.toolName).toBe('test-tool');
@@ -261,7 +261,7 @@ describe('runEvalDataset', () => {
 
     // First two pass, third fails
     const failOnThird: EvalExpectation = vi.fn().mockImplementation(
-      (_, evalCase) => Promise.resolve({
+      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
         pass: evalCase.id !== 'case-3',
         details: evalCase.id === 'case-3' ? 'Failed' : 'Passed',
       })
@@ -307,8 +307,8 @@ describe('runEvalDataset', () => {
     );
 
     expect(onCaseComplete).toHaveBeenCalledTimes(2);
-    expect(onCaseComplete.mock.calls[0][0].id).toBe('case-1');
-    expect(onCaseComplete.mock.calls[1][0].id).toBe('case-2');
+    expect((onCaseComplete.mock.calls[0][0] as EvalCase).id).toBe('case-1');
+    expect((onCaseComplete.mock.calls[1][0] as EvalCase).id).toBe('case-2');
   });
 
   it('should stop on failure when stopOnFailure is true', async () => {
@@ -321,7 +321,7 @@ describe('runEvalDataset', () => {
 
     // Fail on case-2
     const failOnSecond: EvalExpectation = vi.fn().mockImplementation(
-      (_, evalCase) => Promise.resolve({
+      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
         pass: evalCase.id !== 'case-2',
         details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
       })
@@ -348,7 +348,7 @@ describe('runEvalDataset', () => {
 
     // Fail on case-2
     const failOnSecond: EvalExpectation = vi.fn().mockImplementation(
-      (_, evalCase) => Promise.resolve({
+      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
         pass: evalCase.id !== 'case-2',
         details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
       })
@@ -388,13 +388,14 @@ describe('runEvalDataset', () => {
 
     expect(mockTestInfo.attach).toHaveBeenCalledWith('mcp-test-results', {
       contentType: 'application/json',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       body: expect.any(Buffer),
     });
   });
 
   it('should enrich context with judgeClient from options', async () => {
     const mockJudgeClient = { evaluate: vi.fn() };
-    const judgeExpectation = vi.fn().mockImplementation((ctx) => {
+    const judgeExpectation = vi.fn().mockImplementation((ctx: EvalExpectationContext) => {
       // Verify context has the judge client
       return Promise.resolve({
         pass: ctx.judgeClient === mockJudgeClient,

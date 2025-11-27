@@ -38,6 +38,6 @@ export function createLLMJudgeClient(config: LLMJudgeConfig): LLMJudgeClient {
       );
 
     default:
-      throw new Error(`Unsupported LLM provider: ${config.provider}`);
+      throw new Error(`Unsupported LLM provider: ${String(config.provider)}`);
   }
 }

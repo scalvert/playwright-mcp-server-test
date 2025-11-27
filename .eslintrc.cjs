@@ -41,10 +41,38 @@ module.exports = {
   ignorePatterns: [
     'dist',
     'node_modules',
+    'examples',
+    'scripts',
+    'src/cli',
+    'src/reporters/ui-src',
     '*.cjs',
     '*.js',
     'playwright.config.ts',
     'tsup.config.ts',
     'vitest.config.mts',
+  ],
+  overrides: [
+    {
+      // Relax certain rules for test files
+      files: ['**/*.test.ts', '**/*.spec.ts'],
+      rules: {
+        // Mock objects accessed in tests don't have proper this bindings
+        '@typescript-eslint/unbound-method': 'off',
+        // Test mocks often use any types
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        // Unused type imports are ok in tests (for type-only assertions)
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            // Allow unused imports in test files
+            ignoreRestSiblings: true,
+          },
+        ],
+      },
+    },
   ],
 };

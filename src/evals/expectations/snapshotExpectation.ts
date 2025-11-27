@@ -76,16 +76,16 @@ export function createSnapshotExpectation(): EvalExpectation {
         typeof response === 'object' &&
         response !== null &&
         'content' in response &&
-        typeof (response as any).content === 'string'
+        typeof (response as { content: unknown }).content === 'string'
       ) {
         normalizedResponse = (response as { content: string }).content;
       }
       // If response is an array with text content, extract the text
       else if (Array.isArray(response) && response.length > 0) {
         // MCP format: [{ type: "text", text: "content" }]
-        const textContent = response
-          .filter((item: any) => item?.type === 'text')
-          .map((item: any) => item.text)
+        const textContent = (response as Array<{ type?: string; text?: string }>)
+          .filter((item) => item?.type === 'text')
+          .map((item) => item.text ?? '')
           .join('\n');
 
         if (textContent) {
@@ -94,6 +94,7 @@ export function createSnapshotExpectation(): EvalExpectation {
       }
 
       // Use Playwright's native snapshot testing
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       await context.expect(normalizedResponse).toMatchSnapshot(
         evalCase.expectedSnapshot
       );

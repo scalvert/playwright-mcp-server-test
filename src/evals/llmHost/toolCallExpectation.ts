@@ -104,9 +104,8 @@ export function createToolCallExpectation(): EvalExpectation {
     }
 
     // Extract actual tool calls from response
-    const actualCalls = (response as any)?.toolCalls as
-      | Array<LLMToolCall>
-      | undefined;
+    const responseObj = response as { toolCalls?: Array<LLMToolCall> } | null;
+    const actualCalls = responseObj?.toolCalls;
 
     if (!actualCalls || actualCalls.length === 0) {
       const requiredCalls = expectedCalls.filter(

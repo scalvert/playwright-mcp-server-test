@@ -90,7 +90,7 @@ export function createAnthropicAdapter(): LLMAdapter {
 
       // Parse response
       const resp = response as {
-        stop_reason: 'end_turn' | 'tool_use' | 'max_tokens' | string;
+        stop_reason: string;
         content: AnthropicContentBlock[];
       };
 

@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { createExactExpectation } from './exactExpectation.js';
 import type { EvalCase } from '../datasetTypes.js';
 import type { EvalExpectationContext } from '../evalRunner.js';
+import type { MCPFixtureApi } from '../../mcp/fixtures/mcpFixture.js';
 
 describe('exactExpectation', () => {
   const mockContext: EvalExpectationContext = {
-    mcp: {} as any,
+    mcp: {} as unknown as MCPFixtureApi,
     judgeClient: null,
   };
 

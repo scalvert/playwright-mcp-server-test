@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { createTextContainsExpectation } from './textContainsExpectation.js';
 import type { EvalCase } from '../datasetTypes.js';
+import type { EvalExpectationContext } from '../evalRunner.js';
+import type { MCPFixtureApi } from '../../mcp/fixtures/mcpFixture.js';
 
 describe('createTextContainsExpectation', () => {
-  const mockContext = {
-    mcp: {} as any,
+  const mockContext: EvalExpectationContext = {
+    mcp: {} as unknown as MCPFixtureApi,
   };
 
   describe('basic functionality', () => {
