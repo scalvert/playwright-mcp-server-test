@@ -11,17 +11,17 @@
     "llm",
     "server-testing"
   ],
-  "license": "MIT",
-  "author": "MCP Testing Contributors",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mcp-testing/server-tester.git"
-  },
   "homepage": "https://github.com/mcp-testing/server-tester#readme",
   "bugs": {
     "url": "https://github.com/mcp-testing/server-tester/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcp-testing/server-tester.git"
+  },
+  "license": "MIT",
+  "author": "MCP Testing Contributors",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,8 +51,8 @@
   ],
   "scripts": {
     "build": "npm run build:ui && tsup && npm run build:copy-ui",
-    "build:ui": "tsx src/reporters/build-ui.ts",
     "build:copy-ui": "cp -r src/reporters/ui-dist dist/reporters/",
+    "build:ui": "tsx src/reporters/build-ui.ts",
     "dev": "tsup --watch",
     "dev:ui": "tsx src/reporters/build-ui.ts --watch",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
@@ -78,6 +78,7 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@openai/agents": "^0.3.3",
     "@playwright/test": "^1.49.0",
+    "@release-it-plugins/lerna-changelog": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -93,6 +94,7 @@
     "prettier": "^3.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "release-it": "^15.5.0",
     "tailwindcss": "^3.4.15",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
@@ -120,5 +122,24 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "release-it": {
+    "plugins": {
+      "@release-it-plugins/lerna-changelog": {
+        "infile": "CHANGELOG.md",
+        "launchEditor": true
+      }
+    },
+    "git": {
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true,
+      "tokenRef": "GITHUB_AUTH"
+    }
   }
 }
