@@ -5,6 +5,7 @@ Complete API documentation for `@mcp-testing/server-tester`.
 ## Table of Contents
 
 - [Fixtures](#fixtures)
+- [Authentication](#authentication)
 - [Eval Functions](#eval-functions)
 - [Expectation Functions](#expectation-functions)
 - [Text Utilities](#text-utilities)
@@ -73,6 +74,174 @@ Get server information (name, version).
 ```typescript
 const info = mcp.getServerInfo();
 console.log(info?.name, info?.version);
+```
+
+## Authentication
+
+For comprehensive authentication documentation, see the [Authentication Guide](./authentication.md).
+
+### Token Utilities
+
+```typescript
+import {
+  createTokenAuthHeaders,
+  validateAccessToken,
+  isTokenExpired,
+  isTokenExpiringSoon,
+} from '@mcp-testing/server-tester';
+```
+
+#### `createTokenAuthHeaders(accessToken, tokenType?)`
+
+Create HTTP headers with Authorization header.
+
+**Parameters:**
+- `accessToken: string` - Access token
+- `tokenType?: string` - Token type (default: `'Bearer'`)
+
+**Returns:** `Record<string, string>`
+
+```typescript
+const headers = createTokenAuthHeaders(process.env.MCP_ACCESS_TOKEN);
+// { Authorization: 'Bearer eyJ...' }
+```
+
+#### `validateAccessToken(accessToken)`
+
+Validate that an access token is present and non-empty.
+
+**Parameters:**
+- `accessToken: string | undefined` - Token to validate
+
+**Throws:** `Error` if token is missing or empty
+
+#### `isTokenExpired(accessToken)`
+
+Check if a JWT token appears to be expired.
+
+**Parameters:**
+- `accessToken: string` - JWT token
+
+**Returns:** `boolean`
+
+#### `isTokenExpiringSoon(expiresAt, bufferMs?)`
+
+Check if a token will expire within the buffer time.
+
+**Parameters:**
+- `expiresAt: number | undefined` - Expiration timestamp in milliseconds
+- `bufferMs?: number` - Buffer time (default: `60000` = 1 minute)
+
+**Returns:** `boolean`
+
+### OAuth Flow Functions
+
+```typescript
+import {
+  discoverAuthServer,
+  generatePKCE,
+  generateState,
+  buildAuthorizationUrl,
+  validateCallback,
+  exchangeCodeForTokens,
+  refreshAccessToken,
+  loadOAuthState,
+  saveOAuthState,
+} from '@mcp-testing/server-tester';
+```
+
+#### `discoverAuthServer(issuerUrl)`
+
+Discover OAuth authorization server metadata.
+
+**Parameters:**
+- `issuerUrl: string` - Authorization server URL
+
+**Returns:** `Promise<AuthServerMetadata>`
+
+#### `generatePKCE()`
+
+Generate PKCE code verifier and challenge pair.
+
+**Returns:** `Promise<{ codeVerifier: string; codeChallenge: string }>`
+
+#### `generateState()`
+
+Generate random state parameter for CSRF protection.
+
+**Returns:** `string`
+
+#### `buildAuthorizationUrl(config)`
+
+Build OAuth authorization URL for browser redirect.
+
+**Parameters:**
+- `config: AuthorizationUrlConfig`
+
+**Returns:** `URL`
+
+#### `exchangeCodeForTokens(config)`
+
+Exchange authorization code for tokens.
+
+**Parameters:**
+- `config: TokenExchangeConfig`
+
+**Returns:** `Promise<TokenResult>`
+
+#### `refreshAccessToken(config)`
+
+Refresh an access token using a refresh token.
+
+**Parameters:**
+- `config: TokenRefreshConfig`
+
+**Returns:** `Promise<TokenResult>`
+
+### OAuth Client Provider
+
+```typescript
+import { PlaywrightOAuthClientProvider } from '@mcp-testing/server-tester';
+```
+
+Implements the MCP SDK's `OAuthClientProvider` interface with file-based storage.
+
+```typescript
+const provider = new PlaywrightOAuthClientProvider({
+  storagePath: 'playwright/.auth/mcp-oauth-state.json',
+  redirectUri: 'http://localhost:3000/oauth/callback',
+  clientId: process.env.MCP_OAUTH_CLIENT_ID,
+  clientSecret: process.env.MCP_OAUTH_CLIENT_SECRET,
+});
+```
+
+### Auth Fixture
+
+```typescript
+import { test } from '@mcp-testing/server-tester/fixtures/mcpAuth';
+
+test('uses auth provider', async ({ mcpAuthProvider }) => {
+  // mcpAuthProvider is configured from environment variables
+});
+```
+
+### Auth Configuration Types
+
+```typescript
+interface MCPAuthConfig {
+  accessToken?: string;
+  oauth?: MCPOAuthConfig;
+}
+
+interface MCPOAuthConfig {
+  serverUrl: string;
+  scopes?: string[];
+  resource?: string;
+  authStatePath?: string;
+  clientId?: string;
+  clientSecret?: string;
+  redirectUri?: string;
+}
 ```
 
 ## Eval Functions
@@ -423,6 +592,7 @@ type EvalExpectation = (
 
 ## Next Steps
 
+- See the [Authentication Guide](./authentication.md) for OAuth and token auth
 - See the [Expectations Guide](./expectations.md) for detailed expectation usage
 - Check out the [Quick Start Guide](./quickstart.md) for getting started
 - Explore [Examples](../examples) for real-world usage patterns

@@ -1,6 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { MCPConfig } from '../config/mcpConfig.js';
 import {
   validateMCPConfig,
@@ -9,10 +10,31 @@ import {
 } from '../config/mcpConfig.js';
 
 /**
+ * Options for creating an MCP client
+ */
+export interface CreateMCPClientOptions {
+  /**
+   * Client information (name and version)
+   */
+  clientInfo?: {
+    name?: string;
+    version?: string;
+  };
+
+  /**
+   * OAuth client provider for authentication
+   *
+   * When provided, the MCP SDK handles OAuth flow automatically.
+   * This takes precedence over static token auth in config.auth.accessToken.
+   */
+  authProvider?: OAuthClientProvider;
+}
+
+/**
  * Creates and connects an MCP client based on the provided configuration
  *
  * @param config - MCP configuration (will be validated)
- * @param clientInfo - Optional client information (defaults to @mcp-testing/server-tester)
+ * @param options - Optional client options including auth provider
  * @returns Connected MCP Client instance
  * @throws {Error} If config is invalid or connection fails
  *
@@ -25,18 +47,23 @@ import {
  * });
  *
  * @example
- * // HTTP transport
+ * // HTTP transport with static token auth
  * const client = await createMCPClientForConfig({
  *   transport: 'http',
- *   serverUrl: 'http://localhost:3000/mcp'
+ *   serverUrl: 'http://localhost:3000/mcp',
+ *   auth: { accessToken: 'your-token' }
  * });
+ *
+ * @example
+ * // HTTP transport with OAuth provider
+ * const client = await createMCPClientForConfig(
+ *   { transport: 'http', serverUrl: 'http://localhost:3000/mcp' },
+ *   { authProvider: myOAuthProvider }
+ * );
  */
 export async function createMCPClientForConfig(
   config: MCPConfig,
-  clientInfo?: {
-    name?: string;
-    version?: string;
-  }
+  options?: CreateMCPClientOptions
 ): Promise<Client> {
   // Validate config
   const validatedConfig = validateMCPConfig(config);
@@ -44,8 +71,8 @@ export async function createMCPClientForConfig(
   // Create client with info
   const client = new Client(
     {
-      name: clientInfo?.name ?? '@mcp-testing/server-tester',
-      version: clientInfo?.version ?? '0.1.0',
+      name: options?.clientInfo?.name ?? '@mcp-testing/server-tester',
+      version: options?.clientInfo?.version ?? '0.1.0',
     },
     {
       capabilities: validatedConfig.capabilities ?? {},
@@ -72,19 +99,28 @@ export async function createMCPClientForConfig(
 
     await client.connect(transport);
   } else if (isHttpConfig(validatedConfig)) {
+    // Build headers, including static token auth if configured and no authProvider
+    const headers: Record<string, string> = { ...validatedConfig.headers };
+
+    // If using static token auth (no authProvider), add Authorization header
+    if (validatedConfig.auth?.accessToken && !options?.authProvider) {
+      headers.Authorization = `Bearer ${validatedConfig.auth.accessToken}`;
+    }
+
     const transport = new StreamableHTTPClientTransport(
       new URL(validatedConfig.serverUrl),
       {
-        requestInit: validatedConfig.headers ? {
-          headers: validatedConfig.headers,
-        } : undefined,
+        requestInit: Object.keys(headers).length > 0 ? { headers } : undefined,
+        // Pass auth provider for OAuth flow - MCP SDK handles it automatically
+        authProvider: options?.authProvider,
       }
     );
 
     if (validatedConfig.debugLogging) {
       console.log('[MCP] Connecting via HTTP:', {
         serverUrl: validatedConfig.serverUrl,
-        headers: validatedConfig.headers ? Object.keys(validatedConfig.headers) : undefined,
+        headers: Object.keys(headers).length > 0 ? Object.keys(headers) : undefined,
+        hasAuthProvider: !!options?.authProvider,
       });
     }
 

@@ -1,6 +1,63 @@
 import { z } from 'zod';
 
 /**
+ * OAuth configuration for MCP authentication
+ */
+export interface MCPOAuthConfig {
+  /**
+   * OAuth authorization server metadata URL
+   * (e.g., https://auth.example.com/.well-known/oauth-authorization-server)
+   */
+  serverUrl: string;
+
+  /**
+   * Scopes to request during authorization
+   */
+  scopes?: Array<string>;
+
+  /**
+   * Resource indicator (RFC 8707, required by MCP 2025-06-18 spec)
+   */
+  resource?: string;
+
+  /**
+   * Path to Playwright auth state file
+   * (e.g., playwright/.auth/oauth-state.json)
+   */
+  authStatePath?: string;
+
+  /**
+   * Client ID (if pre-registered; otherwise uses Dynamic Client Registration)
+   */
+  clientId?: string;
+
+  /**
+   * Client secret (for confidential clients)
+   */
+  clientSecret?: string;
+
+  /**
+   * Redirect URI for OAuth callback
+   */
+  redirectUri?: string;
+}
+
+/**
+ * Authentication configuration for MCP connections
+ */
+export interface MCPAuthConfig {
+  /**
+   * Pre-acquired access token (simplest authentication mode)
+   */
+  accessToken?: string;
+
+  /**
+   * Full OAuth configuration for browser-based authentication
+   */
+  oauth?: MCPOAuthConfig;
+}
+
+/**
  * MCP host capabilities that can be registered with the server
  */
 export interface MCPHostCapabilities {
@@ -81,6 +138,11 @@ export interface MCPConfig {
    * When true, server stderr is ignored instead of inherited
    */
   quiet?: boolean;
+
+  /**
+   * Authentication configuration (optional for http transport)
+   */
+  auth?: MCPAuthConfig;
 }
 
 /**
@@ -94,6 +156,32 @@ const MCPHostCapabilitiesSchema = z.object({
     })
     .optional(),
 });
+
+/**
+ * Zod schema for MCPOAuthConfig
+ */
+const MCPOAuthConfigSchema = z.object({
+  serverUrl: z.string().url('serverUrl must be a valid URL'),
+  scopes: z.array(z.string()).optional(),
+  resource: z.string().url().optional(),
+  authStatePath: z.string().optional(),
+  clientId: z.string().optional(),
+  clientSecret: z.string().optional(),
+  redirectUri: z.string().url().optional(),
+});
+
+/**
+ * Zod schema for MCPAuthConfig
+ */
+const MCPAuthConfigSchema = z
+  .object({
+    accessToken: z.string().optional(),
+    oauth: MCPOAuthConfigSchema.optional(),
+  })
+  .refine(
+    (data) => !(data.accessToken && data.oauth),
+    'Cannot specify both accessToken and oauth configuration'
+  );
 
 /**
  * Zod schema for stdio transport config
@@ -121,6 +209,7 @@ const HttpConfigSchema = z.object({
   connectTimeoutMs: z.number().positive().optional(),
   requestTimeoutMs: z.number().positive().optional(),
   debugLogging: z.boolean().optional(),
+  auth: MCPAuthConfigSchema.optional(),
 });
 
 /**

@@ -185,8 +185,10 @@ describe('clientFactory', () => {
             command: 'node',
           },
           {
-            name: 'my-custom-client',
-            version: '2.0.0',
+            clientInfo: {
+              name: 'my-custom-client',
+              version: '2.0.0',
+            },
           }
         );
 
@@ -206,7 +208,9 @@ describe('clientFactory', () => {
             command: 'node',
           },
           {
-            name: 'my-custom-client',
+            clientInfo: {
+              name: 'my-custom-client',
+            },
           }
         );
 
@@ -308,6 +312,7 @@ describe('clientFactory', () => {
         expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connecting via HTTP:', {
           serverUrl: 'http://localhost:3000/mcp',
           headers: ['Authorization'],
+          hasAuthProvider: false,
         });
         expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connected successfully');
 

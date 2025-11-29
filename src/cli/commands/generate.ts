@@ -7,12 +7,13 @@ import ora from 'ora';
 import {
   createMCPClientForConfig,
   closeMCPClient,
-  type MCPConfig,
-  validateMCPConfig,
-  type EvalDataset,
-  type EvalCase,
-  type SerializedEvalDataset,
-} from '../../index.js';
+} from '../../mcp/clientFactory.js';
+import { type MCPConfig, validateMCPConfig } from '../../config/mcpConfig.js';
+import type {
+  EvalDataset,
+  EvalCase,
+  SerializedEvalDataset,
+} from '../../evals/datasetTypes.js';
 import { suggestExpectations } from '../utils/expectationSuggester.js';
 
 interface GenerateOptions {

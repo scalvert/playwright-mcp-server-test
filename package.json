@@ -32,6 +32,10 @@
       "types": "./tests/fixtures/mcp.ts",
       "import": "./tests/fixtures/mcp.ts"
     },
+    "./fixtures/mcpAuth": {
+      "types": "./dist/fixtures/mcpAuth.d.ts",
+      "import": "./dist/fixtures/mcpAuth.js"
+    },
     "./reporters/mcpReporter": {
       "types": "./dist/reporters/mcpReporter.d.ts",
       "import": "./dist/reporters/mcpReporter.js",
@@ -71,6 +75,7 @@
     "chalk": "^5.6.2",
     "commander": "^14.0.2",
     "inquirer": "^13.0.1",
+    "oauth4webapi": "^3.0.0",
     "open": "^10.1.0",
     "ora": "^9.0.0"
   },

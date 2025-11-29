@@ -203,6 +203,8 @@ mcpConfig: {
 }
 ```
 
+For OAuth 2.1 authentication and more advanced auth patterns, see the [Authentication Guide](./authentication.md).
+
 **With Custom Timeout:**
 
 ```typescript
@@ -453,5 +455,6 @@ Error: 401 Unauthorized
 ## Next Steps
 
 - See the [Quick Start Guide](./quickstart.md) for basic setup
+- Learn about [Authentication](./authentication.md) for OAuth and token auth
 - Check the [API Reference](./api-reference.md) for config type details
 - Explore [Examples](../examples) for real-world configurations

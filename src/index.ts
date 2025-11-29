@@ -7,7 +7,12 @@
  */
 
 // Config
-export type { MCPConfig, MCPHostCapabilities } from './config/mcpConfig.js';
+export type {
+  MCPConfig,
+  MCPHostCapabilities,
+  MCPAuthConfig,
+  MCPOAuthConfig,
+} from './config/mcpConfig.js';
 export {
   MCPConfigSchema,
   validateMCPConfig,
@@ -15,10 +20,37 @@ export {
   isHttpConfig,
 } from './config/mcpConfig.js';
 
+// Auth
+export type {
+  StoredTokens,
+  StoredClientInfo,
+  StoredOAuthState,
+  OAuthSetupConfig,
+  TokenResult,
+} from './auth/types.js';
+export {
+  PlaywrightOAuthClientProvider,
+  loadOAuthState,
+  saveOAuthState,
+  type PlaywrightOAuthClientProviderConfig,
+} from './auth/oauthClientProvider.js';
+export {
+  createTokenAuthHeaders,
+  validateAccessToken,
+  isTokenExpired,
+  isTokenExpiringSoon,
+} from './auth/tokenAuth.js';
+export {
+  performOAuthSetup,
+  performOAuthSetupIfNeeded,
+  hasValidOAuthState,
+} from './auth/setupOAuth.js';
+
 // MCP Client
 export {
   createMCPClientForConfig,
   closeMCPClient,
+  type CreateMCPClientOptions,
 } from './mcp/clientFactory.js';
 
 // Response Normalization

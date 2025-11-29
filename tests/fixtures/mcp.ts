@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { MCPConfig } from '../../src/config/mcpConfig.js';
 import {
   createMCPClientForConfig,
@@ -9,6 +10,9 @@ import {
   createMCPFixture,
   type MCPFixtureApi,
 } from '../../src/mcp/fixtures/mcpFixture.js';
+import {
+  PlaywrightOAuthClientProvider,
+} from '../../src/auth/oauthClientProvider.js';
 
 /**
  * Extended test fixtures for MCP testing
@@ -42,6 +46,9 @@ export const test = base.extend<MCPFixtures>({
    *
    * The client configuration is read from the project's `use.mcpConfig`
    * setting in playwright.config.ts
+   *
+   * Supports both static token auth (via config.auth.accessToken) and
+   * OAuth (via config.auth.oauth with authStatePath).
    */
   // eslint-disable-next-line no-empty-pattern
   mcpClient: async ({}, use, testInfo) => {
@@ -56,10 +63,26 @@ export const test = base.extend<MCPFixtures>({
       );
     }
 
+    // Create auth provider if OAuth is configured
+    let authProvider: OAuthClientProvider | undefined;
+    if (mcpConfig.auth?.oauth?.authStatePath) {
+      authProvider = new PlaywrightOAuthClientProvider({
+        storagePath: mcpConfig.auth.oauth.authStatePath,
+        redirectUri:
+          mcpConfig.auth.oauth.redirectUri ??
+          'http://localhost:3000/oauth/callback',
+        clientId: mcpConfig.auth.oauth.clientId,
+        clientSecret: mcpConfig.auth.oauth.clientSecret,
+      });
+    }
+
     // Create and connect client
     const client = await createMCPClientForConfig(mcpConfig, {
-      name: '@mcp-testing/server-tester',
-      version: '0.1.0',
+      clientInfo: {
+        name: '@mcp-testing/server-tester',
+        version: '0.1.0',
+      },
+      authProvider,
     });
 
     try {
