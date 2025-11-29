@@ -15,6 +15,8 @@ npm run build
 # Unit tests (Vitest)
 npm test                    # Run all unit tests
 npm run test:watch          # Watch mode
+npm test -- src/mcp/clientFactory.test.ts  # Run single test file
+npm test -- -t "creates client"            # Run tests matching pattern
 
 # Integration tests (Playwright)
 npm run test:playwright
@@ -33,6 +35,7 @@ npm run format:check        # Check formatting
 
 - **`config/`** - `MCPConfig` types and Zod validation for stdio/HTTP transports
 - **`mcp/`** - Client factory (`createMCPClientForConfig`), fixtures (`MCPFixtureApi`), and response normalization
+- **`auth/`** - OAuth 2.1 with PKCE (`PlaywrightOAuthClientProvider`) and static token utilities
 - **`evals/`** - Dataset types, loader, runner, and expectations (exact, schema, textContains, regex, snapshot, judge)
 - **`judge/`** - LLM-as-a-judge implementations (OpenAI, Anthropic)
 - **`spec/`** - MCP protocol conformance checks
@@ -52,6 +55,7 @@ Configuration is read from `project.use.mcpConfig` in playwright.config.ts.
 Public API is defined in `src/index.ts`. The package has multiple export paths:
 - `.` - Main library exports
 - `./fixtures/mcp` - Playwright test fixtures
+- `./fixtures/mcpAuth` - Auth-specific fixtures for OAuth/token auth
 - `./reporters/mcpReporter` - Custom reporter
 
 ## Code Style
@@ -81,3 +85,8 @@ Use conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore
 ### New Transport Type
 1. Add to `MCPConfig` union in `src/config/mcpConfig.ts`
 2. Update `createMCPClientForConfig()` in `src/mcp/clientFactory.ts`
+
+### New Auth Provider
+1. Implement `OAuthClientProvider` interface from `@modelcontextprotocol/sdk/client/auth.js`
+2. Add utilities to `src/auth/` module
+3. Export from `src/index.ts`
