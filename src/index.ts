@@ -163,6 +163,7 @@ export type {
 export {
   runConformanceChecks,
   formatConformanceResult,
+  formatCapabilities,
 } from './spec/conformanceChecks.js';
 
 // Reporter
