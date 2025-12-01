@@ -42,7 +42,7 @@ npm run format:check        # Check formatting
 - **`reporters/`** - Custom Playwright reporter with React-based UI
 - **`cli/`** - `mcp-test init` and `mcp-test generate` commands
 
-### Playwright Fixtures (`tests/fixtures/mcp.ts`)
+### Playwright Fixtures (`src/fixtures/mcp.ts`)
 
 The main test fixture provides:
 - `mcpClient: Client` - Raw MCP SDK client

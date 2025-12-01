@@ -1,18 +1,14 @@
 import { test as base, expect } from '@playwright/test';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js';
-import type { MCPConfig } from '../../src/config/mcpConfig.js';
 import {
   createMCPClientForConfig,
   closeMCPClient,
-} from '../../src/mcp/clientFactory.js';
-import {
   createMCPFixture,
-  type MCPFixtureApi,
-} from '../../src/mcp/fixtures/mcpFixture.js';
-import {
   PlaywrightOAuthClientProvider,
-} from '../../src/auth/oauthClientProvider.js';
+  type MCPConfig,
+  type MCPFixtureApi,
+} from '../index.js';
 
 /**
  * Extended test fixtures for MCP testing
@@ -33,7 +29,7 @@ type MCPFixtures = {
  * Extended Playwright test with MCP fixtures
  *
  * @example
- * import { test, expect } from './fixtures/mcp';
+ * import { test, expect } from '@mcp-testing/server-tester';
  *
  * test('lists tools from MCP server', async ({ mcp }) => {
  *   const tools = await mcp.listTools();

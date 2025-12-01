@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/mcp.js';
+import { test, expect } from '../src/fixtures/mcp.js';
 import {
   runConformanceChecks,
   formatConformanceResult,

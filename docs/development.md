@@ -176,7 +176,6 @@ npm run build      # Build succeeds
 │   ├── spec/         # Protocol conformance checks
 │   └── index.ts      # Public API exports
 ├── tests/
-│   ├── fixtures/mcp.ts           # Playwright fixture entrypoint
 │   ├── mocks/simpleMCPServer.ts  # Mock server for integration tests
 │   └── mcp-tests.spec.ts         # Integration test suite
 ├── examples/         # Example projects
@@ -190,8 +189,8 @@ npm run build      # Build succeeds
 - `src/index.ts` - All exported functions and types
 
 **Fixtures:**
-- `tests/fixtures/mcp.ts` - Playwright fixture definitions
-- `src/mcp/fixtures.ts` - Fixture implementation
+- `src/fixtures/mcp.ts` - Playwright fixture definitions
+- `src/mcp/fixtures/mcpFixture.ts` - Fixture implementation
 
 **Configuration:**
 - `src/config/mcpConfig.ts` - Transport configuration types

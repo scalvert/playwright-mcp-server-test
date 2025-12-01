@@ -44,4 +44,16 @@ export default defineConfig([
     tsconfig: './tsconfig.build.json',
     shims: true,  // Enable shims for __dirname/__filename in ESM
   },
+  // Fixtures build
+  {
+    entry: ['src/fixtures/mcp.ts', 'src/fixtures/mcpAuth.ts'],
+    format: ['esm'],
+    dts: true,
+    splitting: false,
+    sourcemap: true,
+    treeshake: true,
+    minify: false,
+    outDir: 'dist/fixtures',
+    tsconfig: './tsconfig.build.json',
+  },
 ]);

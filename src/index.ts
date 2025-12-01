@@ -66,6 +66,7 @@ export {
 // Fixtures
 export type { MCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
 export { createMCPFixture } from './mcp/fixtures/mcpFixture.js';
+export { test, expect } from './fixtures/mcp.js';
 
 // Backwards compatibility (deprecated)
 /** @deprecated Use createMCPFixture instead */
