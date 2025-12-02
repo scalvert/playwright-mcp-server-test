@@ -273,52 +273,6 @@ describe('clientFactory', () => {
       });
     });
 
-    describe('debug logging', () => {
-      it('logs debug info for stdio when debugLogging is enabled', async () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-
-        await createMCPClientForConfig({
-          transport: 'stdio' as const,
-          command: 'node',
-          args: ['server.js'],
-          cwd: '/path/to/server',
-          debugLogging: true,
-        });
-
-        expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connecting via stdio:', {
-          command: 'node',
-          args: ['server.js'],
-          cwd: '/path/to/server',
-        });
-        expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connected successfully');
-        expect(consoleSpy).toHaveBeenCalledWith('[MCP] Server info:', {
-          name: 'test-server',
-          version: '1.0.0',
-        });
-
-        consoleSpy.mockRestore();
-      });
-
-      it('logs debug info for http when debugLogging is enabled', async () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-
-        await createMCPClientForConfig({
-          transport: 'http' as const,
-          serverUrl: 'http://localhost:3000/mcp',
-          headers: { Authorization: 'Bearer token' },
-          debugLogging: true,
-        });
-
-        expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connecting via HTTP:', {
-          serverUrl: 'http://localhost:3000/mcp',
-          headers: ['Authorization'],
-          hasAuthProvider: false,
-        });
-        expect(consoleSpy).toHaveBeenCalledWith('[MCP] Connected successfully');
-
-        consoleSpy.mockRestore();
-      });
-    });
   });
 
   describe('closeMCPClient', () => {

@@ -8,6 +8,7 @@ import {
   isStdioConfig,
   isHttpConfig,
 } from '../config/mcpConfig.js';
+import { debugClient } from '../debug.js';
 
 /**
  * Options for creating an MCP client
@@ -89,13 +90,11 @@ export async function createMCPClientForConfig(
       ...(validatedConfig.quiet && { stderr: 'ignore' as const }),
     });
 
-    if (validatedConfig.debugLogging) {
-      console.log('[MCP] Connecting via stdio:', {
-        command: validatedConfig.command,
-        args: validatedConfig.args,
-        cwd: validatedConfig.cwd,
-      });
-    }
+    debugClient('Connecting via stdio: %O', {
+      command: validatedConfig.command,
+      args: validatedConfig.args,
+      cwd: validatedConfig.cwd,
+    });
 
     await client.connect(transport);
   } else if (isHttpConfig(validatedConfig)) {
@@ -116,23 +115,19 @@ export async function createMCPClientForConfig(
       }
     );
 
-    if (validatedConfig.debugLogging) {
-      console.log('[MCP] Connecting via HTTP:', {
-        serverUrl: validatedConfig.serverUrl,
-        headers: Object.keys(headers).length > 0 ? Object.keys(headers) : undefined,
-        hasAuthProvider: !!options?.authProvider,
-      });
-    }
+    debugClient('Connecting via HTTP: %O', {
+      serverUrl: validatedConfig.serverUrl,
+      headers: Object.keys(headers).length > 0 ? Object.keys(headers) : undefined,
+      hasAuthProvider: !!options?.authProvider,
+    });
 
     await client.connect(transport);
   }
 
-  if (validatedConfig.debugLogging) {
-    console.log('[MCP] Connected successfully');
-    const serverInfo = client.getServerVersion();
-    if (serverInfo) {
-      console.log('[MCP] Server info:', serverInfo);
-    }
+  debugClient('Connected successfully');
+  const serverInfo = client.getServerVersion();
+  if (serverInfo) {
+    debugClient('Server info: %O', serverInfo);
   }
 
   return client;

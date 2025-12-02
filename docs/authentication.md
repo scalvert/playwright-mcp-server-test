@@ -665,15 +665,15 @@ Error: OAuth state mismatch - possible CSRF attack
 
 Enable debug logging to see MCP protocol messages:
 
-```typescript
-mcpConfig: {
-  transport: 'http',
-  serverUrl: 'https://api.example.com/mcp',
-  debugLogging: true,  // Logs connection and auth details
-  auth: {
-    oauth: { ... },
-  },
-}
+```bash
+# Enable debug logging via environment variable
+DEBUG=mcp-testing:* npm test
+
+# Or just OAuth logs
+DEBUG=mcp-testing:oauth npm test
+
+# Or just client connection logs
+DEBUG=mcp-testing:client npm test
 ```
 
 ### Common IdP Selector Examples

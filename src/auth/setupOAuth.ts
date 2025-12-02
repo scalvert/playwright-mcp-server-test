@@ -13,6 +13,7 @@ import {
 } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { OAuthSetupConfig, StoredOAuthState } from './types.js';
 import { saveOAuthState } from './oauthClientProvider.js';
+import { debugOAuth } from '../debug.js';
 
 /**
  * Default timeout for OAuth login flow (30 seconds)
@@ -163,7 +164,7 @@ export async function performOAuthSetup(
 
     await saveOAuthState(config.outputPath, state);
 
-    console.log(`[OAuth] Auth state saved to ${config.outputPath}`);
+    debugOAuth('Auth state saved to %s', config.outputPath);
   } finally {
     await browser.close();
   }
@@ -266,10 +267,10 @@ export async function performOAuthSetupIfNeeded(
   const hasValid = await hasValidOAuthState(config.outputPath);
 
   if (hasValid) {
-    console.log(`[OAuth] Using existing auth state from ${config.outputPath}`);
+    debugOAuth('Using existing auth state from %s', config.outputPath);
     return;
   }
 
-  console.log('[OAuth] No valid auth state found, performing OAuth flow...');
+  debugOAuth('No valid auth state found, performing OAuth flow...');
   await performOAuthSetup(config);
 }

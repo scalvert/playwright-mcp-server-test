@@ -17,19 +17,11 @@ test.describe('MCP Server Tests', () => {
   test('should connect to MCP server and get server info', async ({ mcp }) => {
     const serverInfo = mcp.getServerInfo();
     expect(serverInfo).toBeTruthy();
-    console.log('Server info:', serverInfo);
   });
 
   test('should list available tools', async ({ mcp }) => {
     const tools = await mcp.listTools();
     expect(tools.length).toBeGreaterThan(0);
-
-    console.log(`Found ${tools.length} tools:`);
-    for (const tool of tools) {
-      console.log(
-        `  - ${tool.name}: ${tool.description ?? '(no description)'}`
-      );
-    }
   });
 
   test('should run conformance checks', async ({ mcp }) => {
@@ -79,32 +71,9 @@ test.describe('MCP Server Tests', () => {
           textContains: createTextContainsExpectation(),
           regex: createRegexExpectation(),
         },
-        onCaseComplete: (caseResult) => {
-          const status = caseResult.pass ? '✓' : '✗';
-          console.log(`  ${status} ${caseResult.id}`);
-          if (!caseResult.pass) {
-            console.log(
-              `    Error: ${caseResult.error ?? 'Expectation failed'}`
-            );
-            if (caseResult.expectations.schema && !caseResult.expectations.schema.pass) {
-              console.log(`    Schema: ${caseResult.expectations.schema.details}`);
-            }
-            if (caseResult.expectations.exact && !caseResult.expectations.exact.pass) {
-              console.log(`    Exact: ${caseResult.expectations.exact.details}`);
-            }
-            if (caseResult.expectations.textContains && !caseResult.expectations.textContains.pass) {
-              console.log(`    TextContains: ${caseResult.expectations.textContains.details}`);
-            }
-            if (caseResult.expectations.regex && !caseResult.expectations.regex.pass) {
-              console.log(`    Regex: ${caseResult.expectations.regex.details}`);
-            }
-          }
-        },
       },
       { mcp }
     );
-
-    console.log(`\nEval Results: ${result.passed}/${result.total} passed`);
 
     // Mock server supports get_weather, calculate, and get_city_info tools
     // All cases should pass now with text-based expectations

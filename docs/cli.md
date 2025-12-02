@@ -221,8 +221,7 @@ For complex MCP configurations, use a JSON config file:
   "args": ["server.js"],
   "env": {
     "NODE_ENV": "test"
-  },
-  "debugLogging": true
+  }
 }
 ```
 

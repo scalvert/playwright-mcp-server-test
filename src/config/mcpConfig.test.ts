@@ -129,18 +129,6 @@ describe('MCPConfig', () => {
         expect(result.requestTimeoutMs).toBe(10000);
       });
 
-      it('should validate config with debug logging', () => {
-        const config = {
-          transport: 'stdio' as const,
-          command: 'node',
-          debugLogging: true,
-        };
-
-        const result = validateMCPConfig(config);
-
-        expect(result.debugLogging).toBe(true);
-      });
-
       it('should reject negative timeout', () => {
         const config = {
           transport: 'stdio',

@@ -129,11 +129,6 @@ export interface MCPConfig {
   requestTimeoutMs?: number;
 
   /**
-   * Enable debug logging
-   */
-  debugLogging?: boolean;
-
-  /**
    * Suppress stderr output from the server process (stdio only)
    * When true, server stderr is ignored instead of inherited
    */
@@ -194,7 +189,6 @@ const StdioConfigSchema = z.object({
   capabilities: MCPHostCapabilitiesSchema.optional(),
   connectTimeoutMs: z.number().positive().optional(),
   requestTimeoutMs: z.number().positive().optional(),
-  debugLogging: z.boolean().optional(),
   quiet: z.boolean().optional(),
 });
 
@@ -208,7 +202,6 @@ const HttpConfigSchema = z.object({
   capabilities: MCPHostCapabilitiesSchema.optional(),
   connectTimeoutMs: z.number().positive().optional(),
   requestTimeoutMs: z.number().positive().optional(),
-  debugLogging: z.boolean().optional(),
   auth: MCPAuthConfigSchema.optional(),
 });
 

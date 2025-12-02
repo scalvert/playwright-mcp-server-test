@@ -116,14 +116,6 @@ test.describe('MCP Server Tests', () => {
           textContains: createTextContainsExpectation(),
           regex: createRegexExpectation(),
         },
-        onCaseComplete: (caseResult) => {
-          const status = caseResult.pass ? '✓' : '✗';
-          console.log(\`  \${status} \${caseResult.id}\`);
-
-          if (!caseResult.pass) {
-            console.log(\`    Error: \${caseResult.error ?? 'Expectation failed'}\`);
-          }
-        },
       },
       { mcp }
     );
@@ -134,7 +126,6 @@ test.describe('MCP Server Tests', () => {
       contentType: 'application/json',
     });
 
-    console.log(\`\\nEval Results: \${result.passed}/\${result.total} passed\`);
     expect(result.passed).toBeGreaterThan(0);
   });
 });
