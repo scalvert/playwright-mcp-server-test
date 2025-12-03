@@ -7,7 +7,7 @@
 
 import * as http from 'node:http';
 import type { AddressInfo } from 'node:net';
-import Debug from 'debug';
+import createDebug from 'debug';
 import {
   generatePKCE,
   generateState,
@@ -30,7 +30,7 @@ import {
 } from './storage.js';
 import type { StoredTokens, StoredClientInfo, TokenResult } from './types.js';
 
-const debug = Debug('mcp-testing:cli-oauth');
+const debug = createDebug('mcp-testing:cli-oauth');
 
 /**
  * Configuration for CLI OAuth client
