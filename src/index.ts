@@ -46,6 +46,36 @@ export {
   hasValidOAuthState,
 } from './auth/setupOAuth.js';
 
+// Discovery (RFC 9728)
+export {
+  discoverProtectedResource,
+  discoverAuthorizationServer,
+  DiscoveryError,
+  MCP_PROTOCOL_VERSION,
+  type ProtectedResourceMetadata,
+  type ProtectedResourceDiscoveryResult,
+} from './auth/discovery.js';
+
+// Storage
+export {
+  createFileOAuthStorage,
+  generateServerKey,
+  getStateDir,
+  loadTokensFromEnv,
+  injectTokens,
+  ENV_VAR_NAMES,
+  type OAuthStorage,
+  type FileOAuthStorageConfig,
+  type StoredServerMetadata,
+} from './auth/storage.js';
+
+// CLI OAuth
+export {
+  CLIOAuthClient,
+  type CLIOAuthClientConfig,
+  type CLIOAuthResult,
+} from './auth/cli.js';
+
 // MCP Client
 export {
   createMCPClientForConfig,
@@ -161,10 +191,7 @@ export type {
   MCPConformanceCheck,
   MCPConformanceRaw,
 } from './spec/conformanceChecks.js';
-export {
-  runConformanceChecks,
-  formatConformanceResult,
-} from './spec/conformanceChecks.js';
+export { runConformanceChecks } from './spec/conformanceChecks.js';
 
 // Reporter
 export type {

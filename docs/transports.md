@@ -56,13 +56,14 @@ export default defineConfig({
   command: string,           // Command to run (e.g., 'node', 'python', 'deno')
   args?: string[],           // Command arguments
   env?: Record<string, string>, // Environment variables
-  debugLogging?: boolean,    // Enable debug logs (default: false)
   capabilities?: {           // MCP capabilities
     roots?: { listChanged?: boolean },
     sampling?: { ... },
   },
 }
 ```
+
+> **Debug Logging:** Enable with `DEBUG=mcp-testing:* npm test`
 
 ### Examples
 
@@ -126,13 +127,9 @@ mcpConfig: {
 
 **With Debug Logging:**
 
-```typescript
-mcpConfig: {
-  transport: 'stdio',
-  command: 'node',
-  args: ['server.js'],
-  debugLogging: true, // Logs MCP protocol messages
-}
+```bash
+# Enable debug logging via environment variable
+DEBUG=mcp-testing:* npm test
 ```
 
 ### Process Management
@@ -402,7 +399,7 @@ Error: Command not found: node server.js
 **Issue:** Server starts but doesn't respond
 
 **Solutions:**
-- Enable debug logging: `debugLogging: true`
+- Enable debug logging: `DEBUG=mcp-testing:* npm test`
 - Check server logs for errors
 - Verify server writes to stdout (not stderr)
 - Ensure server follows MCP protocol

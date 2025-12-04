@@ -48,7 +48,6 @@ export default defineConfig({
             'Authorization': `Bearer ${process.env.GLEAN_API_TOKEN}`,
           } : undefined,
           requestTimeoutMs: 60000, // 60 seconds for search operations
-          debugLogging: process.env.DEBUG === 'true',
         }
       }
     },
