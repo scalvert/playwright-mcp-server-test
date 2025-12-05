@@ -318,12 +318,22 @@ export class PlaywrightOAuthClientProvider implements OAuthClientProvider {
 }
 
 /**
- * Loads OAuth state from a file
+ * Loads OAuth state from a single file (Playwright auth pattern)
  *
- * Utility function for reading stored auth state outside of the provider.
+ * This function reads from Playwright's single-file auth state format,
+ * typically created by `performOAuthSetup` in globalSetup.
  *
- * @param storagePath - Path to the auth state file
+ * **Note:** This does NOT work with tokens stored by the CLI (`mcp-test login`).
+ * For CLI-stored tokens, use `loadCLITokens(serverUrl)` instead.
+ *
+ * @param storagePath - Path to the auth state file (e.g., 'playwright/.auth/oauth-state.json')
  * @returns The stored OAuth state, or null if not found
+ *
+ * @example
+ * ```typescript
+ * // Load Playwright auth state
+ * const state = await loadOAuthState('playwright/.auth/oauth-state.json');
+ * ```
  */
 export async function loadOAuthState(
   storagePath: string
@@ -340,12 +350,25 @@ export async function loadOAuthState(
 }
 
 /**
- * Saves OAuth state to a file
+ * Saves OAuth state to a single file (Playwright auth pattern)
  *
- * Utility function for writing auth state outside of the provider.
+ * This function writes to Playwright's single-file auth state format.
+ * Used by `performOAuthSetup` in globalSetup.
  *
- * @param storagePath - Path to the auth state file
+ * **Note:** This does NOT work with the CLI storage format (`mcp-test login`).
+ * For programmatic token injection compatible with CLI, use `injectTokens(serverUrl, tokens)`.
+ *
+ * @param storagePath - Path to the auth state file (e.g., 'playwright/.auth/oauth-state.json')
  * @param state - The OAuth state to save
+ *
+ * @example
+ * ```typescript
+ * // Save Playwright auth state
+ * await saveOAuthState('playwright/.auth/oauth-state.json', {
+ *   tokens: { accessToken: '...', tokenType: 'Bearer' },
+ *   savedAt: Date.now(),
+ * });
+ * ```
  */
 export async function saveOAuthState(
   storagePath: string,

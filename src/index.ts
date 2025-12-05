@@ -63,6 +63,8 @@ export {
   getStateDir,
   loadTokensFromEnv,
   injectTokens,
+  loadCLITokens,
+  hasValidCLITokens,
   ENV_VAR_NAMES,
   type OAuthStorage,
   type FileOAuthStorageConfig,

@@ -212,10 +212,24 @@ async function completeLoginForm(
 }
 
 /**
- * Checks if OAuth state exists and contains valid tokens
+ * Checks if OAuth state exists and contains valid tokens (Playwright auth pattern)
  *
- * @param storagePath - Path to the auth state file
+ * This function checks Playwright's single-file auth state format,
+ * typically created by `performOAuthSetup` in globalSetup.
+ *
+ * **Note:** This does NOT work with tokens stored by the CLI (`mcp-test login`).
+ * For CLI-stored tokens, use `hasValidCLITokens(serverUrl)` instead.
+ *
+ * @param storagePath - Path to the auth state file (e.g., 'playwright/.auth/oauth-state.json')
  * @returns true if valid auth state exists
+ *
+ * @example
+ * ```typescript
+ * // Check Playwright auth state
+ * if (await hasValidOAuthState('playwright/.auth/oauth-state.json')) {
+ *   console.log('Auth state is valid, skipping OAuth setup');
+ * }
+ * ```
  */
 export async function hasValidOAuthState(storagePath: string): Promise<boolean> {
   try {

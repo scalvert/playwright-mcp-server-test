@@ -221,6 +221,65 @@ export async function injectTokens(
 }
 
 /**
+ * Load tokens stored by the CLI (`mcp-test login`)
+ *
+ * This function reads tokens from the multi-file storage format used by the CLI.
+ * For Playwright's single-file auth pattern, use `loadOAuthState` instead.
+ *
+ * @param serverUrl - The MCP server URL
+ * @param stateDir - Optional custom state directory
+ * @returns StoredTokens if found, null otherwise
+ *
+ * @example
+ * ```typescript
+ * // Load tokens stored by: npx mcp-test login https://api.example.com/mcp
+ * const tokens = await loadCLITokens('https://api.example.com/mcp');
+ * if (tokens) {
+ *   console.log('Access token:', tokens.accessToken);
+ * }
+ * ```
+ */
+export async function loadCLITokens(
+  serverUrl: string,
+  stateDir?: string
+): Promise<StoredTokens | null> {
+  const storage = createFileOAuthStorage({ serverUrl, stateDir });
+  return storage.loadTokens();
+}
+
+/**
+ * Check if valid CLI tokens exist for a server
+ *
+ * This function checks the multi-file storage format used by the CLI.
+ * For Playwright's single-file auth pattern, use `hasValidOAuthState` instead.
+ *
+ * @param serverUrl - The MCP server URL
+ * @param options - Optional configuration
+ * @param options.stateDir - Custom state directory
+ * @param options.bufferMs - Buffer time before expiration (default: 60000ms)
+ * @returns true if valid (non-expired) tokens exist
+ *
+ * @example
+ * ```typescript
+ * // Check if we need to login
+ * const hasTokens = await hasValidCLITokens('https://api.example.com/mcp');
+ * if (!hasTokens) {
+ *   console.log('Run: npx mcp-test login https://api.example.com/mcp');
+ * }
+ * ```
+ */
+export async function hasValidCLITokens(
+  serverUrl: string,
+  options?: { stateDir?: string; bufferMs?: number }
+): Promise<boolean> {
+  const storage = createFileOAuthStorage({
+    serverUrl,
+    stateDir: options?.stateDir,
+  });
+  return storage.hasValidToken(options?.bufferMs);
+}
+
+/**
  * Creates a file-based OAuth storage instance
  *
  * @param config - Storage configuration

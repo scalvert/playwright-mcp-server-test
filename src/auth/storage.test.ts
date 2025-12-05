@@ -24,6 +24,8 @@ import {
   getStateDir,
   loadTokensFromEnv,
   injectTokens,
+  loadCLITokens,
+  hasValidCLITokens,
   createFileOAuthStorage,
   ENV_VAR_NAMES,
 } from './storage.js';
@@ -219,6 +221,112 @@ describe('storage', () => {
       expect(mocks.mkdir).toHaveBeenCalledWith(
         expect.stringContaining('/custom/state'),
         { recursive: true, mode: 0o700 }
+      );
+    });
+  });
+
+  describe('loadCLITokens', () => {
+    it('returns tokens when file exists', async () => {
+      const storedTokens = {
+        accessToken: 'cli-token',
+        tokenType: 'Bearer',
+        expiresAt: Date.now() + 3600000,
+      };
+      mocks.readFile.mockResolvedValue(JSON.stringify(storedTokens));
+
+      const tokens = await loadCLITokens('https://api.example.com/mcp');
+
+      expect(tokens).toEqual(storedTokens);
+      expect(mocks.readFile).toHaveBeenCalledWith(
+        expect.stringMatching(/tokens\.json$/),
+        'utf-8'
+      );
+    });
+
+    it('returns null when file does not exist', async () => {
+      const error = new Error('ENOENT') as NodeJS.ErrnoException;
+      error.code = 'ENOENT';
+      mocks.readFile.mockRejectedValue(error);
+
+      const tokens = await loadCLITokens('https://api.example.com/mcp');
+
+      expect(tokens).toBeNull();
+    });
+
+    it('uses custom state directory', async () => {
+      const storedTokens = { accessToken: 'token', tokenType: 'Bearer' };
+      mocks.readFile.mockResolvedValue(JSON.stringify(storedTokens));
+
+      await loadCLITokens('https://api.example.com', '/custom/dir');
+
+      expect(mocks.readFile).toHaveBeenCalledWith(
+        expect.stringContaining('/custom/dir'),
+        'utf-8'
+      );
+    });
+  });
+
+  describe('hasValidCLITokens', () => {
+    it('returns false when no tokens exist', async () => {
+      const error = new Error('ENOENT') as NodeJS.ErrnoException;
+      error.code = 'ENOENT';
+      mocks.readFile.mockRejectedValue(error);
+
+      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+
+      expect(valid).toBe(false);
+    });
+
+    it('returns true when valid token exists', async () => {
+      const futureExpiry = Date.now() + 3600000; // 1 hour from now
+      mocks.readFile.mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'valid-token',
+          tokenType: 'Bearer',
+          expiresAt: futureExpiry,
+        })
+      );
+
+      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+
+      expect(valid).toBe(true);
+    });
+
+    it('returns false when token is expired', async () => {
+      const pastExpiry = Date.now() - 3600000; // 1 hour ago
+      mocks.readFile.mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'expired-token',
+          tokenType: 'Bearer',
+          expiresAt: pastExpiry,
+        })
+      );
+
+      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+
+      expect(valid).toBe(false);
+    });
+
+    it('uses custom state directory and buffer', async () => {
+      const soonExpiry = Date.now() + 30000; // 30 seconds from now
+      mocks.readFile.mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'token',
+          tokenType: 'Bearer',
+          expiresAt: soonExpiry,
+        })
+      );
+
+      // With 10 second buffer, token should be valid
+      const valid = await hasValidCLITokens('https://api.example.com', {
+        stateDir: '/custom/dir',
+        bufferMs: 10000,
+      });
+
+      expect(valid).toBe(true);
+      expect(mocks.readFile).toHaveBeenCalledWith(
+        expect.stringContaining('/custom/dir'),
+        'utf-8'
       );
     });
   });
