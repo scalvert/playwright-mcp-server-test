@@ -221,10 +221,10 @@ export async function injectTokens(
 }
 
 /**
- * Load tokens stored by the CLI (`mcp-test login`)
+ * Load stored OAuth tokens for an MCP server
  *
- * This function reads tokens from the multi-file storage format used by the CLI.
- * For Playwright's single-file auth pattern, use `loadOAuthState` instead.
+ * Reads tokens from the standard storage location for the given server URL.
+ * Tokens are stored by `mcp-test login` or `injectTokens()`.
  *
  * @param serverUrl - The MCP server URL
  * @param stateDir - Optional custom state directory
@@ -232,14 +232,14 @@ export async function injectTokens(
  *
  * @example
  * ```typescript
- * // Load tokens stored by: npx mcp-test login https://api.example.com/mcp
- * const tokens = await loadCLITokens('https://api.example.com/mcp');
+ * // After running: npx mcp-test login https://api.example.com/mcp
+ * const tokens = await loadTokens('https://api.example.com/mcp');
  * if (tokens) {
  *   console.log('Access token:', tokens.accessToken);
  * }
  * ```
  */
-export async function loadCLITokens(
+export async function loadTokens(
   serverUrl: string,
   stateDir?: string
 ): Promise<StoredTokens | null> {
@@ -248,10 +248,10 @@ export async function loadCLITokens(
 }
 
 /**
- * Check if valid CLI tokens exist for a server
+ * Check if valid OAuth tokens exist for an MCP server
  *
- * This function checks the multi-file storage format used by the CLI.
- * For Playwright's single-file auth pattern, use `hasValidOAuthState` instead.
+ * Returns true if tokens exist and are not expired (with buffer).
+ * Use this to check if authentication is needed before making requests.
  *
  * @param serverUrl - The MCP server URL
  * @param options - Optional configuration
@@ -261,14 +261,15 @@ export async function loadCLITokens(
  *
  * @example
  * ```typescript
- * // Check if we need to login
- * const hasTokens = await hasValidCLITokens('https://api.example.com/mcp');
- * if (!hasTokens) {
+ * if (await hasValidTokens('https://api.example.com/mcp')) {
+ *   // Use stored tokens
+ *   const tokens = await loadTokens('https://api.example.com/mcp');
+ * } else {
  *   console.log('Run: npx mcp-test login https://api.example.com/mcp');
  * }
  * ```
  */
-export async function hasValidCLITokens(
+export async function hasValidTokens(
   serverUrl: string,
   options?: { stateDir?: string; bufferMs?: number }
 ): Promise<boolean> {

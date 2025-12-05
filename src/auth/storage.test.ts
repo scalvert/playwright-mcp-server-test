@@ -24,8 +24,8 @@ import {
   getStateDir,
   loadTokensFromEnv,
   injectTokens,
-  loadCLITokens,
-  hasValidCLITokens,
+  loadTokens,
+  hasValidTokens,
   createFileOAuthStorage,
   ENV_VAR_NAMES,
 } from './storage.js';
@@ -225,16 +225,16 @@ describe('storage', () => {
     });
   });
 
-  describe('loadCLITokens', () => {
+  describe('loadTokens', () => {
     it('returns tokens when file exists', async () => {
       const storedTokens = {
-        accessToken: 'cli-token',
+        accessToken: 'stored-token',
         tokenType: 'Bearer',
         expiresAt: Date.now() + 3600000,
       };
       mocks.readFile.mockResolvedValue(JSON.stringify(storedTokens));
 
-      const tokens = await loadCLITokens('https://api.example.com/mcp');
+      const tokens = await loadTokens('https://api.example.com/mcp');
 
       expect(tokens).toEqual(storedTokens);
       expect(mocks.readFile).toHaveBeenCalledWith(
@@ -248,7 +248,7 @@ describe('storage', () => {
       error.code = 'ENOENT';
       mocks.readFile.mockRejectedValue(error);
 
-      const tokens = await loadCLITokens('https://api.example.com/mcp');
+      const tokens = await loadTokens('https://api.example.com/mcp');
 
       expect(tokens).toBeNull();
     });
@@ -257,7 +257,7 @@ describe('storage', () => {
       const storedTokens = { accessToken: 'token', tokenType: 'Bearer' };
       mocks.readFile.mockResolvedValue(JSON.stringify(storedTokens));
 
-      await loadCLITokens('https://api.example.com', '/custom/dir');
+      await loadTokens('https://api.example.com', '/custom/dir');
 
       expect(mocks.readFile).toHaveBeenCalledWith(
         expect.stringContaining('/custom/dir'),
@@ -266,13 +266,13 @@ describe('storage', () => {
     });
   });
 
-  describe('hasValidCLITokens', () => {
+  describe('hasValidTokens', () => {
     it('returns false when no tokens exist', async () => {
       const error = new Error('ENOENT') as NodeJS.ErrnoException;
       error.code = 'ENOENT';
       mocks.readFile.mockRejectedValue(error);
 
-      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+      const valid = await hasValidTokens('https://api.example.com/mcp');
 
       expect(valid).toBe(false);
     });
@@ -287,7 +287,7 @@ describe('storage', () => {
         })
       );
 
-      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+      const valid = await hasValidTokens('https://api.example.com/mcp');
 
       expect(valid).toBe(true);
     });
@@ -302,7 +302,7 @@ describe('storage', () => {
         })
       );
 
-      const valid = await hasValidCLITokens('https://api.example.com/mcp');
+      const valid = await hasValidTokens('https://api.example.com/mcp');
 
       expect(valid).toBe(false);
     });
@@ -318,7 +318,7 @@ describe('storage', () => {
       );
 
       // With 10 second buffer, token should be valid
-      const valid = await hasValidCLITokens('https://api.example.com', {
+      const valid = await hasValidTokens('https://api.example.com', {
         stateDir: '/custom/dir',
         bufferMs: 10000,
       });
