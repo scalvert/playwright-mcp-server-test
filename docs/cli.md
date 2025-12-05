@@ -7,6 +7,7 @@ The `@mcp-testing/server-tester` CLI provides interactive commands to help you g
 - [init - Initialize Project](#init---initialize-project)
 - [generate - Generate Eval Dataset](#generate---generate-eval-dataset)
 - [login - OAuth Authentication](#login---oauth-authentication)
+- [token - Export Tokens for CI/CD](#token---export-tokens-for-cicd)
 
 ## `init` - Initialize Project
 
@@ -518,6 +519,135 @@ npx mcp-test login https://api.example.com/mcp --force
 Ensure the environment variables are named correctly:
 - `MCP_ACCESS_TOKEN` - The access token
 - `MCP_REFRESH_TOKEN` - The refresh token (optional, for token refresh)
+
+## `token` - Export Tokens for CI/CD
+
+Export stored OAuth tokens in formats suitable for CI/CD environments like GitHub Actions.
+
+### Usage
+
+```bash
+npx mcp-test token <server-url> [options]
+```
+
+### Arguments
+
+- `<server-url>` - (required) The MCP server URL to get tokens for
+
+### Options
+
+- `-f, --format <format>` - Output format: `env`, `json`, or `gh` (default: `env`)
+- `--state-dir <dir>` - Custom directory for token storage
+- `-h, --help` - Display help
+
+### Output Formats
+
+#### `env` (default)
+
+Outputs tokens as shell-compatible environment variable assignments:
+
+```bash
+npx mcp-test token https://api.example.com/mcp
+
+# Output:
+MCP_ACCESS_TOKEN=eyJhbGciOiJSUzI1NiIs...
+MCP_REFRESH_TOKEN=dGhpcyBpcyBhIHJlZnJl...
+MCP_TOKEN_TYPE=Bearer
+MCP_TOKEN_EXPIRES_AT=1736956200000
+```
+
+Use with `eval` to set environment variables:
+
+```bash
+eval $(npx mcp-test token https://api.example.com/mcp)
+```
+
+#### `json`
+
+Outputs tokens as a JSON object:
+
+```bash
+npx mcp-test token https://api.example.com/mcp --format json
+
+# Output:
+{
+  "MCP_ACCESS_TOKEN": "eyJhbGciOiJSUzI1NiIs...",
+  "MCP_REFRESH_TOKEN": "dGhpcyBpcyBhIHJlZnJl...",
+  "MCP_TOKEN_TYPE": "Bearer",
+  "MCP_TOKEN_EXPIRES_AT": 1736956200000
+}
+```
+
+#### `gh`
+
+Outputs ready-to-paste GitHub CLI commands for setting repository secrets:
+
+```bash
+npx mcp-test token https://api.example.com/mcp --format gh
+
+# Output:
+# Run these commands to set GitHub Actions secrets:
+gh secret set MCP_ACCESS_TOKEN --body "eyJhbGciOiJSUzI1NiIs..."
+gh secret set MCP_REFRESH_TOKEN --body "dGhpcyBpcyBhIHJlZnJl..."
+gh secret set MCP_TOKEN_TYPE --body "Bearer"
+gh secret set MCP_TOKEN_EXPIRES_AT --body "1736956200000"
+```
+
+### Workflow: Setting Up GitHub Actions
+
+1. **Authenticate locally:**
+
+   ```bash
+   npx mcp-test login https://api.example.com/mcp
+   ```
+
+2. **Export tokens for GitHub:**
+
+   ```bash
+   npx mcp-test token https://api.example.com/mcp --format gh
+   ```
+
+3. **Run the output commands** (or copy/paste each secret manually):
+
+   ```bash
+   gh secret set MCP_ACCESS_TOKEN --body "..."
+   gh secret set MCP_REFRESH_TOKEN --body "..."
+   gh secret set MCP_TOKEN_TYPE --body "Bearer"
+   gh secret set MCP_TOKEN_EXPIRES_AT --body "..."
+   ```
+
+4. **Configure your workflow:**
+
+   ```yaml
+   # .github/workflows/mcp-tests.yml
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       env:
+         MCP_ACCESS_TOKEN: ${{ secrets.MCP_ACCESS_TOKEN }}
+         MCP_REFRESH_TOKEN: ${{ secrets.MCP_REFRESH_TOKEN }}
+         MCP_TOKEN_TYPE: ${{ secrets.MCP_TOKEN_TYPE }}
+         MCP_TOKEN_EXPIRES_AT: ${{ secrets.MCP_TOKEN_EXPIRES_AT }}
+       steps:
+         - uses: actions/checkout@v4
+         - run: npm ci
+         - run: npx playwright test
+   ```
+
+### Error Handling
+
+If no tokens are found for the specified server:
+
+```bash
+npx mcp-test token https://api.example.com/mcp
+
+# Output (to stderr):
+# No tokens found for https://api.example.com/mcp
+#
+# Expected location: ~/.local/state/mcp-tests/api.example.com_mcp/tokens.json
+#
+# Run 'mcp-test login https://api.example.com/mcp' to authenticate first.
+```
 
 ## Next Steps
 

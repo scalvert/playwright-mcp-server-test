@@ -207,7 +207,7 @@ export default defineConfig({
 - **[Quick Start Guide](./docs/quickstart.md)** - Detailed setup and configuration
 - **[Expectations](./docs/expectations.md)** - All validation types (exact, schema, regex, text contains, snapshot, LLM judge)
 - **[API Reference](./docs/api-reference.md)** - Complete API documentation
-- **[CLI Commands](./docs/cli.md)** - `init`, `generate`, and `login` command details
+- **[CLI Commands](./docs/cli.md)** - `init`, `generate`, `login`, and `token` command details
 - **[UI Reporter](./docs/ui-reporter.md)** - Interactive web UI for test results
 - **[Transports](./docs/transports.md)** - Stdio vs HTTP configuration
 - **[Development](./docs/development.md)** - Contributing and building
@@ -357,10 +357,18 @@ jobs:
       - run: npm run test:playwright
 ```
 
-To obtain tokens for CI:
-1. Run `mcp-test login <server-url>` locally
-2. Copy tokens from `~/.local/state/mcp-tests/<server-key>/tokens.json`
-3. Add as GitHub repository secrets
+**To set up GitHub Actions secrets:**
+
+1. Authenticate locally: `npx mcp-test login <server-url>`
+2. Export tokens for GitHub: `npx mcp-test token <server-url> --format gh`
+3. Run the output `gh secret set` commands (requires [GitHub CLI](https://cli.github.com/))
+
+The `token` command supports multiple formats:
+- `env` (default) - Shell-compatible `KEY=value` pairs
+- `json` - JSON object for scripting
+- `gh` - Ready-to-paste GitHub CLI commands
+
+See the [CLI Guide](./docs/cli.md#token---export-tokens-for-cicd) for details.
 
 Alternatively, inject tokens programmatically in your test setup:
 
