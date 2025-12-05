@@ -52,7 +52,7 @@ expect(result.passed).toBe(result.total);
 
 - 🎭 **Playwright Integration** - Use MCP servers in Playwright tests with idiomatic fixtures
 - 📊 **Matrix Evals** - Run dataset-driven evaluations across multiple transports
-- 📸 **Snapshot Testing** - Capture and compare tool responses using Playwright snapshots
+- 📸 **Snapshot Testing** - Capture and compare deterministic responses with optional sanitizers for variable data
 - 🤖 **LLM-as-a-Judge** - Optional semantic evaluation using OpenAI or Anthropic
 - 🔌 **Multiple Transports** - Support for both stdio (local) and HTTP (remote) connections
 - ✅ **Protocol Conformance** - Built-in checks for MCP spec compliance
@@ -266,7 +266,9 @@ See [Transports Guide](./docs/transports.md) for configuration.
 
 ### Snapshot Testing
 
-Use Playwright's snapshot testing to capture and compare tool responses:
+Snapshot testing captures tool responses and compares them against stored baselines. This works best for **deterministic responses** like help text, configuration, or schema discovery.
+
+> **Note:** For responses with timestamps, IDs, or live data, use [sanitizers](./docs/expectations.md#snapshot-sanitizers) to normalize variable content, or consider schema validation instead.
 
 ```bash
 # Generate dataset with snapshot expectations
@@ -279,7 +281,19 @@ npx playwright test
 npx playwright test --update-snapshots
 ```
 
-This uses Playwright's native `toMatchSnapshot()` under the hood, which stores snapshots in `__snapshots__/` folders and provides excellent diff output on failures.
+For responses with variable data, use sanitizers:
+
+```json
+{
+  "id": "get-user",
+  "toolName": "get_user",
+  "args": { "id": "123" },
+  "expectedSnapshot": "user-profile",
+  "snapshotSanitizers": ["uuid", "iso-date", { "remove": ["lastLoginAt"] }]
+}
+```
+
+See the [Expectations Guide](./docs/expectations.md#snapshot-testing) for when to use snapshots vs other validation methods.
 
 ## CLI OAuth Authentication
 
