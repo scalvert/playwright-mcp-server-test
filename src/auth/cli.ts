@@ -265,6 +265,8 @@ export class CLIOAuthClient {
       const age = Date.now() - cachedMetadata.discoveredAt;
       if (age < DEFAULT_METADATA_TTL_MS) {
         debug('Using cached server metadata (age: %dms)', age);
+        debug('Cached protected resource scopes: %O', cachedMetadata.protectedResource.scopes_supported);
+        debug('Cached auth server scopes: %O', cachedMetadata.authServer.server.scopes_supported);
         return {
           protectedResource: cachedMetadata.protectedResource,
           authServer: cachedMetadata.authServer,
@@ -277,6 +279,7 @@ export class CLIOAuthClient {
     debug('Discovering protected resource:', this.config.mcpServerUrl);
     const prResult = await discoverProtectedResource(this.config.mcpServerUrl);
     debug('Found protected resource:', prResult.metadata.resource);
+    debug('Protected resource scopes_supported: %O', prResult.metadata.scopes_supported);
 
     // Get authorization server URL
     const authServerUrl = prResult.metadata.authorization_servers?.[0];
@@ -290,6 +293,7 @@ export class CLIOAuthClient {
     debug('Discovering authorization server:', authServerUrl);
     const authServer = await discoverAuthorizationServer(authServerUrl);
     debug('Found authorization server:', authServer.issuer);
+    debug('Auth server scopes_supported: %O', authServer.server.scopes_supported);
 
     // Cache metadata
     const metadata: StoredServerMetadata = {
@@ -405,15 +409,22 @@ export class CLIOAuthClient {
     const state = generateState();
 
     // Start callback server
-    const { server, port, codePromise } = await this.startCallbackServer(state);
+    const { port, codePromise, close } = await this.startCallbackServer(state);
     const redirectUri = `http://127.0.0.1:${port}/callback`;
 
     try {
-      // Determine scopes: user-provided > discovered > fallback
+      // Determine scopes: user-provided > protected resource > auth server > fallback
+      // Try multiple sources since not all servers advertise scopes in the same place
       const requestedScopes = this.config.scopes ??
-        protectedResource.scopes_supported ?? ['openid'];
+        protectedResource.scopes_supported ??
+        authServer.server.scopes_supported ??
+        ['openid'];
 
-      debug('Requesting scopes: %s', requestedScopes.join(', '));
+      debug('Scope resolution:');
+      debug('  - User config scopes: %O', this.config.scopes);
+      debug('  - Protected resource scopes_supported: %O', protectedResource.scopes_supported);
+      debug('  - Auth server scopes_supported: %O', authServer.server.scopes_supported);
+      debug('  - Final requested scopes: %O', requestedScopes);
 
       const authUrl = buildAuthorizationUrl({
         authServer,
@@ -424,6 +435,13 @@ export class CLIOAuthClient {
         state,
         resource: protectedResource.resource,
       });
+
+      debug('Authorization URL: %s', authUrl.toString());
+      debug('Authorization URL params:');
+      debug('  - client_id: %s', authUrl.searchParams.get('client_id'));
+      debug('  - redirect_uri: %s', authUrl.searchParams.get('redirect_uri'));
+      debug('  - scope: %s', authUrl.searchParams.get('scope'));
+      debug('  - resource: %s', authUrl.searchParams.get('resource'));
 
       // Open browser or print URL
       await this.openBrowserOrPrintUrl(authUrl);
@@ -439,6 +457,7 @@ export class CLIOAuthClient {
         clientId: client.clientId,
         clientSecret: client.clientSecret,
         code,
+        state,
         codeVerifier: pkce.codeVerifier,
         redirectUri,
       });
@@ -449,8 +468,8 @@ export class CLIOAuthClient {
 
       return { tokens, requestedScopes };
     } finally {
-      // Clean up callback server
-      server.close();
+      // Clean up callback server and all connections
+      close();
     }
   }
 
@@ -494,14 +513,29 @@ export class CLIOAuthClient {
   private async startCallbackServer(
     expectedState: string
   ): Promise<{
-    server: http.Server;
     port: number;
     codePromise: Promise<string>;
+    close: () => void;
   }> {
     const timeoutMs = this.config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
     return new Promise((resolve, reject) => {
       const server = http.createServer();
+
+      // Track active connections so we can force-close them
+      const connections = new Set<import('node:net').Socket>();
+      server.on('connection', (socket) => {
+        connections.add(socket);
+        socket.on('close', () => connections.delete(socket));
+      });
+
+      // Helper to force-close the server
+      const forceClose = () => {
+        for (const socket of connections) {
+          socket.destroy();
+        }
+        server.close();
+      };
 
       let codeResolve: (code: string) => void;
       let codeReject: (error: Error) => void;
@@ -513,7 +547,7 @@ export class CLIOAuthClient {
 
       // Set up timeout
       const timeout = setTimeout(() => {
-        server.close();
+        forceClose();
         codeReject(new Error(`OAuth flow timed out after ${timeoutMs}ms`));
       }, timeoutMs);
 
@@ -576,7 +610,7 @@ export class CLIOAuthClient {
       server.listen(preferredPort, '127.0.0.1', () => {
         const address = server.address() as AddressInfo;
         debug('Callback server listening on port', address.port);
-        resolve({ server, port: address.port, codePromise });
+        resolve({ port: address.port, codePromise, close: forceClose });
       });
 
       server.on('error', (err) => {
@@ -633,21 +667,28 @@ export class CLIOAuthClient {
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Authentication Successful</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
-           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .container { text-align: center; background: white; padding: 40px 60px; border-radius: 16px;
-                 box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .checkmark { font-size: 64px; margin-bottom: 20px; }
-    h1 { color: #1a202c; margin: 0 0 10px 0; }
-    p { color: #718096; margin: 0; }
+           background: #f8fafc; }
+    .container { text-align: center; background: white; padding: 48px 64px; border-radius: 8px;
+                 border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .icon { width: 48px; height: 48px; margin: 0 auto 24px; background: #dcfce7; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; }
+    .icon svg { width: 24px; height: 24px; color: #16a34a; }
+    h1 { color: #0f172a; margin: 0 0 8px 0; font-size: 20px; font-weight: 600; }
+    p { color: #64748b; margin: 0; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="checkmark">✓</div>
+    <div class="icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
     <h1>Authentication Successful</h1>
     <p>You can close this window and return to the terminal.</p>
   </div>
@@ -663,22 +704,29 @@ export class CLIOAuthClient {
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Authentication Failed</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
-           background: linear-gradient(135deg, #f56565 0%, #c53030 100%); }
-    .container { text-align: center; background: white; padding: 40px 60px; border-radius: 16px;
-                 box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .icon { font-size: 64px; margin-bottom: 20px; }
-    h1 { color: #1a202c; margin: 0 0 10px 0; }
-    p { color: #718096; margin: 0; }
-    code { background: #f7fafc; padding: 2px 8px; border-radius: 4px; color: #e53e3e; }
+           background: #f8fafc; }
+    .container { text-align: center; background: white; padding: 48px 64px; border-radius: 8px;
+                 border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .icon { width: 48px; height: 48px; margin: 0 auto 24px; background: #fee2e2; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; }
+    .icon svg { width: 24px; height: 24px; color: #dc2626; }
+    h1 { color: #0f172a; margin: 0 0 8px 0; font-size: 20px; font-weight: 600; }
+    p { color: #64748b; margin: 0 0 8px 0; font-size: 14px; }
+    code { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; color: #dc2626; font-size: 13px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">✕</div>
+    <div class="icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </div>
     <h1>Authentication Failed</h1>
     <p>Error: <code>${escapeHtml(error)}</code></p>
     ${description ? `<p>${escapeHtml(description)}</p>` : ''}
