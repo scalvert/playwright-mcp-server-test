@@ -1,4 +1,14 @@
 
+
+## v0.8.0 (2025-12-05)
+
+#### :rocket: Enhancement
+* [#5](https://github.com/mcp-testing/server-tester/pull/5) feat: Add snapshot testing, token export command, and OAuth improvements ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.7.0 (2025-12-04)
 
 #### :rocket: Enhancement
