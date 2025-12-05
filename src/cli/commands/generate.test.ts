@@ -68,6 +68,10 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
   throw new Error('process.exit called');
 });
 
+// Mock console to suppress output during tests
+vi.spyOn(console, 'log').mockImplementation(() => {});
+vi.spyOn(console, 'error').mockImplementation(() => {});
+
 import { generate } from './generate.js';
 
 // Valid config to return from validateMCPConfig
