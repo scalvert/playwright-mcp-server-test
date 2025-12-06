@@ -221,6 +221,66 @@ export async function injectTokens(
 }
 
 /**
+ * Load stored OAuth tokens for an MCP server
+ *
+ * Reads tokens from the standard storage location for the given server URL.
+ * Tokens are stored by `mcp-test login` or `injectTokens()`.
+ *
+ * @param serverUrl - The MCP server URL
+ * @param stateDir - Optional custom state directory
+ * @returns StoredTokens if found, null otherwise
+ *
+ * @example
+ * ```typescript
+ * // After running: npx mcp-test login https://api.example.com/mcp
+ * const tokens = await loadTokens('https://api.example.com/mcp');
+ * if (tokens) {
+ *   console.log('Access token:', tokens.accessToken);
+ * }
+ * ```
+ */
+export async function loadTokens(
+  serverUrl: string,
+  stateDir?: string
+): Promise<StoredTokens | null> {
+  const storage = createFileOAuthStorage({ serverUrl, stateDir });
+  return storage.loadTokens();
+}
+
+/**
+ * Check if valid OAuth tokens exist for an MCP server
+ *
+ * Returns true if tokens exist and are not expired (with buffer).
+ * Use this to check if authentication is needed before making requests.
+ *
+ * @param serverUrl - The MCP server URL
+ * @param options - Optional configuration
+ * @param options.stateDir - Custom state directory
+ * @param options.bufferMs - Buffer time before expiration (default: 60000ms)
+ * @returns true if valid (non-expired) tokens exist
+ *
+ * @example
+ * ```typescript
+ * if (await hasValidTokens('https://api.example.com/mcp')) {
+ *   // Use stored tokens
+ *   const tokens = await loadTokens('https://api.example.com/mcp');
+ * } else {
+ *   console.log('Run: npx mcp-test login https://api.example.com/mcp');
+ * }
+ * ```
+ */
+export async function hasValidTokens(
+  serverUrl: string,
+  options?: { stateDir?: string; bufferMs?: number }
+): Promise<boolean> {
+  const storage = createFileOAuthStorage({
+    serverUrl,
+    stateDir: options?.stateDir,
+  });
+  return storage.hasValidToken(options?.bufferMs);
+}
+
+/**
  * Creates a file-based OAuth storage instance
  *
  * @param config - Storage configuration

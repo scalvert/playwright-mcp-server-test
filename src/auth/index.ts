@@ -17,8 +17,6 @@ export type {
 // OAuth client provider
 export {
   PlaywrightOAuthClientProvider,
-  loadOAuthState,
-  saveOAuthState,
   type PlaywrightOAuthClientProviderConfig,
 } from './oauthClientProvider.js';
 
@@ -50,7 +48,6 @@ export {
 export {
   performOAuthSetup,
   performOAuthSetupIfNeeded,
-  hasValidOAuthState,
 } from './setupOAuth.js';
 
 // Discovery (RFC 9728)
@@ -63,16 +60,13 @@ export {
   type ProtectedResourceDiscoveryResult,
 } from './discovery.js';
 
-// Storage
+// Token Storage
 export {
-  createFileOAuthStorage,
-  generateServerKey,
-  getStateDir,
-  loadTokensFromEnv,
+  loadTokens,
+  hasValidTokens,
   injectTokens,
+  loadTokensFromEnv,
   ENV_VAR_NAMES,
-  type OAuthStorage,
-  type FileOAuthStorageConfig,
   type StoredServerMetadata,
 } from './storage.js';
 
