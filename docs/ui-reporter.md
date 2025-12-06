@@ -87,6 +87,7 @@ Comprehensive table with:
 - **Timestamp** - When the test ran
 
 Features:
+
 - **Sorting** - Click column headers to sort
 - **Search** - Filter by name or ID
 - **Click to Expand** - See full details in modal
@@ -118,6 +119,7 @@ Click any result row to see:
 ### Theme Toggle
 
 Switch between light and dark modes:
+
 - Click the theme toggle button in the top-right
 - Preference saved to localStorage
 - Automatic detection of system preference on first load
@@ -143,6 +145,7 @@ Results are saved to `.mcp-test-results/`:
 ### Timestamped Runs
 
 Each test run creates a new directory with an ISO timestamp:
+
 - Format: `run-YYYY-MM-DDTHH-mm-ss`
 - Preserves historical results
 - Useful for comparing runs over time
@@ -150,6 +153,7 @@ Each test run creates a new directory with an ISO timestamp:
 ### Latest Symlink
 
 The `latest/` directory is a symlink to the most recent run:
+
 - Always points to the newest results
 - Easy to bookmark
 - Consistent URL for CI/CD
@@ -178,6 +182,7 @@ This prevents committing generated reports while keeping them available locally.
 Each expectation type shows specific information:
 
 **Exact Match:**
+
 ```
 ✓ Exact match
   Expected: { "result": 5 }
@@ -185,18 +190,21 @@ Each expectation type shows specific information:
 ```
 
 **Schema Validation:**
+
 ```
 ✗ Schema validation failed
   Error: Expected number, received string at path "temperature"
 ```
 
 **Text Contains:**
+
 ```
 ✓ Text contains
   All 3 substrings found
 ```
 
 **Regex:**
+
 ```
 ✗ Regex pattern failed
   Failed patterns:
@@ -205,6 +213,7 @@ Each expectation type shows specific information:
 ```
 
 **LLM Judge:**
+
 ```
 ✓ LLM judge passed
   Score: 0.85 (threshold: 0.7)
@@ -223,7 +232,7 @@ export default defineConfig({
     ['list'],
     [
       '@mcp-testing/server-tester/reporters/mcpReporter',
-      { outputDir: 'custom-results' }
+      { outputDir: 'custom-results' },
     ],
   ],
 });
@@ -298,6 +307,7 @@ gh-pages -d .mcp-test-results/latest
 **Issue:** No report appears after test run
 
 **Solutions:**
+
 - Verify reporter is in `playwright.config.ts`
 - Check for syntax errors in config
 - Ensure tests actually ran (check terminal output)
@@ -308,6 +318,7 @@ gh-pages -d .mcp-test-results/latest
 **Issue:** Report generated but browser doesn't open
 
 **Solutions:**
+
 - Check `PLAYWRIGHT_SKIP_BROWSER_OPEN` env var
 - Try opening manually: `open .mcp-test-results/latest/index.html`
 - Verify browser is installed
@@ -317,6 +328,7 @@ gh-pages -d .mcp-test-results/latest
 **Issue:** Report shows but some data is missing
 
 **Solutions:**
+
 - Check console for JavaScript errors (F12 → Console)
 - Verify `data.js` was generated correctly
 - Look for tool call failures in test output
@@ -327,6 +339,7 @@ gh-pages -d .mcp-test-results/latest
 **Issue:** UI looks broken or unstyled
 
 **Solutions:**
+
 - Verify `styles.css` and `app.js` exist
 - Check browser console for loading errors
 - Try hard refresh (Cmd+Shift+R or Ctrl+Shift+R)

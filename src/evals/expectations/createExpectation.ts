@@ -46,7 +46,11 @@ export interface TextExpectationDefinition<TExpected, TOptions = void> {
    * @param options - Options passed to the factory
    * @returns Validation result
    */
-  validate: (text: string, expected: TExpected, options: TOptions) => ValidationResult;
+  validate: (
+    text: string,
+    expected: TExpected,
+    options: TOptions
+  ) => ValidationResult;
 }
 
 /**

@@ -2,7 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { runConformanceChecks } from './conformanceChecks.js';
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { Tool, ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
+import type {
+  Tool,
+  ServerCapabilities,
+} from '@modelcontextprotocol/sdk/types.js';
 
 function createMockTool(name: string, description?: string): Tool {
   return {
@@ -61,7 +64,9 @@ describe('runConformanceChecks', () => {
       const result = await runConformanceChecks(mcp);
 
       expect(result.pass).toBe(true);
-      const serverCheck = result.checks.find((c) => c.name === 'server_info_present');
+      const serverCheck = result.checks.find(
+        (c) => c.name === 'server_info_present'
+      );
       expect(serverCheck?.pass).toBe(true);
       expect(serverCheck?.message).toContain('test-server');
     });
@@ -75,7 +80,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const serverCheck = result.checks.find((c) => c.name === 'server_info_present');
+      const serverCheck = result.checks.find(
+        (c) => c.name === 'server_info_present'
+      );
       expect(serverCheck?.pass).toBe(false);
       expect(serverCheck?.message).toBe('Server info is missing');
     });
@@ -87,9 +94,13 @@ describe('runConformanceChecks', () => {
         tools: [createMockTool('test-tool')],
       });
 
-      const result = await runConformanceChecks(mcp, { checkServerInfo: false });
+      const result = await runConformanceChecks(mcp, {
+        checkServerInfo: false,
+      });
 
-      const serverCheck = result.checks.find((c) => c.name === 'server_info_present');
+      const serverCheck = result.checks.find(
+        (c) => c.name === 'server_info_present'
+      );
       expect(serverCheck).toBeUndefined();
     });
   });
@@ -104,7 +115,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const capCheck = result.checks.find((c) => c.name === 'capabilities_valid');
+      const capCheck = result.checks.find(
+        (c) => c.name === 'capabilities_valid'
+      );
       expect(capCheck?.pass).toBe(true);
       expect(capCheck?.message).toContain('tools');
       expect(capCheck?.message).toContain('resources');
@@ -120,7 +133,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const capCheck = result.checks.find((c) => c.name === 'capabilities_valid');
+      const capCheck = result.checks.find(
+        (c) => c.name === 'capabilities_valid'
+      );
       expect(capCheck?.pass).toBe(false);
     });
   });
@@ -135,7 +150,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const toolsCheck = result.checks.find((c) => c.name === 'list_tools_succeeds');
+      const toolsCheck = result.checks.find(
+        (c) => c.name === 'list_tools_succeeds'
+      );
       expect(toolsCheck?.pass).toBe(true);
       expect(toolsCheck?.message).toContain('2 tools');
     });
@@ -150,7 +167,9 @@ describe('runConformanceChecks', () => {
       const result = await runConformanceChecks(mcp);
 
       expect(result.pass).toBe(false);
-      const toolsCheck = result.checks.find((c) => c.name === 'list_tools_succeeds');
+      const toolsCheck = result.checks.find(
+        (c) => c.name === 'list_tools_succeeds'
+      );
       expect(toolsCheck?.pass).toBe(false);
       expect(toolsCheck?.message).toContain('Connection failed');
     });
@@ -166,7 +185,9 @@ describe('runConformanceChecks', () => {
         requiredTools: ['tool1', 'tool3'],
       });
 
-      const reqCheck = result.checks.find((c) => c.name === 'required_tools_present');
+      const reqCheck = result.checks.find(
+        (c) => c.name === 'required_tools_present'
+      );
       expect(reqCheck?.pass).toBe(false);
       expect(reqCheck?.message).toContain('tool3');
     });
@@ -186,7 +207,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp, { validateSchemas: true });
 
-      const schemaCheck = result.checks.find((c) => c.name === 'tool_schemas_valid');
+      const schemaCheck = result.checks.find(
+        (c) => c.name === 'tool_schemas_valid'
+      );
       expect(schemaCheck?.pass).toBe(false);
       expect(schemaCheck?.message).toContain('invalid-tool');
       expect(schemaCheck?.message).toContain('must be "object"');
@@ -204,7 +227,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const resourceCheck = result.checks.find((c) => c.name === 'list_resources_succeeds');
+      const resourceCheck = result.checks.find(
+        (c) => c.name === 'list_resources_succeeds'
+      );
       expect(resourceCheck).toBeDefined();
       expect(resourceCheck?.pass).toBe(true);
       expect(result.raw.resources).toHaveLength(1);
@@ -219,7 +244,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const resourceCheck = result.checks.find((c) => c.name === 'list_resources_succeeds');
+      const resourceCheck = result.checks.find(
+        (c) => c.name === 'list_resources_succeeds'
+      );
       expect(resourceCheck).toBeUndefined();
       expect(result.raw.resources).toBeNull();
     });
@@ -234,7 +261,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const resourceCheck = result.checks.find((c) => c.name === 'list_resources_succeeds');
+      const resourceCheck = result.checks.find(
+        (c) => c.name === 'list_resources_succeeds'
+      );
       expect(resourceCheck?.pass).toBe(false);
       expect(resourceCheck?.message).toContain('Resource error');
     });
@@ -249,7 +278,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp, { checkResources: false });
 
-      const resourceCheck = result.checks.find((c) => c.name === 'list_resources_succeeds');
+      const resourceCheck = result.checks.find(
+        (c) => c.name === 'list_resources_succeeds'
+      );
       expect(resourceCheck).toBeUndefined();
     });
   });
@@ -265,7 +296,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const promptCheck = result.checks.find((c) => c.name === 'list_prompts_succeeds');
+      const promptCheck = result.checks.find(
+        (c) => c.name === 'list_prompts_succeeds'
+      );
       expect(promptCheck).toBeDefined();
       expect(promptCheck?.pass).toBe(true);
       expect(result.raw.prompts).toHaveLength(1);
@@ -280,7 +313,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const promptCheck = result.checks.find((c) => c.name === 'list_prompts_succeeds');
+      const promptCheck = result.checks.find(
+        (c) => c.name === 'list_prompts_succeeds'
+      );
       expect(promptCheck).toBeUndefined();
       expect(result.raw.prompts).toBeNull();
     });
@@ -295,7 +330,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const promptCheck = result.checks.find((c) => c.name === 'list_prompts_succeeds');
+      const promptCheck = result.checks.find(
+        (c) => c.name === 'list_prompts_succeeds'
+      );
       expect(promptCheck?.pass).toBe(false);
       expect(promptCheck?.message).toContain('Prompt error');
     });
@@ -312,7 +349,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const errorCheck = result.checks.find((c) => c.name === 'invalid_tool_returns_error');
+      const errorCheck = result.checks.find(
+        (c) => c.name === 'invalid_tool_returns_error'
+      );
       expect(errorCheck?.pass).toBe(true);
     });
 
@@ -326,7 +365,9 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      const errorCheck = result.checks.find((c) => c.name === 'invalid_tool_returns_error');
+      const errorCheck = result.checks.find(
+        (c) => c.name === 'invalid_tool_returns_error'
+      );
       expect(errorCheck?.pass).toBe(false);
     });
   });
@@ -341,7 +382,10 @@ describe('runConformanceChecks', () => {
 
       const result = await runConformanceChecks(mcp);
 
-      expect(result.raw.serverInfo).toEqual({ name: 'my-server', version: '2.0.0' });
+      expect(result.raw.serverInfo).toEqual({
+        name: 'my-server',
+        version: '2.0.0',
+      });
     });
 
     it('should return raw capabilities', async () => {
@@ -377,4 +421,3 @@ describe('runConformanceChecks', () => {
     });
   });
 });
-

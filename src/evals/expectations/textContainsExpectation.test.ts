@@ -33,11 +33,7 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: 'hello',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(true);
       expect(result.details).toContain('contains expected substring');
@@ -52,11 +48,7 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: 'goodbye',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(false);
       expect(result.details).toContain('Missing');
@@ -91,11 +83,7 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: ['hello', 'world', 'missing'],
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(false);
       expect(result.details).toContain('Missing 1 substring');
@@ -113,17 +101,15 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: 'Hello',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(false);
     });
 
     it('should support case-insensitive matching', async () => {
-      const expectation = createTextContainsExpectation({ caseSensitive: false });
+      const expectation = createTextContainsExpectation({
+        caseSensitive: false,
+      });
       const evalCase: EvalCase = {
         id: 'test',
         toolName: 'test_tool',
@@ -131,17 +117,15 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: 'HELLO',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(true);
     });
 
     it('should handle mixed case with case-insensitive option', async () => {
-      const expectation = createTextContainsExpectation({ caseSensitive: false });
+      const expectation = createTextContainsExpectation({
+        caseSensitive: false,
+      });
       const evalCase: EvalCase = {
         id: 'test',
         toolName: 'test_tool',
@@ -149,11 +133,7 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: ['HeLLo', 'WoRLd'],
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello WORLD'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello WORLD');
 
       expect(result.pass).toBe(true);
     });
@@ -169,11 +149,7 @@ describe('createTextContainsExpectation', () => {
         expectedTextContains: 'test',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'this is a test'
-      );
+      const result = await expectation(mockContext, evalCase, 'this is a test');
 
       expect(result.pass).toBe(true);
     });
@@ -188,9 +164,7 @@ describe('createTextContainsExpectation', () => {
       };
 
       const response = {
-        content: [
-          { type: 'text', text: 'The weather is sunny' },
-        ],
+        content: [{ type: 'text', text: 'The weather is sunny' }],
       };
 
       const result = await expectation(mockContext, evalCase, response);

@@ -36,9 +36,7 @@ function App() {
       >
         <div className="max-w-[1600px] mx-auto p-6 h-full flex flex-col gap-6">
           {/* Dashboard */}
-          <MetricsCards
-            results={data.runData.results}
-          />
+          <MetricsCards results={data.runData.results} />
 
           {/* Results Table */}
           <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex-1 min-h-0">

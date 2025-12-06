@@ -18,7 +18,9 @@ function createMockMCP(callToolResponse?: {
     getServerInfo: vi.fn().mockReturnValue({ name: 'test', version: '1.0.0' }),
     listTools: vi.fn().mockResolvedValue([]),
     callTool: vi.fn().mockResolvedValue({
-      content: callToolResponse?.content ?? [{ type: 'text', text: 'response' }],
+      content: callToolResponse?.content ?? [
+        { type: 'text', text: 'response' },
+      ],
       structuredContent: callToolResponse?.structuredContent,
       isError: callToolResponse?.isError ?? false,
     }),
@@ -45,7 +47,9 @@ function createPassingExpectation(): EvalExpectation {
 }
 
 function createFailingExpectation(details?: string): EvalExpectation {
-  return vi.fn().mockResolvedValue({ pass: false, details: details ?? 'Failed' });
+  return vi
+    .fn()
+    .mockResolvedValue({ pass: false, details: details ?? 'Failed' });
 }
 
 describe('runEvalCase', () => {
@@ -239,10 +243,7 @@ describe('runEvalDataset', () => {
       createEvalCase({ id: 'case-3' }),
     ]);
 
-    const result = await runEvalDataset(
-      { dataset, expectations: {} },
-      context
-    );
+    const result = await runEvalDataset({ dataset, expectations: {} }, context);
 
     expect(result.total).toBe(3);
     expect(result.caseResults).toHaveLength(3);
@@ -260,12 +261,14 @@ describe('runEvalDataset', () => {
     ]);
 
     // First two pass, third fails
-    const failOnThird: EvalExpectation = vi.fn().mockImplementation(
-      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
-        pass: evalCase.id !== 'case-3',
-        details: evalCase.id === 'case-3' ? 'Failed' : 'Passed',
-      })
-    );
+    const failOnThird: EvalExpectation = vi
+      .fn()
+      .mockImplementation((_: EvalExpectationContext, evalCase: EvalCase) =>
+        Promise.resolve({
+          pass: evalCase.id !== 'case-3',
+          details: evalCase.id === 'case-3' ? 'Failed' : 'Passed',
+        })
+      );
 
     const result = await runEvalDataset(
       { dataset, expectations: { exact: failOnThird } },
@@ -284,10 +287,7 @@ describe('runEvalDataset', () => {
     ]);
     dataset.name = 'my-dataset';
 
-    const result = await runEvalDataset(
-      { dataset, expectations: {} },
-      context
-    );
+    const result = await runEvalDataset({ dataset, expectations: {} }, context);
 
     expect(result.caseResults[0]!.datasetName).toBe('my-dataset');
     expect(result.caseResults[1]!.datasetName).toBe('my-dataset');
@@ -320,12 +320,14 @@ describe('runEvalDataset', () => {
     ]);
 
     // Fail on case-2
-    const failOnSecond: EvalExpectation = vi.fn().mockImplementation(
-      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
-        pass: evalCase.id !== 'case-2',
-        details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
-      })
-    );
+    const failOnSecond: EvalExpectation = vi
+      .fn()
+      .mockImplementation((_: EvalExpectationContext, evalCase: EvalCase) =>
+        Promise.resolve({
+          pass: evalCase.id !== 'case-2',
+          details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
+        })
+      );
 
     const result = await runEvalDataset(
       { dataset, expectations: { exact: failOnSecond }, stopOnFailure: true },
@@ -347,12 +349,14 @@ describe('runEvalDataset', () => {
     ]);
 
     // Fail on case-2
-    const failOnSecond: EvalExpectation = vi.fn().mockImplementation(
-      (_: EvalExpectationContext, evalCase: EvalCase) => Promise.resolve({
-        pass: evalCase.id !== 'case-2',
-        details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
-      })
-    );
+    const failOnSecond: EvalExpectation = vi
+      .fn()
+      .mockImplementation((_: EvalExpectationContext, evalCase: EvalCase) =>
+        Promise.resolve({
+          pass: evalCase.id !== 'case-2',
+          details: evalCase.id === 'case-2' ? 'Failed' : 'Passed',
+        })
+      );
 
     const result = await runEvalDataset(
       { dataset, expectations: { exact: failOnSecond }, stopOnFailure: false },
@@ -367,10 +371,7 @@ describe('runEvalDataset', () => {
     const context = createContext();
     const dataset = createDataset([createEvalCase()]);
 
-    const result = await runEvalDataset(
-      { dataset, expectations: {} },
-      context
-    );
+    const result = await runEvalDataset({ dataset, expectations: {} }, context);
 
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
   });
@@ -380,7 +381,8 @@ describe('runEvalDataset', () => {
       attach: vi.fn().mockResolvedValue(undefined),
     };
     const context = createContext();
-    context.testInfo = mockTestInfo as unknown as EvalExpectationContext['testInfo'];
+    context.testInfo =
+      mockTestInfo as unknown as EvalExpectationContext['testInfo'];
 
     const dataset = createDataset([createEvalCase()]);
 
@@ -395,13 +397,15 @@ describe('runEvalDataset', () => {
 
   it('should enrich context with judgeClient from options', async () => {
     const mockJudgeClient = { evaluate: vi.fn() };
-    const judgeExpectation = vi.fn().mockImplementation((ctx: EvalExpectationContext) => {
-      // Verify context has the judge client
-      return Promise.resolve({
-        pass: ctx.judgeClient === mockJudgeClient,
-        details: ctx.judgeClient ? 'Has judge' : 'No judge',
+    const judgeExpectation = vi
+      .fn()
+      .mockImplementation((ctx: EvalExpectationContext) => {
+        // Verify context has the judge client
+        return Promise.resolve({
+          pass: ctx.judgeClient === mockJudgeClient,
+          details: ctx.judgeClient ? 'Has judge' : 'No judge',
+        });
       });
-    });
 
     const context = createContext();
     const dataset = createDataset([createEvalCase()]);
@@ -410,7 +414,8 @@ describe('runEvalDataset', () => {
       {
         dataset,
         expectations: { judge: judgeExpectation },
-        judgeClient: mockJudgeClient as unknown as EvalExpectationContext['judgeClient'],
+        judgeClient:
+          mockJudgeClient as unknown as EvalExpectationContext['judgeClient'],
       },
       context
     );
@@ -425,11 +430,7 @@ describe('expectation integration', () => {
     const context = createContext(mcp);
     const expectation = vi.fn().mockResolvedValue({ pass: true });
 
-    await runEvalCase(
-      createEvalCase(),
-      { exact: expectation },
-      context
-    );
+    await runEvalCase(createEvalCase(), { exact: expectation }, context);
 
     expect(expectation).toHaveBeenCalledWith(
       expect.objectContaining({ mcp }),
@@ -468,7 +469,9 @@ describe('expectation integration', () => {
 
   it('should not run expectations when tool call errors', async () => {
     const mcp = createMockMCP();
-    (mcp.callTool as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Tool failed'));
+    (mcp.callTool as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error('Tool failed')
+    );
 
     const context = createContext(mcp);
     const expectation = vi.fn().mockResolvedValue({ pass: true });

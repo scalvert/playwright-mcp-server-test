@@ -24,6 +24,7 @@ npm install
 ```
 
 This will install:
+
 - `@playwright/test` - Test framework
 - `@mcp-testing/server-tester` - Evaluation framework
 - `fixturify-project` - Test fixture management
@@ -35,11 +36,13 @@ Note: The SQLite MCP server (`mcp-server-sqlite-npx`) is run via `npx -y` and do
 ## Running Tests
 
 ### Run all tests (direct mode only)
+
 ```bash
 npm test
 ```
 
 ### Run with LLM host mode tests (requires API keys)
+
 ```bash
 # OpenAI
 OPENAI_API_KEY=your-key-here npm test
@@ -52,11 +55,13 @@ OPENAI_API_KEY=key1 ANTHROPIC_API_KEY=key2 npm test
 ```
 
 ### Run in UI mode
+
 ```bash
 npm run test:ui
 ```
 
 ### Debug mode
+
 ```bash
 npm run test:debug
 ```
@@ -106,8 +111,8 @@ test.use({
   mcpConfig: ({ dbPath }) => ({
     transport: 'stdio',
     command: 'npx',
-    args: ['-y', 'mcp-server-sqlite-npx', dbPath]
-  })
+    args: ['-y', 'mcp-server-sqlite-npx', dbPath],
+  }),
 });
 ```
 
@@ -123,7 +128,7 @@ test.extend({
     // setup database...
     await use(project);
     project.dispose(); // Removes temp directory + database
-  }
+  },
 });
 ```
 
@@ -203,6 +208,7 @@ CREATE TABLE posts (
 ```
 
 Seeded with:
+
 - 4 users (admin, moderator, regular users)
 - 5 posts (mix of published and drafts)
 
@@ -232,6 +238,7 @@ sqlite-server/
 ### "Server not found" error
 
 Make sure dependencies are installed:
+
 ```bash
 npm install
 ```
@@ -239,6 +246,7 @@ npm install
 ### "Database is locked" error
 
 Make sure previous test runs completed properly. Clean temp directories:
+
 ```bash
 # macOS/Linux
 rm -rf /tmp/sqlite-test-*
@@ -247,6 +255,7 @@ rm -rf /tmp/sqlite-test-*
 ### LLM tests skipped
 
 LLM host mode tests require API keys:
+
 ```bash
 export OPENAI_API_KEY="your-key"
 export ANTHROPIC_API_KEY="your-key"
@@ -255,6 +264,7 @@ export ANTHROPIC_API_KEY="your-key"
 ### Build errors with better-sqlite3
 
 better-sqlite3 is a native module. If you encounter build errors:
+
 ```bash
 npm rebuild better-sqlite3
 ```

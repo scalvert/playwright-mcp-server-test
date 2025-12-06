@@ -1,7 +1,4 @@
-import type {
-  MCPEvalRunData,
-  MCPEvalHistoricalSummary,
-} from '../types.js';
+import type { MCPEvalRunData, MCPEvalHistoricalSummary } from '../types.js';
 
 /**
  * Generates the HTML report from run data
@@ -612,12 +609,16 @@ export function generateHTMLReport(
       </div>
     </div>
 
-    ${historical.length > 1 ? `
+    ${
+      historical.length > 1
+        ? `
     <div class="chart-container">
       <h2>Historical Trend</h2>
       <canvas id="trendChart"></canvas>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <div class="controls">
       <input type="text" class="search-input" id="searchInput" placeholder="Search by case ID or tool name...">

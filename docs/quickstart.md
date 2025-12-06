@@ -98,6 +98,7 @@ test('calls a tool', async ({ mcp }) => {
 ```
 
 Available fixtures:
+
 - `mcpClient: Client` - Raw MCP SDK client
 - `mcp: MCPFixtureApi` - High-level test API with helper methods
 

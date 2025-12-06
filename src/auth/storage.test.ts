@@ -81,7 +81,9 @@ describe('storage', () => {
     });
 
     it('replaces problematic characters', () => {
-      const key = generateServerKey('https://api.example.com/path%20with%20spaces');
+      const key = generateServerKey(
+        'https://api.example.com/path%20with%20spaces'
+      );
       // %20 characters should be replaced with underscores
       expect(key).toMatch(/^api\.example\.com_path/);
       expect(key).not.toMatch(/%/);
@@ -114,7 +116,11 @@ describe('storage', () => {
       const dir = getStateDir('https://api.example.com');
 
       expect(dir).toBe(
-        path.join('C:\\Users\\Test\\AppData\\Local', 'mcp-tests', 'api.example.com')
+        path.join(
+          'C:\\Users\\Test\\AppData\\Local',
+          'mcp-tests',
+          'api.example.com'
+        )
       );
 
       Object.defineProperty(process, 'platform', { value: originalPlatform });
@@ -424,7 +430,9 @@ describe('storage', () => {
         error.code = 'EACCES';
         mocks.unlink.mockRejectedValue(error);
 
-        await expect(storage.deleteTokens()).rejects.toThrow('Permission denied');
+        await expect(storage.deleteTokens()).rejects.toThrow(
+          'Permission denied'
+        );
       });
     });
 

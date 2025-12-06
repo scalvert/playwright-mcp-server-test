@@ -83,7 +83,9 @@ export function createOpenAIAdapter(): LLMAdapter {
       tools: unknown[],
       config: LLMHostConfig
     ): Promise<LLMChatResult> {
-      const openai = client as { chat: { completions: { create: (opts: unknown) => Promise<unknown> } } };
+      const openai = client as {
+        chat: { completions: { create: (opts: unknown) => Promise<unknown> } };
+      };
 
       const response = await openai.chat.completions.create({
         model: config.model || 'gpt-4o',
@@ -119,7 +121,10 @@ export function createOpenAIAdapter(): LLMAdapter {
       if (message.tool_calls && message.tool_calls.length > 0) {
         const toolCalls: LLMToolCall[] = message.tool_calls.map((tc) => ({
           name: tc.function.name,
-          arguments: JSON.parse(tc.function.arguments) as Record<string, unknown>,
+          arguments: JSON.parse(tc.function.arguments) as Record<
+            string,
+            unknown
+          >,
           id: tc.id,
         }));
 
@@ -155,11 +160,15 @@ export function createOpenAIAdapter(): LLMAdapter {
       return {
         role: 'assistant',
         content: chatResult.textContent,
-        tool_calls: rawResponse.choices[0]?.message?.tool_calls as OpenAIMessage['tool_calls'],
+        tool_calls: rawResponse.choices[0]?.message
+          ?.tool_calls as OpenAIMessage['tool_calls'],
       };
     },
 
-    createToolResultMessage(toolCall: LLMToolCall, result: string): OpenAIMessage {
+    createToolResultMessage(
+      toolCall: LLMToolCall,
+      result: string
+    ): OpenAIMessage {
       return {
         role: 'tool',
         tool_call_id: toolCall.id,

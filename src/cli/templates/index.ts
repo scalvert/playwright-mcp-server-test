@@ -15,7 +15,13 @@ export function getPlaywrightConfigTemplate(answers: ProjectAnswers): string {
       ? `{
           transport: 'stdio' as const,
           command: '${answers.serverCommand?.split(' ')[0] || 'node'}',
-          args: [${answers.serverCommand?.split(' ').slice(1).map((arg) => `'${arg}'`).join(', ') || "'server.js'"}],
+          args: [${
+            answers.serverCommand
+              ?.split(' ')
+              .slice(1)
+              .map((arg) => `'${arg}'`)
+              .join(', ') || "'server.js'"
+          }],
           capabilities: {
             roots: { listChanged: true },
           },

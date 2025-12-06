@@ -20,11 +20,7 @@ describe('exactExpectation', () => {
         expectedExact: { result: 5 },
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        { result: 5 }
-      );
+      const result = await expectation(mockContext, evalCase, { result: 5 });
 
       expect(result.pass).toBe(true);
       expect(result.details).toContain('matches expected');
@@ -39,11 +35,7 @@ describe('exactExpectation', () => {
         expectedExact: { result: 5 },
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        { result: 10 }
-      );
+      const result = await expectation(mockContext, evalCase, { result: 10 });
 
       expect(result.pass).toBe(false);
       expect(result.details).toContain('Expected');
@@ -58,11 +50,9 @@ describe('exactExpectation', () => {
         args: {},
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        { anything: 'goes' }
-      );
+      const result = await expectation(mockContext, evalCase, {
+        anything: 'goes',
+      });
 
       expect(result.pass).toBe(true);
       expect(result.details).toContain('skipping');

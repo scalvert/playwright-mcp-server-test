@@ -80,7 +80,9 @@ export async function generate(options: GenerateOptions): Promise<void> {
           metadata: existing.metadata,
         };
         console.log(
-          chalk.gray(`\nLoaded existing dataset with ${existingCases.length} cases`)
+          chalk.gray(
+            `\nLoaded existing dataset with ${existingCases.length} cases`
+          )
         );
       } else {
         const { datasetName } = await inquirer.prompt([
@@ -124,7 +126,10 @@ export async function generate(options: GenerateOptions): Promise<void> {
           type: 'list',
           name: 'toolName',
           message: 'Select tool to test:',
-          choices: tools.map((t) => ({ name: `${t.name} - ${t.description}`, value: t.name })),
+          choices: tools.map((t) => ({
+            name: `${t.name} - ${t.description}`,
+            value: t.name,
+          })),
         },
       ]);
 
@@ -241,15 +246,21 @@ export async function generate(options: GenerateOptions): Promise<void> {
         }
 
         const answers = await inquirer.prompt(prompts);
-        const { caseId, description, useTextContains, useRegex, useExact, useSnapshot } =
-          answers as {
-            caseId: string;
-            description: string;
-            useTextContains?: boolean;
-            useRegex?: boolean;
-            useExact?: boolean;
-            useSnapshot?: boolean;
-          };
+        const {
+          caseId,
+          description,
+          useTextContains,
+          useRegex,
+          useExact,
+          useSnapshot,
+        } = answers as {
+          caseId: string;
+          description: string;
+          useTextContains?: boolean;
+          useRegex?: boolean;
+          useExact?: boolean;
+          useSnapshot?: boolean;
+        };
 
         const testCase: EvalCase = {
           id: caseId,
@@ -326,7 +337,11 @@ export async function generate(options: GenerateOptions): Promise<void> {
         console.log();
         console.log(chalk.cyan('Snapshot testing:'));
         console.log(chalk.gray('  First run will capture snapshots'));
-        console.log(chalk.gray('  Update snapshots: npx playwright test --update-snapshots'));
+        console.log(
+          chalk.gray(
+            '  Update snapshots: npx playwright test --update-snapshots'
+          )
+        );
       }
     } else {
       console.log(chalk.yellow('\nNo test cases added.'));

@@ -65,6 +65,7 @@ npm run build     # Build succeeds
 ### Making Changes
 
 1. Create a feature branch:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -76,6 +77,7 @@ npm run build     # Build succeeds
 4. Update documentation as needed
 
 5. Commit with conventional commit messages:
+
    ```bash
    git commit -m "feat: add new expectation type"
    git commit -m "fix: resolve transport timeout issue"
@@ -97,38 +99,43 @@ npm run build     # Build succeeds
 This project enforces specific code conventions:
 
 ### 1. Function Declarations
+
 ```typescript
 // ✓ Good
-export function createClient() { }
+export function createClient() {}
 
 // ✗ Avoid
-export const createClient = () => { }
+export const createClient = () => {};
 ```
 
 ### 2. Explicit null
+
 ```typescript
 // ✓ Good
-condition ? 'value' : null
+condition ? 'value' : null;
 
 // ✗ Avoid
-condition && 'value'
+condition && 'value';
 ```
 
 ### 3. Descriptive Type Names
+
 ```typescript
 // ✓ Good
-EvalDataset, MCPFixtureApi, LLMJudgeClient
+(EvalDataset, MCPFixtureApi, LLMJudgeClient);
 
 // ✗ Avoid
-Data, Api, Client
+(Data, Api, Client);
 ```
 
 ### 4. TypeScript Strict Mode
+
 - No `any` types
 - Prefer type safety
 - Use proper null checks
 
 ### 5. Async Function Style
+
 - Keep `async` keyword for consistency
 - Even if no `await` currently used
 
@@ -162,6 +169,7 @@ Data, Api, Client
 5. Update `docs/expectations.md`
 
 Example:
+
 ```typescript
 // src/evals/expectations/myExpectation.ts
 import type { EvalExpectation } from '../evalTypes';
@@ -218,6 +226,7 @@ When adding features:
 ### PR Title Format
 
 Use conventional commit format:
+
 - `feat: add HTTP SSE support`
 - `fix: resolve connection timeout issue`
 - `docs: improve expectations guide`
@@ -225,6 +234,7 @@ Use conventional commit format:
 ### PR Description
 
 Include:
+
 - What changed and why
 - Related issue (if any)
 - How to test the changes

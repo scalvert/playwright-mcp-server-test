@@ -16,10 +16,10 @@ This guide covers authentication options for testing MCP servers that require au
 
 `@mcp-testing/server-tester` supports two authentication modes:
 
-| Mode | Use Case | Setup Complexity |
-|------|----------|------------------|
-| **Static Token** | Pre-acquired API tokens, service accounts | Simple |
-| **OAuth 2.1** | Full OAuth flow with PKCE and optional DCR | Advanced |
+| Mode             | Use Case                                   | Setup Complexity |
+| ---------------- | ------------------------------------------ | ---------------- |
+| **Static Token** | Pre-acquired API tokens, service accounts  | Simple           |
+| **OAuth 2.1**    | Full OAuth flow with PKCE and optional DCR | Advanced         |
 
 Choose based on your server's authentication requirements:
 
@@ -559,9 +559,7 @@ import {
 ### OAuth Client Provider
 
 ```typescript
-import {
-  PlaywrightOAuthClientProvider,
-} from '@mcp-testing/server-tester';
+import { PlaywrightOAuthClientProvider } from '@mcp-testing/server-tester';
 
 // Create provider for MCP SDK
 const provider = new PlaywrightOAuthClientProvider({
@@ -601,6 +599,7 @@ Error: Failed to fetch OAuth metadata from https://auth.example.com
 ```
 
 **Solutions:**
+
 - Verify the auth server URL is correct
 - Check network connectivity
 - Ensure the server exposes `/.well-known/oauth-authorization-server`
@@ -612,6 +611,7 @@ Error: Timeout waiting for selector #username
 ```
 
 **Solutions:**
+
 - Verify login selectors match your IdP's HTML
 - Use browser DevTools to inspect the login page
 - Check if the login page uses iframes (need to switch context)
@@ -624,6 +624,7 @@ Error: No authorization code in callback URL
 ```
 
 **Solutions:**
+
 - Check redirect URI matches exactly (including trailing slashes)
 - Verify the OAuth client has the correct redirect URI registered
 - Check for OAuth error in callback URL parameters
@@ -635,6 +636,7 @@ Error: 401 Unauthorized - Token expired
 ```
 
 **Solutions:**
+
 - Delete `playwright/.auth/mcp-oauth-state.json` and re-run
 - Implement token refresh using `refreshAccessToken()`
 - Use `performOAuthSetupIfNeeded()` which checks expiration
@@ -646,6 +648,7 @@ Error: PKCE verification failed - invalid code_verifier
 ```
 
 **Solutions:**
+
 - Ensure the same `codeVerifier` is used for auth request and token exchange
 - Check that `code_challenge_method` is set to `S256`
 - Verify no URL encoding issues with the verifier
@@ -657,6 +660,7 @@ Error: OAuth state mismatch - possible CSRF attack
 ```
 
 **Solutions:**
+
 - Ensure the same state parameter is used throughout the flow
 - Check for session/cookie issues
 - Verify no browser caching problems
@@ -679,6 +683,7 @@ DEBUG=mcp-testing:client npm test
 ### Common IdP Selector Examples
 
 **Okta:**
+
 ```typescript
 loginSelectors: {
   usernameInput: '#okta-signin-username',
@@ -688,6 +693,7 @@ loginSelectors: {
 ```
 
 **Auth0:**
+
 ```typescript
 loginSelectors: {
   usernameInput: 'input[name="email"]',
@@ -697,6 +703,7 @@ loginSelectors: {
 ```
 
 **Azure AD:**
+
 ```typescript
 loginSelectors: {
   usernameInput: 'input[name="loginfmt"]',
@@ -706,6 +713,7 @@ loginSelectors: {
 ```
 
 **Google:**
+
 ```typescript
 loginSelectors: {
   usernameInput: 'input[type="email"]',

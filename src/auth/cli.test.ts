@@ -63,7 +63,8 @@ describe('CLIOAuthClient', () => {
       authorization_servers: ['https://auth.example.com'],
       scopes_supported: ['read', 'write'],
     },
-    discoveryUrl: 'https://api.example.com/.well-known/oauth-protected-resource/mcp',
+    discoveryUrl:
+      'https://api.example.com/.well-known/oauth-protected-resource/mcp',
     usedPathAwareDiscovery: true,
   };
 
@@ -340,7 +341,9 @@ describe('CLIOAuthClient', () => {
         expiresAt: Date.now() - 1000,
       });
       mocks.mockStorage.hasValidToken.mockResolvedValue(false);
-      mocks.mockStorage.loadClient.mockResolvedValue({ clientId: 'cached-client' });
+      mocks.mockStorage.loadClient.mockResolvedValue({
+        clientId: 'cached-client',
+      });
       mocks.refreshAccessToken.mockResolvedValue({
         accessToken: 'new-token',
         tokenType: 'Bearer',
@@ -371,7 +374,9 @@ describe('CLIOAuthClient', () => {
         expiresAt: Date.now() - 1000,
       });
       mocks.mockStorage.hasValidToken.mockResolvedValue(false);
-      mocks.mockStorage.loadClient.mockResolvedValue({ clientId: 'cached-client' });
+      mocks.mockStorage.loadClient.mockResolvedValue({
+        clientId: 'cached-client',
+      });
       mocks.refreshAccessToken.mockResolvedValue({
         accessToken: 'new-token',
         tokenType: 'Bearer',

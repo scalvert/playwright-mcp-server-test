@@ -31,7 +31,10 @@ describe('clientFactory', () => {
     // Set up mock implementations
     mocks.mockConnect.mockResolvedValue(undefined);
     mocks.mockClose.mockResolvedValue(undefined);
-    mocks.mockGetServerVersion.mockReturnValue({ name: 'test-server', version: '1.0.0' });
+    mocks.mockGetServerVersion.mockReturnValue({
+      name: 'test-server',
+      version: '1.0.0',
+    });
     mocks.MockClient.mockImplementation(() => ({
       connect: mocks.mockConnect,
       close: mocks.mockClose,
@@ -249,7 +252,9 @@ describe('clientFactory', () => {
         };
 
         await expect(
-          createMCPClientForConfig(config as Parameters<typeof createMCPClientForConfig>[0])
+          createMCPClientForConfig(
+            config as Parameters<typeof createMCPClientForConfig>[0]
+          )
         ).rejects.toThrow();
       });
 
@@ -259,7 +264,9 @@ describe('clientFactory', () => {
         };
 
         await expect(
-          createMCPClientForConfig(config as Parameters<typeof createMCPClientForConfig>[0])
+          createMCPClientForConfig(
+            config as Parameters<typeof createMCPClientForConfig>[0]
+          )
         ).rejects.toThrow();
       });
 
@@ -272,7 +279,6 @@ describe('clientFactory', () => {
         await expect(createMCPClientForConfig(config)).rejects.toThrow();
       });
     });
-
   });
 
   describe('closeMCPClient', () => {
@@ -281,23 +287,32 @@ describe('clientFactory', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      await closeMCPClient(mockClient as unknown as Parameters<typeof closeMCPClient>[0]);
+      await closeMCPClient(
+        mockClient as unknown as Parameters<typeof closeMCPClient>[0]
+      );
 
       expect(mockClient.close).toHaveBeenCalled();
     });
 
     it('throws and logs error when close fails', async () => {
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const errorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
       const closeError = new Error('Close failed');
       const mockClient = {
         close: vi.fn().mockRejectedValue(closeError),
       };
 
       await expect(
-        closeMCPClient(mockClient as unknown as Parameters<typeof closeMCPClient>[0])
+        closeMCPClient(
+          mockClient as unknown as Parameters<typeof closeMCPClient>[0]
+        )
       ).rejects.toThrow('Close failed');
 
-      expect(errorSpy).toHaveBeenCalledWith('[MCP] Error closing client:', closeError);
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[MCP] Error closing client:',
+        closeError
+      );
 
       errorSpy.mockRestore();
     });

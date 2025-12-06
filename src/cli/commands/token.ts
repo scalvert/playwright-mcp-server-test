@@ -4,7 +4,11 @@
  * Outputs tokens in formats suitable for CI/CD environments like GitHub Actions.
  */
 
-import { createFileOAuthStorage, ENV_VAR_NAMES, getStateDir } from '../../auth/storage.js';
+import {
+  createFileOAuthStorage,
+  ENV_VAR_NAMES,
+  getStateDir,
+} from '../../auth/storage.js';
 
 export type TokenFormat = 'env' | 'json' | 'gh';
 
@@ -121,15 +125,23 @@ function outputGitHubFormat(tokens: {
   expiresAt?: number;
 }): void {
   console.log('# Run these commands to set GitHub Actions secrets:');
-  console.log(`gh secret set ${ENV_VAR_NAMES.accessToken} --body "${tokens.accessToken}"`);
+  console.log(
+    `gh secret set ${ENV_VAR_NAMES.accessToken} --body "${tokens.accessToken}"`
+  );
 
   if (tokens.refreshToken) {
-    console.log(`gh secret set ${ENV_VAR_NAMES.refreshToken} --body "${tokens.refreshToken}"`);
+    console.log(
+      `gh secret set ${ENV_VAR_NAMES.refreshToken} --body "${tokens.refreshToken}"`
+    );
   }
 
-  console.log(`gh secret set ${ENV_VAR_NAMES.tokenType} --body "${tokens.tokenType}"`);
+  console.log(
+    `gh secret set ${ENV_VAR_NAMES.tokenType} --body "${tokens.tokenType}"`
+  );
 
   if (tokens.expiresAt) {
-    console.log(`gh secret set ${ENV_VAR_NAMES.expiresAt} --body "${tokens.expiresAt}"`);
+    console.log(
+      `gh secret set ${ENV_VAR_NAMES.expiresAt} --body "${tokens.expiresAt}"`
+    );
   }
 }

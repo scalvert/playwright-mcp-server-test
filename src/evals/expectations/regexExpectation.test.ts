@@ -33,11 +33,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: 'hello',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(true);
       expect(result.details).toContain('matches expected pattern');
@@ -52,11 +48,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: 'goodbye',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'hello world'
-      );
+      const result = await expectation(mockContext, evalCase, 'hello world');
 
       expect(result.pass).toBe(false);
       expect(result.details).toContain('Failed to match');
@@ -163,11 +155,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: '(cat|dog|bird)',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'I have a dog'
-      );
+      const result = await expectation(mockContext, evalCase, 'I have a dog');
 
       expect(result.pass).toBe(true);
     });
@@ -199,11 +187,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: '\\$\\d+\\.\\d{2}',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'Price: $19.99'
-      );
+      const result = await expectation(mockContext, evalCase, 'Price: $19.99');
 
       expect(result.pass).toBe(true);
     });
@@ -306,11 +290,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: 'test',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'this is a test'
-      );
+      const result = await expectation(mockContext, evalCase, 'this is a test');
 
       expect(result.pass).toBe(true);
     });
@@ -325,9 +305,7 @@ describe('createRegexExpectation', () => {
       };
 
       const response = {
-        content: [
-          { type: 'text', text: 'The weather is sunny' },
-        ],
+        content: [{ type: 'text', text: 'The weather is sunny' }],
       };
 
       const result = await expectation(mockContext, evalCase, response);
@@ -367,11 +345,7 @@ describe('createRegexExpectation', () => {
         expectedRegex: '[invalid(',
       };
 
-      const result = await expectation(
-        mockContext,
-        evalCase,
-        'any text'
-      );
+      const result = await expectation(mockContext, evalCase, 'any text');
 
       expect(result.pass).toBe(false);
       expect(result.details).toContain('Invalid pattern');
@@ -424,11 +398,11 @@ describe('createRegexExpectation', () => {
         toolName: 'generate_report',
         args: {},
         expectedRegex: [
-          '^# \\w+',           // Title
-          '^## Summary',      // Summary section
-          '^### \\w+',        // Subsection
+          '^# \\w+', // Title
+          '^## Summary', // Summary section
+          '^### \\w+', // Subsection
           '\\*\\*\\w+:\\*\\*', // Bold key-value
-          '^- \\w+',          // List item
+          '^- \\w+', // List item
         ],
       };
 

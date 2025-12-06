@@ -19,7 +19,9 @@ interface InitOptions {
 }
 
 export async function init(options: InitOptions): Promise<void> {
-  console.log(chalk.cyan.bold('\n🎭 Playwright MCP Evals - Project Initializer\n'));
+  console.log(
+    chalk.cyan.bold('\n🎭 Playwright MCP Evals - Project Initializer\n')
+  );
 
   // Prompt for configuration - done sequentially to avoid complex type inference
   const basicAnswers = await inquirer.prompt<{
@@ -184,7 +186,9 @@ export async function init(options: InitOptions): Promise<void> {
     console.log();
   } catch (error) {
     spinner.fail('Failed to create project');
-    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    console.error(
+      chalk.red(error instanceof Error ? error.message : String(error))
+    );
     process.exit(1);
   }
 }

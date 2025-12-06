@@ -98,7 +98,11 @@
       "args": {
         "query": "SELECT title, published FROM posts WHERE published = 1 ORDER BY id"
       },
-      "expectedTextContains": ["Getting Started", "Database Best Practices", "Performance Tuning"]
+      "expectedTextContains": [
+        "Getting Started",
+        "Database Best Practices",
+        "Performance Tuning"
+      ]
     },
     {
       "id": "should find moderator users",
@@ -176,7 +180,15 @@
       "args": {
         "table_name": "users"
       },
-      "expectedTextContains": ["id", "name", "email", "role", "created_at", "INTEGER", "TEXT"]
+      "expectedTextContains": [
+        "id",
+        "name",
+        "email",
+        "role",
+        "created_at",
+        "INTEGER",
+        "TEXT"
+      ]
     },
     {
       "id": "should count users using OpenAI",

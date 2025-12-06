@@ -1,0 +1,11 @@
+# Build output
+dist/
+
+# Snapshot files (may contain non-JSON error messages)
+**/*-snapshots/*.json
+
+# Package lock
+package-lock.json
+
+# Generated eval results
+**/.mcp-eval-results/

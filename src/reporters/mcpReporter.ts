@@ -74,7 +74,8 @@ export default class MCPReporter implements Reporter {
   async onTestEnd(test: TestCase, result: TestResult): Promise<void> {
     // Strategy 1: Extract MCP eval results from runEvalDataset() attachments
     const evalAttachment = result.attachments.find(
-      (a) => a.name === 'mcp-test-results' && a.contentType === 'application/json'
+      (a) =>
+        a.name === 'mcp-test-results' && a.contentType === 'application/json'
     );
 
     let hasEvalDataset = false;
@@ -107,7 +108,10 @@ export default class MCPReporter implements Reporter {
     }
 
     const mcpCallAttachments = result.attachments.filter(
-      (a) => a.name && a.name.startsWith('mcp-call-') && a.contentType === 'application/json'
+      (a) =>
+        a.name &&
+        a.name.startsWith('mcp-call-') &&
+        a.contentType === 'application/json'
     );
 
     for (const attachment of mcpCallAttachments) {
@@ -276,9 +280,7 @@ export default class MCPReporter implements Reporter {
     };
   }
 
-  private async loadHistoricalData(): Promise<
-    Array<MCPEvalHistoricalSummary>
-  > {
+  private async loadHistoricalData(): Promise<Array<MCPEvalHistoricalSummary>> {
     try {
       if (!existsSync(this.config.outputDir)) {
         return [];

@@ -199,7 +199,9 @@ export function generateState(): string {
 export function buildAuthorizationUrl(config: AuthorizationUrlConfig): URL {
   const authorizationEndpoint = config.authServer.server.authorization_endpoint;
   if (!authorizationEndpoint) {
-    throw new Error('Authorization server does not have an authorization_endpoint');
+    throw new Error(
+      'Authorization server does not have an authorization_endpoint'
+    );
   }
 
   const authorizationUrl = new URL(authorizationEndpoint);

@@ -4,7 +4,10 @@
  * Validates that the response text contains all expected substrings.
  */
 
-import { createTextExpectation, type ValidationResult } from './createExpectation.js';
+import {
+  createTextExpectation,
+  type ValidationResult,
+} from './createExpectation.js';
 import { findMissingSubstrings } from './textUtils.js';
 
 /**

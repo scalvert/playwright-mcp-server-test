@@ -133,7 +133,10 @@ describe('discovery', () => {
     it('throws on missing resource field', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ authorization_servers: ['https://auth.example.com'] }),
+        json: () =>
+          Promise.resolve({
+            authorization_servers: ['https://auth.example.com'],
+          }),
       });
 
       await expect(
@@ -151,7 +154,9 @@ describe('discovery', () => {
           }),
       });
 
-      const result = await discoverProtectedResource('https://api.example.com/');
+      const result = await discoverProtectedResource(
+        'https://api.example.com/'
+      );
 
       expect(mockFetch).toHaveBeenCalledWith(
         'https://api.example.com/.well-known/oauth-protected-resource/',
@@ -175,7 +180,9 @@ describe('discovery', () => {
     });
 
     it('discovers authorization server metadata', async () => {
-      const result = await discoverAuthorizationServer('https://auth.example.com');
+      const result = await discoverAuthorizationServer(
+        'https://auth.example.com'
+      );
 
       expect(result.server).toEqual(mockAuthServer);
       expect(result.issuer).toBe('https://auth.example.com');
@@ -196,7 +203,9 @@ describe('discovery', () => {
       const callArgs = mocks.discoveryRequest.mock.calls[0];
       expect(callArgs).toBeDefined();
       const options = callArgs![1];
-      expect(options.headers.get('MCP-Protocol-Version')).toBe(MCP_PROTOCOL_VERSION);
+      expect(options.headers.get('MCP-Protocol-Version')).toBe(
+        MCP_PROTOCOL_VERSION
+      );
     });
 
     it('passes correct issuer URL', async () => {
@@ -237,7 +246,9 @@ describe('discovery', () => {
 
       expect(error.message).toBe('Discovery failed');
       expect(error.status).toBe(404);
-      expect(error.url).toBe('https://example.com/.well-known/oauth-protected-resource');
+      expect(error.url).toBe(
+        'https://example.com/.well-known/oauth-protected-resource'
+      );
       expect(error.name).toBe('DiscoveryError');
     });
 

@@ -93,7 +93,12 @@ const test = base.extend<SQLiteFixtures>({
           'INSERT INTO posts (user_id, title, content, published) VALUES (?, ?, ?, ?)'
         );
 
-        insertPost.run(1, 'Getting Started with SQLite', 'A comprehensive guide...', 1);
+        insertPost.run(
+          1,
+          'Getting Started with SQLite',
+          'A comprehensive guide...',
+          1
+        );
         insertPost.run(1, 'Draft: Advanced Topics', 'Coming soon...', 0);
         insertPost.run(2, 'Database Best Practices', 'Learn how to...', 1);
         insertPost.run(2, 'Performance Tuning', 'Optimize your queries...', 1);
@@ -154,11 +159,11 @@ test.describe('Protocol Conformance', () => {
     });
 
     // SQLite server should pass all conformance checks
-    const passedChecks = result.checks.filter(c => c.pass);
+    const passedChecks = result.checks.filter((c) => c.pass);
     expect(passedChecks.length).toBeGreaterThanOrEqual(4); // At least 4 of 5 checks should pass
 
     // Verify specific checks exist
-    const checkNames = result.checks.map(c => c.name);
+    const checkNames = result.checks.map((c) => c.name);
     expect(checkNames).toContain('server_info_present');
     expect(checkNames).toContain('invalid_tool_returns_error');
   });
@@ -177,7 +182,7 @@ test.describe('Protocol Conformance', () => {
     expect(tools.length).toBeGreaterThan(0);
 
     // Verify expected SQLite tools are present
-    const toolNames = tools.map(t => t.name);
+    const toolNames = tools.map((t) => t.name);
     expect(toolNames).toContain('read_query');
     expect(toolNames).toContain('list_tables');
     expect(toolNames).toContain('describe_table');
@@ -221,7 +226,10 @@ test('Run SQLite MCP Server evaluation dataset', async ({ mcp }, testInfo) => {
             evalCase.mode === 'direct' &&
             evalCase.toolName === 'read_query'
           ) {
-            return validateRecordCount(response, evalCase.metadata.expectedRecordCount);
+            return validateRecordCount(
+              response,
+              evalCase.metadata.expectedRecordCount
+            );
           }
           return { pass: true, details: 'N/A' };
         },
@@ -231,7 +239,9 @@ test('Run SQLite MCP Server evaluation dataset', async ({ mcp }, testInfo) => {
   );
 
   // For now, we expect all direct mode tests to pass
-  const directModeTests = dataset.cases.filter(c => c.mode === 'direct' || !c.mode);
+  const directModeTests = dataset.cases.filter(
+    (c) => c.mode === 'direct' || !c.mode
+  );
   expect(result.passed).toBeGreaterThanOrEqual(directModeTests.length);
 });
 
@@ -393,7 +403,9 @@ test.describe('Error Handling', () => {
  * These tests show how to use the library programmatically for custom validation.
  */
 test.describe('Advanced Testing Features', () => {
-  test('should validate query results with custom Zod schema', async ({ mcp }) => {
+  test('should validate query results with custom Zod schema', async ({
+    mcp,
+  }) => {
     const response = await mcp.callTool('read_query', {
       query: 'SELECT * FROM users WHERE role = "admin"',
     });

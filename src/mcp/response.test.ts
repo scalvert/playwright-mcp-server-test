@@ -14,7 +14,10 @@ describe('normalizeToolResponse', () => {
       expect(normalized.text).toBe('Hello World');
       expect(normalized.isError).toBe(false);
       expect(normalized.contentBlocks).toHaveLength(1);
-      expect(normalized.contentBlocks[0]).toEqual({ type: 'text', text: 'Hello World' });
+      expect(normalized.contentBlocks[0]).toEqual({
+        type: 'text',
+        text: 'Hello World',
+      });
       expect(normalized.raw).toBe(result);
     });
 
@@ -87,7 +90,10 @@ describe('normalizeToolResponse', () => {
 
       const normalized = normalizeToolResponse(result);
 
-      expect(normalized.structuredContent).toEqual({ key: 'value', nested: { a: 1 } });
+      expect(normalized.structuredContent).toEqual({
+        key: 'value',
+        nested: { a: 1 },
+      });
     });
 
     it('should use structuredContent as text when no content blocks', () => {
@@ -105,7 +111,10 @@ describe('normalizeToolResponse', () => {
       // Cast to unknown to test runtime behavior with string structuredContent
       const result: CallToolResult = {
         content: [],
-        structuredContent: 'plain text structured content' as unknown as Record<string, unknown>,
+        structuredContent: 'plain text structured content' as unknown as Record<
+          string,
+          unknown
+        >,
       };
 
       const normalized = normalizeToolResponse(result);
@@ -116,7 +125,10 @@ describe('normalizeToolResponse', () => {
     it('should prefer content blocks text over structuredContent', () => {
       const result: CallToolResult = {
         content: [{ type: 'text', text: 'From content' }],
-        structuredContent: 'From structured' as unknown as Record<string, unknown>,
+        structuredContent: 'From structured' as unknown as Record<
+          string,
+          unknown
+        >,
       };
 
       const normalized = normalizeToolResponse(result);
@@ -153,9 +165,7 @@ describe('normalizeToolResponse', () => {
 
     it('should handle content blocks without text', () => {
       const result: CallToolResult = {
-        content: [
-          { type: 'image', data: 'abc123', mimeType: 'image/jpeg' },
-        ],
+        content: [{ type: 'image', data: 'abc123', mimeType: 'image/jpeg' }],
       };
 
       const normalized = normalizeToolResponse(result);
@@ -166,7 +176,9 @@ describe('normalizeToolResponse', () => {
 
     it('should handle content with unknown type', () => {
       const result: CallToolResult = {
-        content: [{ text: 'No type specified' } as unknown] as CallToolResult['content'],
+        content: [
+          { text: 'No type specified' } as unknown,
+        ] as CallToolResult['content'],
       };
 
       const normalized = normalizeToolResponse(result);
@@ -239,9 +251,7 @@ describe('extractText', () => {
     });
 
     it('should stringify array if no text blocks found', () => {
-      const content = [
-        { type: 'image', data: 'abc' },
-      ];
+      const content = [{ type: 'image', data: 'abc' }];
 
       expect(extractText(content)).toBe('[{"type":"image","data":"abc"}]');
     });

@@ -117,7 +117,8 @@ export async function createMCPClientForConfig(
 
     debugClient('Connecting via HTTP: %O', {
       serverUrl: validatedConfig.serverUrl,
-      headers: Object.keys(headers).length > 0 ? Object.keys(headers) : undefined,
+      headers:
+        Object.keys(headers).length > 0 ? Object.keys(headers) : undefined,
       hasAuthProvider: !!options?.authProvider,
     });
 

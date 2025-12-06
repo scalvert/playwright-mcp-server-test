@@ -78,14 +78,8 @@ export {
 } from './mcp/clientFactory.js';
 
 // Response Normalization
-export type {
-  ContentBlock,
-  NormalizedToolResponse,
-} from './mcp/response.js';
-export {
-  normalizeToolResponse,
-  extractText,
-} from './mcp/response.js';
+export type { ContentBlock, NormalizedToolResponse } from './mcp/response.js';
+export { normalizeToolResponse, extractText } from './mcp/response.js';
 
 // Fixtures
 export type { MCPFixtureApi } from './mcp/fixtures/mcpFixture.js';

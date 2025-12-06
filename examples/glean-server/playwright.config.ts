@@ -20,11 +20,14 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { open: 'never' }],
-    ['@mcp-testing/server-tester/reporters/mcpReporter', {
-      outputDir: '.mcp-test-results',
-      autoOpen: !process.env.CI,
-      historyLimit: 10
-    }]
+    [
+      '@mcp-testing/server-tester/reporters/mcpReporter',
+      {
+        outputDir: '.mcp-test-results',
+        autoOpen: !process.env.CI,
+        historyLimit: 10,
+      },
+    ],
   ],
 
   // Shared settings for all the projects below
@@ -42,14 +45,17 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         mcpConfig: {
           transport: 'http',
-          serverUrl: process.env.GLEAN_MCP_SERVER_URL || 'http://localhost:3000/mcp',
+          serverUrl:
+            process.env.GLEAN_MCP_SERVER_URL || 'http://localhost:3000/mcp',
           // Add authentication headers if needed
-          headers: process.env.GLEAN_API_TOKEN ? {
-            'Authorization': `Bearer ${process.env.GLEAN_API_TOKEN}`,
-          } : undefined,
+          headers: process.env.GLEAN_API_TOKEN
+            ? {
+                Authorization: `Bearer ${process.env.GLEAN_API_TOKEN}`,
+              }
+            : undefined,
           requestTimeoutMs: 60000, // 60 seconds for search operations
-        }
-      }
+        },
+      },
     },
   ],
 });

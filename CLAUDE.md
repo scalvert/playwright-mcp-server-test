@@ -45,6 +45,7 @@ npm run format:check        # Check formatting
 ### Playwright Fixtures (`src/fixtures/mcp.ts`)
 
 The main test fixture provides:
+
 - `mcpClient: Client` - Raw MCP SDK client
 - `mcp: MCPFixtureApi` - High-level test API with `listTools()`, `callTool()`, etc.
 
@@ -53,6 +54,7 @@ Configuration is read from `project.use.mcpConfig` in playwright.config.ts.
 ### Exports
 
 Public API is defined in `src/index.ts`. The package has multiple export paths:
+
 - `.` - Main library exports
 - `./fixtures/mcp` - Playwright test fixtures
 - `./fixtures/mcpAuth` - Auth-specific fixtures for OAuth/token auth
@@ -73,20 +75,24 @@ Use conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore
 ## Adding New Features
 
 ### New Expectation Type
+
 1. Create `src/evals/expectations/myExpectation.ts` returning `EvalExpectation`
 2. Export from `src/index.ts`
 3. Add unit tests (`*.test.ts`)
 
 ### New LLM Judge Provider
+
 1. Add to `LLMProviderKind` in `src/judge/judgeTypes.ts`
 2. Implement `LLMJudgeClient` interface in `src/judge/myProviderJudge.ts`
 3. Add to switch in `src/judge/judgeClient.ts`
 
 ### New Transport Type
+
 1. Add to `MCPConfig` union in `src/config/mcpConfig.ts`
 2. Update `createMCPClientForConfig()` in `src/mcp/clientFactory.ts`
 
 ### New Auth Provider
+
 1. Implement `OAuthClientProvider` interface from `@modelcontextprotocol/sdk/client/auth.js`
 2. Add utilities to `src/auth/` module
 3. Export from `src/index.ts`

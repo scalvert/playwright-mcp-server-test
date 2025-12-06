@@ -166,6 +166,7 @@ const expectations = {
 ### Schema Capabilities
 
 Zod schemas support:
+
 - Type validation (`string`, `number`, `boolean`, etc.)
 - Format validation (`email`, `url`, `uuid`, etc.)
 - Nested objects and arrays
@@ -205,13 +206,13 @@ Captures and compares tool responses against stored snapshots using Playwright's
 
 ### When to Use Snapshots
 
-| Good Use Cases | Poor Use Cases |
-|----------------|----------------|
-| Help text and documentation | Live data (weather, stock prices) |
-| Configuration and schema discovery | Responses with timestamps |
-| Mocked/stubbed servers in CI | Random IDs, session tokens |
-| Static content tools | Non-deterministic ordering |
-| Regression testing with controlled data | Pagination cursors |
+| Good Use Cases                          | Poor Use Cases                    |
+| --------------------------------------- | --------------------------------- |
+| Help text and documentation             | Live data (weather, stock prices) |
+| Configuration and schema discovery      | Responses with timestamps         |
+| Mocked/stubbed servers in CI            | Random IDs, session tokens        |
+| Static content tools                    | Non-deterministic ordering        |
+| Regression testing with controlled data | Pagination cursors                |
 
 ### Usage
 
@@ -223,10 +224,7 @@ const expectations = {
 };
 
 // Requires testInfo and expect from Playwright
-await runEvalDataset(
-  { dataset, expectations },
-  { mcp, testInfo, expect }
-);
+await runEvalDataset({ dataset, expectations }, { mcp, testInfo, expect });
 ```
 
 ### Dataset Format
@@ -252,13 +250,13 @@ When responses contain variable data that would cause snapshot mismatches, use s
 
 #### Built-in Sanitizers
 
-| Sanitizer | Matches | Replacement |
-|-----------|---------|-------------|
-| `timestamp` | Unix timestamps (10-13 digits) | `[TIMESTAMP]` |
-| `uuid` | UUIDs v1-v5 | `[UUID]` |
-| `iso-date` | ISO 8601 dates | `[ISO_DATE]` |
-| `objectId` | MongoDB ObjectIds (24 hex chars) | `[OBJECT_ID]` |
-| `jwt` | JWT tokens | `[JWT]` |
+| Sanitizer   | Matches                          | Replacement   |
+| ----------- | -------------------------------- | ------------- |
+| `timestamp` | Unix timestamps (10-13 digits)   | `[TIMESTAMP]` |
+| `uuid`      | UUIDs v1-v5                      | `[UUID]`      |
+| `iso-date`  | ISO 8601 dates                   | `[ISO_DATE]`  |
+| `objectId`  | MongoDB ObjectIds (24 hex chars) | `[OBJECT_ID]` |
+| `jwt`       | JWT tokens                       | `[JWT]`       |
 
 #### Dataset Format with Sanitizers
 
@@ -371,7 +369,8 @@ const judgeClient = createLLMJudgeClient({
 const expectations = {
   judge: createJudgeExpectation({
     'search-relevance': {
-      rubric: 'Evaluate if the search results are relevant to the query. Score 0-1.',
+      rubric:
+        'Evaluate if the search results are relevant to the query. Score 0-1.',
       passingThreshold: 0.7,
     },
   }),
@@ -397,6 +396,7 @@ const result = await runEvalDataset(
 ### Supported Providers
 
 - **OpenAI** - Requires `OPENAI_API_KEY` environment variable
+
   ```typescript
   createLLMJudgeClient({
     provider: 'openai',
@@ -449,6 +449,7 @@ const result = await runEvalDataset(
 ```
 
 Each eval case will use the appropriate expectation based on which fields are defined:
+
 - `expectedExact` → Exact match validation
 - `expectedSchemaName` → Schema validation
 - `expectedTextContains` → Text contains validation
@@ -530,15 +531,15 @@ const result = await runEvalDataset(
 
 ### Choosing the Right Expectation
 
-| Response Type | Recommended Expectation | Why |
-|---------------|------------------------|-----|
-| JSON with fixed structure | Exact Match | Predictable, structured data |
-| JSON with variable values | Schema | Type-safe validation with flexibility |
-| Markdown/formatted text | Text Contains | Order-independent content validation |
-| Text with specific format | Regex | Pattern-based validation |
-| Deterministic output (help, config) | Snapshot | Detect any changes to known-good output |
-| Variable data with stable structure | Snapshot + Sanitizers | Normalize timestamps/IDs before comparison |
-| Subjective quality | LLM Judge | Semantic understanding required |
+| Response Type                       | Recommended Expectation | Why                                        |
+| ----------------------------------- | ----------------------- | ------------------------------------------ |
+| JSON with fixed structure           | Exact Match             | Predictable, structured data               |
+| JSON with variable values           | Schema                  | Type-safe validation with flexibility      |
+| Markdown/formatted text             | Text Contains           | Order-independent content validation       |
+| Text with specific format           | Regex                   | Pattern-based validation                   |
+| Deterministic output (help, config) | Snapshot                | Detect any changes to known-good output    |
+| Variable data with stable structure | Snapshot + Sanitizers   | Normalize timestamps/IDs before comparison |
+| Subjective quality                  | LLM Judge               | Semantic understanding required            |
 
 ### Next Steps
 

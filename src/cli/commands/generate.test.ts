@@ -190,7 +190,10 @@ describe('generate command', () => {
         output: '/test-output/multi.json',
       });
 
-      const content = vol.readFileSync('/test-output/multi.json', 'utf-8') as string;
+      const content = vol.readFileSync(
+        '/test-output/multi.json',
+        'utf-8'
+      ) as string;
       const dataset = JSON.parse(content);
 
       expect(dataset.cases).toHaveLength(2);
@@ -220,7 +223,10 @@ describe('generate command', () => {
         output: '/test-output/normal.json',
       });
 
-      const content = vol.readFileSync('/test-output/normal.json', 'utf-8') as string;
+      const content = vol.readFileSync(
+        '/test-output/normal.json',
+        'utf-8'
+      ) as string;
       const dataset = JSON.parse(content);
 
       expect(dataset.cases[0].expectedTextContains).toEqual(['response']);
@@ -287,9 +293,7 @@ describe('generate command', () => {
         JSON.stringify({
           name: 'existing-dataset',
           description: 'Existing',
-          cases: [
-            { id: 'existing-case', toolName: 'old_tool', args: {} },
-          ],
+          cases: [{ id: 'existing-case', toolName: 'old_tool', args: {} }],
           metadata: { version: '1.0', created: '2024-01-01' },
         })
       );
@@ -376,7 +380,10 @@ describe('generate command', () => {
       mocks.mockClient.listTools.mockRejectedValue(new Error('List failed'));
 
       try {
-        await generate({ config: configPath, output: '/test-output/fail.json' });
+        await generate({
+          config: configPath,
+          output: '/test-output/fail.json',
+        });
       } catch {
         // Expected to throw due to error propagation
       }

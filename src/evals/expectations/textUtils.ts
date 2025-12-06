@@ -51,9 +51,7 @@ export function findMissingSubstrings(
   const searchText = caseSensitive ? text : text.toLowerCase();
 
   return substrings.filter((substring) => {
-    const searchSubstring = caseSensitive
-      ? substring
-      : substring.toLowerCase();
+    const searchSubstring = caseSensitive ? substring : substring.toLowerCase();
     return !searchText.includes(searchSubstring);
   });
 }
@@ -65,10 +63,7 @@ export function findMissingSubstrings(
  * @param patterns - Regex patterns (as strings)
  * @returns Array of failed patterns (empty if all matched)
  */
-export function findFailedPatterns(
-  text: string,
-  patterns: string[]
-): string[] {
+export function findFailedPatterns(text: string, patterns: string[]): string[] {
   return patterns.filter((pattern) => {
     try {
       // Use multiline flag to allow ^ and $ to match line starts/ends

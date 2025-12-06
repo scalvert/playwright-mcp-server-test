@@ -94,7 +94,9 @@ describe('mcpFixture', () => {
         const result = await fixture.callTool('failing_tool', {});
 
         expect(result.isError).toBe(true);
-        expect(result.content).toEqual([{ type: 'text', text: 'Error occurred' }]);
+        expect(result.content).toEqual([
+          { type: 'text', text: 'Error occurred' },
+        ]);
       });
 
       it('callTool handles empty arguments', async () => {
@@ -214,11 +216,15 @@ describe('mcpFixture', () => {
 
       it('callTool propagates client errors', async () => {
         mockClient = createMockClient({
-          callTool: vi.fn().mockRejectedValue(new Error('Tool execution failed')),
+          callTool: vi
+            .fn()
+            .mockRejectedValue(new Error('Tool execution failed')),
         });
         const fixture = createMCPFixture(mockClient);
 
-        await expect(fixture.callTool('failing', {})).rejects.toThrow('Tool execution failed');
+        await expect(fixture.callTool('failing', {})).rejects.toThrow(
+          'Tool execution failed'
+        );
       });
     });
   });

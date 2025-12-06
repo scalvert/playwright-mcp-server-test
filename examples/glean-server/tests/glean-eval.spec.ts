@@ -132,14 +132,18 @@ test.describe('Glean MCP Server Evaluation', () => {
     const passRate = result.passed / result.total;
     expect(passRate).toBeGreaterThanOrEqual(0.75);
 
-    const directModeResults = result.caseResults.filter((r) => r.mode === 'direct');
+    const directModeResults = result.caseResults.filter(
+      (r) => r.mode === 'direct'
+    );
     const directModePassed = directModeResults.filter((r) => r.pass).length;
     expect(directModePassed).toBe(directModeResults.length);
   });
 });
 
 test.describe('Advanced Testing Features', () => {
-  test('should extract and validate text from search results', async ({ mcp }) => {
+  test('should extract and validate text from search results', async ({
+    mcp,
+  }) => {
     const result = await mcp.callTool('search', {
       query: 'documentation',
     });
@@ -151,7 +155,9 @@ test.describe('Advanced Testing Features', () => {
     expect(text.toLowerCase()).toContain('doc');
   });
 
-  test('should handle pagination with num_results parameter', async ({ mcp }) => {
+  test('should handle pagination with num_results parameter', async ({
+    mcp,
+  }) => {
     const result = await mcp.callTool('search', {
       query: 'num_results:5 API',
     });

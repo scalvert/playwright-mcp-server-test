@@ -39,7 +39,9 @@ export interface RetryOptions {
 /**
  * Default retry options
  */
-const DEFAULT_OPTIONS: Required<Omit<RetryOptions, 'onRetry'>> & { onRetry?: RetryOptions['onRetry'] } = {
+const DEFAULT_OPTIONS: Required<Omit<RetryOptions, 'onRetry'>> & {
+  onRetry?: RetryOptions['onRetry'];
+} = {
   maxAttempts: 3,
   baseDelayMs: 1000,
   maxDelayMs: 30000,
