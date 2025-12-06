@@ -1,6 +1,12 @@
 import React from 'react';
 
-export function Logo({ className = '', size = 32 }: { className?: string; size?: number }) {
+export function Logo({
+  className = '',
+  size = 32,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       width={size}

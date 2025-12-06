@@ -45,10 +45,7 @@ export {
 } from './oauthFlow.js';
 
 // Playwright setup utilities
-export {
-  performOAuthSetup,
-  performOAuthSetupIfNeeded,
-} from './setupOAuth.js';
+export { performOAuthSetup, performOAuthSetupIfNeeded } from './setupOAuth.js';
 
 // Discovery (RFC 9728)
 export {

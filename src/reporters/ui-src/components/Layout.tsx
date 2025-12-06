@@ -9,7 +9,12 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export function Layout({ timestamp, platform, durationMs, children }: LayoutProps) {
+export function Layout({
+  timestamp,
+  platform,
+  durationMs,
+  children,
+}: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}

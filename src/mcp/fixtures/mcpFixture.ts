@@ -8,7 +8,9 @@ import type {
 
 // Dynamic import of test for conditional step tracking
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let testStep: ((name: string, fn: () => Promise<unknown>) => Promise<unknown>) | null = null;
+let testStep:
+  | ((name: string, fn: () => Promise<unknown>) => Promise<unknown>)
+  | null = null;
 
 // Try to load test.step() dynamically
 try {
@@ -155,7 +157,9 @@ export function createMCPFixture(
       };
 
       // Wrap in test.step if available
-      return (testStep ? testStep('MCP: listTools()', execute) : execute()) as Promise<Array<Tool>>;
+      return (
+        testStep ? testStep('MCP: listTools()', execute) : execute()
+      ) as Promise<Array<Tool>>;
     },
 
     async callTool<TArgs extends Record<string, unknown>>(
@@ -191,7 +195,9 @@ export function createMCPFixture(
       };
 
       // Wrap in test.step if available
-      return (testStep ? testStep(`MCP: callTool("${name}")`, execute) : execute()) as Promise<CallToolResult>;
+      return (
+        testStep ? testStep(`MCP: callTool("${name}")`, execute) : execute()
+      ) as Promise<CallToolResult>;
     },
 
     getServerInfo() {

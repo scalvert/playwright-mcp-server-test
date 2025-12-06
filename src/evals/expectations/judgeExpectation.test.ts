@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createJudgeExpectation, type JudgeConfigs } from './judgeExpectation.js';
+import {
+  createJudgeExpectation,
+  type JudgeConfigs,
+} from './judgeExpectation.js';
 import type { EvalCase } from '../datasetTypes.js';
 import type { EvalExpectationContext } from '../evalRunner.js';
 import type { MCPFixtureApi } from '../../mcp/fixtures/mcpFixture.js';
@@ -50,7 +53,8 @@ describe('judgeExpectation', () => {
       vi.clearAllMocks();
       judgeConfigs = {
         'semantic-match': {
-          rubric: 'Evaluate if the response semantically matches the expected value',
+          rubric:
+            'Evaluate if the response semantically matches the expected value',
           passingThreshold: 0.7,
         },
         'with-reference': {
@@ -80,7 +84,9 @@ describe('judgeExpectation', () => {
       it('fails when no judgeClient is available', async () => {
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(); // no judgeClient
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -99,7 +105,9 @@ describe('judgeExpectation', () => {
         const result = await expectation(context, evalCase, 'response');
 
         expect(result.pass).toBe(false);
-        expect(result.details).toBe('Judge config "nonexistent-config" not found');
+        expect(result.details).toBe(
+          'Judge config "nonexistent-config" not found'
+        );
       });
     });
 
@@ -111,7 +119,9 @@ describe('judgeExpectation', () => {
         });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -128,7 +138,9 @@ describe('judgeExpectation', () => {
         });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -141,7 +153,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ pass: true });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -153,7 +167,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ pass: false });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -215,7 +231,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ score: 0.9 });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'with-reference' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'with-reference',
+        });
 
         await expectation(context, evalCase, 'response');
 
@@ -230,7 +248,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ score: 0.9 });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         await expectation(context, evalCase, 'response');
 
@@ -263,11 +283,15 @@ describe('judgeExpectation', () => {
     describe('error handling', () => {
       it('handles evaluation errors gracefully', async () => {
         const mockJudge = {
-          evaluate: vi.fn().mockRejectedValue(new Error('API rate limit exceeded')),
+          evaluate: vi
+            .fn()
+            .mockRejectedValue(new Error('API rate limit exceeded')),
         };
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -282,12 +306,16 @@ describe('judgeExpectation', () => {
         };
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
         expect(result.pass).toBe(false);
-        expect(result.details).toContain('Judge evaluation failed: String error');
+        expect(result.details).toContain(
+          'Judge evaluation failed: String error'
+        );
       });
     });
 
@@ -299,7 +327,9 @@ describe('judgeExpectation', () => {
         });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -312,7 +342,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ score: 0.8 });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 
@@ -323,7 +355,9 @@ describe('judgeExpectation', () => {
         const mockJudge = createMockJudgeClient({ score: 0.333333 });
         const expectation = createJudgeExpectation(judgeConfigs);
         const context = createMockContext(mockJudge);
-        const evalCase = createMockEvalCase({ judgeConfigId: 'semantic-match' });
+        const evalCase = createMockEvalCase({
+          judgeConfigId: 'semantic-match',
+        });
 
         const result = await expectation(context, evalCase, 'response');
 

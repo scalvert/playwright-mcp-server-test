@@ -108,9 +108,7 @@ export class PlaywrightOAuthClientProvider implements OAuthClientProvider {
   /**
    * Loads information about this OAuth client
    */
-  async clientInformation(): Promise<
-    OAuthClientInformationFull | undefined
-  > {
+  async clientInformation(): Promise<OAuthClientInformationFull | undefined> {
     // If we have a pre-registered client, return it
     if (this.config.clientId) {
       return {

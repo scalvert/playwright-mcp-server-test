@@ -192,6 +192,7 @@ Response preview:
 #### 1. Live MCP Connection
 
 The generator connects to your actual MCP server to:
+
 - List available tools
 - Call tools with your arguments
 - Show real responses
@@ -199,6 +200,7 @@ The generator connects to your actual MCP server to:
 #### 2. Smart Expectation Suggestions
 
 Based on the response format, the generator suggests:
+
 - **Text Contains** - Key phrases and values from the response
 - **Regex Patterns** - Format patterns (dates, numbers, etc.)
 
@@ -262,13 +264,8 @@ The generated dataset is a JSON file:
       "id": "weather-london",
       "toolName": "get_weather",
       "args": { "city": "London" },
-      "expectedTextContains": [
-        "London",
-        "temperature"
-      ],
-      "expectedRegex": [
-        "\\d+"
-      ]
+      "expectedTextContains": ["London", "temperature"],
+      "expectedRegex": ["\\d+"]
     }
   ]
 }
@@ -323,6 +320,7 @@ Error: Command not found: node server.js
 ```
 
 Solutions:
+
 - Verify the command is correct
 - Check that the server script exists
 - Ensure all dependencies are installed
@@ -338,6 +336,7 @@ Error: Required parameter 'city' missing
 ```
 
 Solutions:
+
 - Check the tool's expected argument schema
 - Use valid JSON for arguments
 - Review tool documentation
@@ -405,6 +404,7 @@ npx mcp-test login https://api.example.com/mcp --scopes read,write
 ```
 
 This is useful when:
+
 - You only need a subset of available scopes
 - The server requires explicit scope selection
 - You want to test with minimal permissions
@@ -413,13 +413,14 @@ This is useful when:
 
 Tokens are stored locally in a secure directory:
 
-| Platform | Default Location |
-|----------|------------------|
+| Platform | Default Location                                                                      |
+| -------- | ------------------------------------------------------------------------------------- |
 | Linux    | `$XDG_STATE_HOME/mcp-tests/<server-key>/` or `~/.local/state/mcp-tests/<server-key>/` |
-| macOS    | `~/.local/state/mcp-tests/<server-key>/` |
-| Windows  | `%LOCALAPPDATA%\mcp-tests\<server-key>\` |
+| macOS    | `~/.local/state/mcp-tests/<server-key>/`                                              |
+| Windows  | `%LOCALAPPDATA%\mcp-tests\<server-key>\`                                              |
 
 **Security:**
+
 - Directory permissions: `0700` (owner only)
 - File permissions: `0600` (owner read/write only)
 - Files stored: `tokens.json`, `client.json`, `server.json`
@@ -517,6 +518,7 @@ npx mcp-test login https://api.example.com/mcp --force
 #### CI Environment Variables Not Working
 
 Ensure the environment variables are named correctly:
+
 - `MCP_ACCESS_TOKEN` - The access token
 - `MCP_REFRESH_TOKEN` - The refresh token (optional, for token refresh)
 

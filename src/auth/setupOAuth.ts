@@ -122,7 +122,8 @@ export async function performOAuthSetup(
     const error = callbackUrl.searchParams.get('error');
 
     if (error) {
-      const errorDescription = callbackUrl.searchParams.get('error_description');
+      const errorDescription =
+        callbackUrl.searchParams.get('error_description');
       throw new Error(
         `OAuth authorization failed: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`
       );
@@ -231,7 +232,9 @@ async function completeLoginForm(
  * }
  * ```
  */
-export async function hasValidOAuthState(storagePath: string): Promise<boolean> {
+export async function hasValidOAuthState(
+  storagePath: string
+): Promise<boolean> {
   try {
     const { loadOAuthState } = await import('./oauthClientProvider.js');
     const state = await loadOAuthState(storagePath);

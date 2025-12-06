@@ -265,8 +265,14 @@ export class CLIOAuthClient {
       const age = Date.now() - cachedMetadata.discoveredAt;
       if (age < DEFAULT_METADATA_TTL_MS) {
         debug('Using cached server metadata (age: %dms)', age);
-        debug('Cached protected resource scopes: %O', cachedMetadata.protectedResource.scopes_supported);
-        debug('Cached auth server scopes: %O', cachedMetadata.authServer.server.scopes_supported);
+        debug(
+          'Cached protected resource scopes: %O',
+          cachedMetadata.protectedResource.scopes_supported
+        );
+        debug(
+          'Cached auth server scopes: %O',
+          cachedMetadata.authServer.server.scopes_supported
+        );
         return {
           protectedResource: cachedMetadata.protectedResource,
           authServer: cachedMetadata.authServer,
@@ -279,7 +285,10 @@ export class CLIOAuthClient {
     debug('Discovering protected resource:', this.config.mcpServerUrl);
     const prResult = await discoverProtectedResource(this.config.mcpServerUrl);
     debug('Found protected resource:', prResult.metadata.resource);
-    debug('Protected resource scopes_supported: %O', prResult.metadata.scopes_supported);
+    debug(
+      'Protected resource scopes_supported: %O',
+      prResult.metadata.scopes_supported
+    );
 
     // Get authorization server URL
     const authServerUrl = prResult.metadata.authorization_servers?.[0];
@@ -293,7 +302,10 @@ export class CLIOAuthClient {
     debug('Discovering authorization server:', authServerUrl);
     const authServer = await discoverAuthorizationServer(authServerUrl);
     debug('Found authorization server:', authServer.issuer);
-    debug('Auth server scopes_supported: %O', authServer.server.scopes_supported);
+    debug(
+      'Auth server scopes_supported: %O',
+      authServer.server.scopes_supported
+    );
 
     // Cache metadata
     const metadata: StoredServerMetadata = {
@@ -417,13 +429,18 @@ export class CLIOAuthClient {
       // Try multiple sources since not all servers advertise scopes in the same place
       const requestedScopes = this.config.scopes ??
         protectedResource.scopes_supported ??
-        authServer.server.scopes_supported ??
-        ['openid'];
+        authServer.server.scopes_supported ?? ['openid'];
 
       debug('Scope resolution:');
       debug('  - User config scopes: %O', this.config.scopes);
-      debug('  - Protected resource scopes_supported: %O', protectedResource.scopes_supported);
-      debug('  - Auth server scopes_supported: %O', authServer.server.scopes_supported);
+      debug(
+        '  - Protected resource scopes_supported: %O',
+        protectedResource.scopes_supported
+      );
+      debug(
+        '  - Auth server scopes_supported: %O',
+        authServer.server.scopes_supported
+      );
       debug('  - Final requested scopes: %O', requestedScopes);
 
       const authUrl = buildAuthorizationUrl({
@@ -510,9 +527,7 @@ export class CLIOAuthClient {
   /**
    * Start local callback server
    */
-  private async startCallbackServer(
-    expectedState: string
-  ): Promise<{
+  private async startCallbackServer(expectedState: string): Promise<{
     port: number;
     codePromise: Promise<string>;
     close: () => void;
@@ -572,7 +587,9 @@ export class CLIOAuthClient {
           res.writeHead(400, { 'Content-Type': 'text/html' });
           res.end(this.errorHtml(error, errorDescription ?? undefined));
           codeReject(
-            new Error(`OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`)
+            new Error(
+              `OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`
+            )
           );
           return;
         }
@@ -592,7 +609,9 @@ export class CLIOAuthClient {
         if (!code) {
           clearTimeout(timeout);
           res.writeHead(400, { 'Content-Type': 'text/html' });
-          res.end(this.errorHtml('missing_code', 'No authorization code received'));
+          res.end(
+            this.errorHtml('missing_code', 'No authorization code received')
+          );
           codeReject(new Error('No authorization code in callback'));
           return;
         }
@@ -625,7 +644,9 @@ export class CLIOAuthClient {
   private async openBrowserOrPrintUrl(url: URL): Promise<void> {
     if (isHeadless()) {
       console.log('\n' + '='.repeat(60));
-      console.log('Please open the following URL in your browser to authenticate:');
+      console.log(
+        'Please open the following URL in your browser to authenticate:'
+      );
       console.log('\n' + url.toString() + '\n');
       console.log('='.repeat(60) + '\n');
       return;
@@ -751,7 +772,11 @@ function isHeadless(): boolean {
   }
 
   // Linux without DISPLAY (no X server)
-  if (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY) {
+  if (
+    process.platform === 'linux' &&
+    !process.env.DISPLAY &&
+    !process.env.WAYLAND_DISPLAY
+  ) {
     return true;
   }
 

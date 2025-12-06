@@ -8,7 +8,10 @@ import type {
 /**
  * Built-in regex patterns for common variable data
  */
-const BUILT_IN_PATTERNS: Record<string, { pattern: RegExp; replacement: string }> = {
+const BUILT_IN_PATTERNS: Record<
+  string,
+  { pattern: RegExp; replacement: string }
+> = {
   // Unix timestamps (milliseconds: 13 digits, seconds: 10 digits)
   timestamp: {
     pattern: /\b\d{10,13}\b/g,
@@ -16,12 +19,14 @@ const BUILT_IN_PATTERNS: Record<string, { pattern: RegExp; replacement: string }
   },
   // UUIDs (v1-v5, any case)
   uuid: {
-    pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+    pattern:
+      /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
     replacement: '[UUID]',
   },
   // ISO 8601 date strings (with optional time and timezone)
   'iso-date': {
-    pattern: /\b\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?\b/g,
+    pattern:
+      /\b\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?\b/g,
     replacement: '[ISO_DATE]',
   },
   // MongoDB ObjectIds (24 hex characters)
@@ -74,7 +79,11 @@ function removeField(obj: Record<string, unknown>, path: string): void {
   }
 
   const lastPart = parts[parts.length - 1];
-  if (lastPart !== undefined && current !== null && typeof current === 'object') {
+  if (
+    lastPart !== undefined &&
+    current !== null &&
+    typeof current === 'object'
+  ) {
     delete (current as Record<string, unknown>)[lastPart];
   }
 }
@@ -99,7 +108,10 @@ function deepClone<T>(value: T): T {
 /**
  * Apply sanitizers to a string value
  */
-function sanitizeString(value: string, sanitizers: SnapshotSanitizer[]): string {
+function sanitizeString(
+  value: string,
+  sanitizers: SnapshotSanitizer[]
+): string {
   let result = value;
 
   for (const sanitizer of sanitizers) {
@@ -123,7 +135,10 @@ function sanitizeString(value: string, sanitizers: SnapshotSanitizer[]): string 
 /**
  * Apply sanitizers to any value (recursively for objects/arrays)
  */
-function applySanitizers(value: unknown, sanitizers: SnapshotSanitizer[]): unknown {
+function applySanitizers(
+  value: unknown,
+  sanitizers: SnapshotSanitizer[]
+): unknown {
   if (sanitizers.length === 0) {
     return value;
   }
@@ -274,7 +289,9 @@ export function createSnapshotExpectation(): EvalExpectation {
       // If response is an array with text content, extract the text
       else if (Array.isArray(response) && response.length > 0) {
         // MCP format: [{ type: "text", text: "content" }]
-        const textContent = (response as Array<{ type?: string; text?: string }>)
+        const textContent = (
+          response as Array<{ type?: string; text?: string }>
+        )
           .filter((item) => item?.type === 'text')
           .map((item) => item.text ?? '')
           .join('\n');
@@ -285,7 +302,10 @@ export function createSnapshotExpectation(): EvalExpectation {
       }
 
       // Apply sanitizers if configured
-      if (evalCase.snapshotSanitizers && evalCase.snapshotSanitizers.length > 0) {
+      if (
+        evalCase.snapshotSanitizers &&
+        evalCase.snapshotSanitizers.length > 0
+      ) {
         normalizedResponse = applySanitizers(
           normalizedResponse,
           evalCase.snapshotSanitizers
@@ -294,9 +314,9 @@ export function createSnapshotExpectation(): EvalExpectation {
 
       // Use Playwright's native snapshot testing
       // eslint-disable-next-line @typescript-eslint/await-thenable
-      await context.expect(normalizedResponse).toMatchSnapshot(
-        evalCase.expectedSnapshot
-      );
+      await context
+        .expect(normalizedResponse)
+        .toMatchSnapshot(evalCase.expectedSnapshot);
 
       return {
         pass: true,

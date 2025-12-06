@@ -230,9 +230,7 @@ async function executeToolCall(
       );
 
       if (!simulationResult.success) {
-        throw new Error(
-          simulationResult.error || 'LLM host simulation failed'
-        );
+        throw new Error(simulationResult.error || 'LLM host simulation failed');
       }
 
       return { response: simulationResult };

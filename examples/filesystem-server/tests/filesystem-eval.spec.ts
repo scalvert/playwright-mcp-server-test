@@ -52,8 +52,13 @@ const test = base.extend<FilesystemFixtures>({
           'api.md': '# API Reference\n\nAPI documentation',
         },
         data: {
-          'users.csv': 'id,name,email\n1,Alice,alice@example.com\n2,Bob,bob@example.com',
-          'settings.json': JSON.stringify({ theme: 'dark', lang: 'en' }, null, 2),
+          'users.csv':
+            'id,name,email\n1,Alice,alice@example.com\n2,Bob,bob@example.com',
+          'settings.json': JSON.stringify(
+            { theme: 'dark', lang: 'en' },
+            null,
+            2
+          ),
         },
       },
     });
@@ -132,7 +137,9 @@ test.describe('Direct API Tests', () => {
   });
 
   test('handles non-existent files', async ({ mcp }) => {
-    const result = await mcp.callTool('read_file', { path: 'does-not-exist.txt' });
+    const result = await mcp.callTool('read_file', {
+      path: 'does-not-exist.txt',
+    });
     expect(result.isError).toBe(true);
   });
 
@@ -193,7 +200,9 @@ test.describe('Eval Dataset (Batch)', () => {
       path.join(import.meta.dirname, '..', 'eval-dataset.json')
     );
 
-    const directCases = dataset.cases.filter((c) => c.mode === 'direct' || !c.mode);
+    const directCases = dataset.cases.filter(
+      (c) => c.mode === 'direct' || !c.mode
+    );
     const directDataset = { ...dataset, cases: directCases };
 
     const result = await runEvalDataset(
@@ -215,7 +224,9 @@ test.describe('Eval Dataset (Batch)', () => {
 });
 
 test.describe('Eval: Direct Mode', () => {
-  const directCases = evalDataset.cases.filter((c) => c.mode === 'direct' || !c.mode);
+  const directCases = evalDataset.cases.filter(
+    (c) => c.mode === 'direct' || !c.mode
+  );
 
   for (const evalCase of directCases) {
     test(evalCase.id, async ({ mcp }, testInfo) => {
@@ -266,7 +277,9 @@ test.describe('LLM Host Simulation (E2E)', () => {
     expect(result.success).toBe(true);
     expect(result.toolCalls.length).toBeGreaterThan(0);
 
-    const listDirCall = result.toolCalls.find((c) => c.name === 'list_directory');
+    const listDirCall = result.toolCalls.find(
+      (c) => c.name === 'list_directory'
+    );
     expect(listDirCall).toBeDefined();
 
     expect(result.response).toContain('guide');
@@ -325,7 +338,9 @@ test.describe('Eval: LLM Host Mode', () => {
           .map(([name, exp]) => `${name}: ${exp.details}`)
           .join('\n');
 
-        expect(result.pass, `Eval failed:\n${result.error || failures}`).toBe(true);
+        expect(result.pass, `Eval failed:\n${result.error || failures}`).toBe(
+          true
+        );
       }
 
       expect(result.pass).toBe(true);

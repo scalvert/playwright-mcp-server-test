@@ -48,7 +48,7 @@ List all tools available from the MCP server.
 
 ```typescript
 const tools = await mcp.listTools();
-console.log(tools.map(t => t.name));
+console.log(tools.map((t) => t.name));
 ```
 
 ##### `callTool<TArgs>(name, args)`
@@ -56,6 +56,7 @@ console.log(tools.map(t => t.name));
 Call a tool by name with arguments.
 
 **Parameters:**
+
 - `name: string` - Tool name
 - `args: TArgs` - Tool arguments
 
@@ -96,6 +97,7 @@ import {
 Create HTTP headers with Authorization header.
 
 **Parameters:**
+
 - `accessToken: string` - Access token
 - `tokenType?: string` - Token type (default: `'Bearer'`)
 
@@ -111,6 +113,7 @@ const headers = createTokenAuthHeaders(process.env.MCP_ACCESS_TOKEN);
 Validate that an access token is present and non-empty.
 
 **Parameters:**
+
 - `accessToken: string | undefined` - Token to validate
 
 **Throws:** `Error` if token is missing or empty
@@ -120,6 +123,7 @@ Validate that an access token is present and non-empty.
 Check if a JWT token appears to be expired.
 
 **Parameters:**
+
 - `accessToken: string` - JWT token
 
 **Returns:** `boolean`
@@ -129,6 +133,7 @@ Check if a JWT token appears to be expired.
 Check if a token will expire within the buffer time.
 
 **Parameters:**
+
 - `expiresAt: number | undefined` - Expiration timestamp in milliseconds
 - `bufferMs?: number` - Buffer time (default: `60000` = 1 minute)
 
@@ -155,6 +160,7 @@ import {
 Discover OAuth authorization server metadata.
 
 **Parameters:**
+
 - `issuerUrl: string` - Authorization server URL
 
 **Returns:** `Promise<AuthServerMetadata>`
@@ -176,6 +182,7 @@ Generate random state parameter for CSRF protection.
 Build OAuth authorization URL for browser redirect.
 
 **Parameters:**
+
 - `config: AuthorizationUrlConfig`
 
 **Returns:** `URL`
@@ -185,6 +192,7 @@ Build OAuth authorization URL for browser redirect.
 Exchange authorization code for tokens.
 
 **Parameters:**
+
 - `config: TokenExchangeConfig`
 
 **Returns:** `Promise<TokenResult>`
@@ -194,6 +202,7 @@ Exchange authorization code for tokens.
 Refresh an access token using a refresh token.
 
 **Parameters:**
+
 - `config: TokenRefreshConfig`
 
 **Returns:** `Promise<TokenResult>`
@@ -251,6 +260,7 @@ interface MCPOAuthConfig {
 Load an eval dataset from a JSON file.
 
 **Parameters:**
+
 - `path: string` - Path to dataset JSON file
 - `options?: object`
   - `schemas?: Record<string, ZodSchema>` - Zod schemas for validation
@@ -273,6 +283,7 @@ const dataset = await loadEvalDataset('./data/evals.json', {
 Run an eval dataset with expectations.
 
 **Parameters:**
+
 - `options: object`
   - `dataset: EvalDataset` - Dataset to run
   - `expectations: Record<string, EvalExpectation>` - Expectations to apply
@@ -332,6 +343,7 @@ const expectations = {
 Create text contains expectation for substring matching.
 
 **Parameters:**
+
 - `options?: object`
   - `caseSensitive?: boolean` - Case-sensitive matching (default: `true`)
 
@@ -362,13 +374,14 @@ const expectations = {
 Create schema validation expectation using Zod schemas.
 
 **Parameters:**
+
 - `dataset: EvalDataset` - Dataset with schemas attached
 
 **Returns:** `EvalExpectation`
 
 ```typescript
 const dataset = await loadEvalDataset('./evals.json', {
-  schemas: { 'user': UserSchema },
+  schemas: { user: UserSchema },
 });
 
 const expectations = {
@@ -381,6 +394,7 @@ const expectations = {
 Create LLM-as-a-judge expectation for semantic evaluation.
 
 **Parameters:**
+
 - `configs: Record<string, JudgeConfig>` - Judge configurations by ID
   - `rubric: string` - Evaluation criteria
   - `passingThreshold: number` - Minimum score (0-1) to pass
@@ -391,7 +405,8 @@ Create LLM-as-a-judge expectation for semantic evaluation.
 const expectations = {
   judge: createJudgeExpectation({
     'search-relevance': {
-      rubric: 'Evaluate if search results are relevant to the query. Score 0-1.',
+      rubric:
+        'Evaluate if search results are relevant to the query. Score 0-1.',
       passingThreshold: 0.7,
     },
   }),
@@ -405,6 +420,7 @@ const expectations = {
 Extract text content from various MCP response formats.
 
 **Parameters:**
+
 - `response: CallToolResult` - MCP tool call result
 
 **Returns:** `string`
@@ -419,6 +435,7 @@ const text = extractTextFromResponse(result);
 Normalize whitespace for consistent comparison.
 
 **Parameters:**
+
 - `text: string` - Text to normalize
 
 **Returns:** `string`
@@ -433,6 +450,7 @@ const normalized = normalizeWhitespace('  hello\n\n  world  ');
 Check which expected substrings are missing from text.
 
 **Parameters:**
+
 - `text: string` - Text to search
 - `substrings: string[]` - Expected substrings
 - `caseSensitive?: boolean` - Case-sensitive search (default: `true`)
@@ -453,16 +471,17 @@ const missing = findMissingSubstrings(
 Check which regex patterns failed to match.
 
 **Parameters:**
+
 - `text: string` - Text to test
 - `patterns: string[]` - Regex patterns
 
 **Returns:** `string[]` - Failed patterns
 
 ```typescript
-const failed = findFailedPatterns(
-  'Temperature: 20°C',
-  ['Temperature: \\d+°C', 'Humidity: \\d+%']
-);
+const failed = findFailedPatterns('Temperature: 20°C', [
+  'Temperature: \\d+°C',
+  'Humidity: \\d+%',
+]);
 // Returns: ['Humidity: \\d+%']
 ```
 
@@ -473,6 +492,7 @@ const failed = findFailedPatterns(
 Create an LLM judge client for semantic evaluation.
 
 **Parameters:**
+
 - `config: object`
   - `provider: 'openai' | 'anthropic' | 'custom-http'` - LLM provider
   - `model: string` - Model name
@@ -510,6 +530,7 @@ const judgeClient = createLLMJudgeClient({
 Run MCP protocol conformance checks.
 
 **Parameters:**
+
 - `mcp: MCPFixtureApi` - MCP fixture API
 - `options?: object`
   - `requiredTools?: string[]` - Tools that must be present

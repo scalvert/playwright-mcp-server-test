@@ -45,6 +45,7 @@ npm run test:watch
 ```
 
 **Test Coverage:**
+
 - Configuration validation
 - Dataset types and loading
 - Expectations (exact, schema, textContains, regex, snapshot, judge)
@@ -62,6 +63,7 @@ npm run test:playwright
 ```
 
 **Test Coverage:**
+
 - MCP server connection and info
 - Tool listing and conformance checks
 - Eval dataset execution
@@ -79,6 +81,7 @@ npm test && npm run test:playwright
 The integration tests use a mock server located at `tests/mocks/simpleMCPServer.ts`.
 
 **Available Tools:**
+
 - `echo` - Echoes back the input
 - `calculate` - Performs basic math operations
 - `get_weather` - Returns mock weather data
@@ -186,17 +189,21 @@ npm run build      # Build succeeds
 ### Key Files
 
 **Public API:**
+
 - `src/index.ts` - All exported functions and types
 
 **Fixtures:**
+
 - `src/fixtures/mcp.ts` - Playwright fixture definitions
 - `src/mcp/fixtures/mcpFixture.ts` - Fixture implementation
 
 **Configuration:**
+
 - `src/config/mcpConfig.ts` - Transport configuration types
 - `src/config/mcpConfigSchema.ts` - Zod validation schemas
 
 **Evaluations:**
+
 - `src/evals/evalTypes.ts` - Dataset and case types
 - `src/evals/evalRunner.ts` - Dataset execution logic
 - `src/evals/expectations/` - All expectation implementations
@@ -219,6 +226,7 @@ We welcome contributions! Here's how to get started:
 1. **Fork the repository**
 
 2. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -229,6 +237,7 @@ We welcome contributions! Here's how to get started:
    - Update documentation as needed
 
 4. **Run quality checks**
+
    ```bash
    npm run typecheck
    npm run lint
@@ -238,6 +247,7 @@ We welcome contributions! Here's how to get started:
    ```
 
 5. **Commit your changes**
+
    ```bash
    git commit -m "feat: add new feature"
    ```
@@ -251,6 +261,7 @@ We welcome contributions! Here's how to get started:
    - `chore:` - Build/tooling changes
 
 6. **Push and create PR**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -262,30 +273,33 @@ We welcome contributions! Here's how to get started:
 Follow these conventions:
 
 1. **Function declarations over expressions**
+
    ```typescript
    // ✓ Good
-   export function createClient() { }
+   export function createClient() {}
 
    // ✗ Avoid
-   export const createClient = () => { }
+   export const createClient = () => {};
    ```
 
 2. **Explicit null over short-circuit**
+
    ```typescript
    // ✓ Good
-   condition ? 'value' : null
+   condition ? 'value' : null;
 
    // ✗ Avoid
-   condition && 'value'
+   condition && 'value';
    ```
 
 3. **Descriptive type names**
+
    ```typescript
    // ✓ Good
-   EvalDataset, MCPFixtureApi, LLMJudgeClient
+   (EvalDataset, MCPFixtureApi, LLMJudgeClient);
 
    // ✗ Avoid
-   Data, Api, Client
+   (Data, Api, Client);
    ```
 
 4. **TypeScript strict mode**

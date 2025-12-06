@@ -51,7 +51,9 @@ describe('openaiJudge', () => {
 
       expect(() => {
         createOpenAIJudge({ provider: 'openai' });
-      }).toThrow('OpenAI API key not found in environment variable: OPENAI_API_KEY');
+      }).toThrow(
+        'OpenAI API key not found in environment variable: OPENAI_API_KEY'
+      );
     });
 
     it('throws error for custom API key env var when not found', () => {
@@ -62,7 +64,9 @@ describe('openaiJudge', () => {
           provider: 'openai',
           apiKeyEnvVar: 'CUSTOM_OPENAI_KEY',
         });
-      }).toThrow('OpenAI API key not found in environment variable: CUSTOM_OPENAI_KEY');
+      }).toThrow(
+        'OpenAI API key not found in environment variable: CUSTOM_OPENAI_KEY'
+      );
     });
 
     it('uses custom API key env var when provided', () => {
@@ -207,7 +211,9 @@ describe('openaiJudge', () => {
 
       await expect(
         judge.evaluate('candidate', 'reference', 'rubric')
-      ).rejects.toThrow('OpenAI judge evaluation failed: No content in OpenAI response');
+      ).rejects.toThrow(
+        'OpenAI judge evaluation failed: No content in OpenAI response'
+      );
     });
 
     it('throws error when API call fails', async () => {

@@ -19,6 +19,7 @@ MCP servers can be accessed via different transport mechanisms. This guide cover
 2. **HTTP** - Remote servers (via HTTP/SSE)
 
 Choose based on your server deployment:
+
 - Use **stdio** for local development and testing
 - Use **HTTP** for remote servers or production environments
 
@@ -135,6 +136,7 @@ DEBUG=mcp-testing:* npm test
 ### Process Management
 
 The stdio transport automatically:
+
 - Starts the server process when tests begin
 - Manages stdin/stdout communication
 - Terminates the process when tests complete
@@ -228,6 +230,7 @@ mcpConfig: {
 ### Connection Management
 
 The HTTP transport:
+
 - Establishes HTTP connection on first use
 - Maintains SSE stream for server events
 - Automatically reconnects on connection loss
@@ -276,7 +279,7 @@ export default defineConfig({
           transport: 'http',
           serverUrl: 'https://staging.example.com/mcp',
           headers: {
-            'Authorization': `Bearer ${process.env.STAGING_TOKEN}`,
+            Authorization: `Bearer ${process.env.STAGING_TOKEN}`,
           },
         },
       },
@@ -290,7 +293,7 @@ export default defineConfig({
           transport: 'http',
           serverUrl: 'https://api.example.com/mcp',
           headers: {
-            'Authorization': `Bearer ${process.env.PROD_TOKEN}`,
+            Authorization: `Bearer ${process.env.PROD_TOKEN}`,
           },
         },
       },
@@ -336,7 +339,7 @@ export default defineConfig({
           ...(process.env.MCP_TRANSPORT === 'http' && {
             serverUrl: process.env.MCP_SERVER_URL,
             headers: {
-              'Authorization': `Bearer ${process.env.MCP_API_TOKEN}`,
+              Authorization: `Bearer ${process.env.MCP_API_TOKEN}`,
             },
           }),
         },
@@ -391,6 +394,7 @@ Error: Command not found: node server.js
 ```
 
 **Solutions:**
+
 - Verify command exists: `which node`
 - Use absolute paths: `/usr/local/bin/node`
 - Check file exists: `ls -la server.js`
@@ -399,6 +403,7 @@ Error: Command not found: node server.js
 **Issue:** Server starts but doesn't respond
 
 **Solutions:**
+
 - Enable debug logging: `DEBUG=mcp-testing:* npm test`
 - Check server logs for errors
 - Verify server writes to stdout (not stderr)
@@ -407,6 +412,7 @@ Error: Command not found: node server.js
 **Issue:** Environment variables not set
 
 **Solutions:**
+
 - Use `env` option in config
 - Check variable names and values
 - Verify dotenv is loaded before config
@@ -420,6 +426,7 @@ Error: connect ECONNREFUSED localhost:3000
 ```
 
 **Solutions:**
+
 - Verify server is running: `curl http://localhost:3000/mcp`
 - Check correct port and host
 - Ensure server accepts HTTP connections
@@ -432,6 +439,7 @@ Error: Request timeout after 30000ms
 ```
 
 **Solutions:**
+
 - Increase timeout: `requestTimeoutMs: 60000`
 - Check server response time
 - Verify server isn't blocking
@@ -444,6 +452,7 @@ Error: 401 Unauthorized
 ```
 
 **Solutions:**
+
 - Verify API token is correct
 - Check header format: `Authorization: Bearer <token>`
 - Ensure token hasn't expired

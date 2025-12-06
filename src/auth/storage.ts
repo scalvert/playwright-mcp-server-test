@@ -342,7 +342,9 @@ class FileOAuthStorage implements OAuthStorage {
     await this.deleteFile(this.tokensPath);
   }
 
-  async hasValidToken(bufferMs: number = DEFAULT_EXPIRY_BUFFER_MS): Promise<boolean> {
+  async hasValidToken(
+    bufferMs: number = DEFAULT_EXPIRY_BUFFER_MS
+  ): Promise<boolean> {
     const tokens = await this.loadTokens();
 
     if (!tokens?.accessToken) {

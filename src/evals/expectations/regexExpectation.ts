@@ -4,7 +4,10 @@
  * Validates that the response text matches all expected regex patterns.
  */
 
-import { createTextExpectation, type ValidationResult } from './createExpectation.js';
+import {
+  createTextExpectation,
+  type ValidationResult,
+} from './createExpectation.js';
 import { findFailedPatterns } from './textUtils.js';
 
 /**

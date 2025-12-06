@@ -314,11 +314,13 @@ npx mcp-test login https://api.example.com/mcp --force
 Tokens are cached locally and automatically refreshed when expired.
 
 **Storage locations:**
+
 - **Linux**: `$XDG_STATE_HOME/mcp-tests/<server-key>/` or `~/.local/state/mcp-tests/<server-key>/`
 - **macOS**: `~/.local/state/mcp-tests/<server-key>/`
 - **Windows**: `%LOCALAPPDATA%\mcp-tests\<server-key>\`
 
 **Security:**
+
 - Directory permissions: `0700` (owner only)
 - File permissions: `0600` (owner read/write only)
 - Files stored: `tokens.json`, `client.json`, `server.json`
@@ -364,6 +366,7 @@ jobs:
 3. Run the output `gh secret set` commands (requires [GitHub CLI](https://cli.github.com/))
 
 The `token` command supports multiple formats:
+
 - `env` (default) - Shell-compatible `KEY=value` pairs
 - `json` - JSON object for scripting
 - `gh` - Ready-to-paste GitHub CLI commands

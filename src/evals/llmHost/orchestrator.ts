@@ -105,7 +105,10 @@ export async function runSimulation(
           const resultText = extractText(mcpResult);
 
           // Create tool result message
-          const resultMessage = adapter.createToolResultMessage(toolCall, resultText);
+          const resultMessage = adapter.createToolResultMessage(
+            toolCall,
+            resultText
+          );
           toolResultMessages.push(resultMessage);
 
           // Track in conversation history

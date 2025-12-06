@@ -7,15 +7,18 @@ Comprehensive testing example for the official [Filesystem MCP Server](https://g
 This is the **canonical example** showing all testing patterns organized into three layers:
 
 ### Unit/Integration Testing (no LLM required)
+
 1. **Protocol Conformance** - Validate MCP protocol compliance
 2. **Direct API Testing** - Call tools directly with assertions
 3. **Inline Eval Cases** - Define eval cases in code with expectations
 
 ### Data-Driven Testing (JSON datasets)
+
 4. **Eval Dataset (Batch)** - Run all cases from JSON together
 5. **Individual Eval Cases** - Generate one test per JSON case
 
 ### End-to-End / Functional Testing (requires LLM API keys)
+
 6. **LLM Host Simulation** - Test real MCP usage with LLM tool discovery
 7. **LLM Host from JSON** - Data-driven LLM host tests
 
@@ -96,7 +99,7 @@ test('LLM discovers and lists directory contents', async ({ mcp }) => {
   expect(result.toolCalls.length).toBeGreaterThan(0);
 
   // Validate the LLM chose the right tool
-  const listDirCall = result.toolCalls.find(c => c.name === 'list_directory');
+  const listDirCall = result.toolCalls.find((c) => c.name === 'list_directory');
   expect(listDirCall).toBeDefined();
 
   // Validate the response

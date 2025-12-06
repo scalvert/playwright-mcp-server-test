@@ -78,7 +78,9 @@ export function createAnthropicAdapter(): LLMAdapter {
       tools: unknown[],
       config: LLMHostConfig
     ): Promise<LLMChatResult> {
-      const anthropic = client as { messages: { create: (opts: unknown) => Promise<unknown> } };
+      const anthropic = client as {
+        messages: { create: (opts: unknown) => Promise<unknown> };
+      };
 
       const response = await anthropic.messages.create({
         model: config.model || 'claude-3-5-sonnet-20241022',
@@ -137,7 +139,9 @@ export function createAnthropicAdapter(): LLMAdapter {
     },
 
     createAssistantMessage(chatResult: LLMChatResult): AnthropicMessage {
-      const rawResponse = chatResult.rawResponse as { content: AnthropicContentBlock[] };
+      const rawResponse = chatResult.rawResponse as {
+        content: AnthropicContentBlock[];
+      };
 
       return {
         role: 'assistant',
@@ -145,7 +149,10 @@ export function createAnthropicAdapter(): LLMAdapter {
       };
     },
 
-    createToolResultMessage(toolCall: LLMToolCall, result: string): AnthropicContentBlock {
+    createToolResultMessage(
+      toolCall: LLMToolCall,
+      result: string
+    ): AnthropicContentBlock {
       return {
         type: 'tool_result',
         tool_use_id: toolCall.id,

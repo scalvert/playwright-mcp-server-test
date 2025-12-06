@@ -19,12 +19,12 @@ Complete working examples demonstrating how to use `@mcp-testing/server-tester` 
 
 ## Examples
 
-| Example | Description | Complexity |
-|---------|-------------|------------|
-| [basic-playwright-usage](./basic-playwright-usage/) | Minimal starter (~60 lines) | ⭐ |
-| [filesystem-server](./filesystem-server/) | **Canonical example** - all patterns | ⭐⭐⭐ |
-| [sqlite-server](./sqlite-server/) | Database testing with custom fixtures | ⭐⭐ |
-| [glean-server](./glean-server/) | Production HTTP server testing | ⭐⭐ |
+| Example                                             | Description                           | Complexity |
+| --------------------------------------------------- | ------------------------------------- | ---------- |
+| [basic-playwright-usage](./basic-playwright-usage/) | Minimal starter (~60 lines)           | ⭐         |
+| [filesystem-server](./filesystem-server/)           | **Canonical example** - all patterns  | ⭐⭐⭐     |
+| [sqlite-server](./sqlite-server/)                   | Database testing with custom fixtures | ⭐⭐       |
+| [glean-server](./glean-server/)                     | Production HTTP server testing        | ⭐⭐       |
 
 ## Quick Start
 
@@ -111,15 +111,15 @@ test('LLM discovers directory contents', async ({ mcp }) => {
 
 ## Example Comparison
 
-| Feature | basic | filesystem | sqlite | glean |
-|---------|-------|------------|--------|-------|
-| Transport | stdio | stdio | stdio | HTTP |
-| Direct API Tests | ✓ | ✓ | ✓ | ✓ |
-| Inline Eval Cases | ✗ | ✓ | ✗ | ✗ |
-| JSON Eval Datasets | ✗ | ✓ | ✓ | ✓ |
-| LLM Host Simulation | ✗ | ✓ | ✗ | ✗ |
-| LLM Host from JSON | ✗ | ✓ | ✓ | ✓ |
-| MCP Reporter | ✗ | ✓ | ✗ | ✓ |
+| Feature             | basic | filesystem | sqlite | glean |
+| ------------------- | ----- | ---------- | ------ | ----- |
+| Transport           | stdio | stdio      | stdio  | HTTP  |
+| Direct API Tests    | ✓     | ✓          | ✓      | ✓     |
+| Inline Eval Cases   | ✗     | ✓          | ✗      | ✗     |
+| JSON Eval Datasets  | ✗     | ✓          | ✓      | ✓     |
+| LLM Host Simulation | ✗     | ✓          | ✗      | ✗     |
+| LLM Host from JSON  | ✗     | ✓          | ✓      | ✓     |
+| MCP Reporter        | ✗     | ✓          | ✗      | ✓     |
 
 ## Running LLM Tests
 

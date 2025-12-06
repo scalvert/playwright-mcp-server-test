@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart3, FlaskConical, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  BarChart3,
+  FlaskConical,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import type { MCPEvalResult } from '../../types';
 
 interface ResultsTableProps {
@@ -14,14 +19,15 @@ interface ResultGroup {
   failed: number;
 }
 
-export function ResultsTable({
-  results,
-  onSelectResult,
-}: ResultsTableProps) {
+export function ResultsTable({ results, onSelectResult }: ResultsTableProps) {
   const [filter, setFilter] = useState<'all' | 'pass' | 'fail'>('all');
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'eval' | 'test'>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'eval' | 'test'>(
+    'all'
+  );
   const [searchQuery, setSearchQuery] = useState('');
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    new Set()
+  );
 
   const filteredResults = useMemo(() => {
     let filtered = [...results];
@@ -86,8 +92,8 @@ export function ResultsTable({
     });
   };
 
-  const evalCount = results.filter(r => r.source === 'eval').length;
-  const testCount = results.filter(r => r.source === 'test').length;
+  const evalCount = results.filter((r) => r.source === 'eval').length;
+  const testCount = results.filter((r) => r.source === 'test').length;
 
   return (
     <div className="flex flex-col h-full">
@@ -200,13 +206,20 @@ export function ResultsTable({
                   >
                     <div className="flex items-center gap-2">
                       {isCollapsed ? (
-                        <ChevronRight size={18} className="text-muted-foreground" />
+                        <ChevronRight
+                          size={18}
+                          className="text-muted-foreground"
+                        />
                       ) : (
-                        <ChevronDown size={18} className="text-muted-foreground" />
+                        <ChevronDown
+                          size={18}
+                          className="text-muted-foreground"
+                        />
                       )}
                       <span className="font-medium">{group.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        ({group.results.length} {group.results.length === 1 ? 'test' : 'tests'})
+                        ({group.results.length}{' '}
+                        {group.results.length === 1 ? 'test' : 'tests'})
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -258,9 +271,17 @@ export function ResultsTable({
                             {/* Type Icon */}
                             <span className="shrink-0">
                               {isEval ? (
-                                <BarChart3 size={16} className="text-blue-600 dark:text-blue-400" title="Eval Dataset" />
+                                <BarChart3
+                                  size={16}
+                                  className="text-blue-600 dark:text-blue-400"
+                                  title="Eval Dataset"
+                                />
                               ) : (
-                                <FlaskConical size={16} className="text-purple-600 dark:text-purple-400" title="Test Suite" />
+                                <FlaskConical
+                                  size={16}
+                                  className="text-purple-600 dark:text-purple-400"
+                                  title="Test Suite"
+                                />
                               )}
                             </span>
 

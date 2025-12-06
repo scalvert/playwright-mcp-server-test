@@ -18,7 +18,9 @@ function createMockMCP(): MCPFixtureApi {
 }
 
 function createContext(options: {
-  expectFn?: (value: unknown) => { toMatchSnapshot: (name: string) => Promise<void> };
+  expectFn?: (value: unknown) => {
+    toMatchSnapshot: (name: string) => Promise<void>;
+  };
 }): EvalExpectationContext {
   return {
     mcp: createMockMCP(),
@@ -83,9 +85,11 @@ describe('createSnapshotExpectation', () => {
     });
 
     it('should fail when snapshot mismatches', async () => {
-      const mockToMatchSnapshot = vi.fn().mockRejectedValue(
-        new Error('Snapshot mismatch: expected "abc" but got "xyz"')
-      );
+      const mockToMatchSnapshot = vi
+        .fn()
+        .mockRejectedValue(
+          new Error('Snapshot mismatch: expected "abc" but got "xyz"')
+        );
       const mockExpect = vi.fn().mockReturnValue({
         toMatchSnapshot: mockToMatchSnapshot,
       });
@@ -277,7 +281,9 @@ describe('createSnapshotExpectation', () => {
       const context = createContext({ expectFn: mockExpect });
       const evalCase = createEvalCase({
         expectedSnapshot: 'test-snapshot',
-        snapshotSanitizers: [{ pattern: 'token_[a-zA-Z0-9]+', replacement: '[TOKEN]' }],
+        snapshotSanitizers: [
+          { pattern: 'token_[a-zA-Z0-9]+', replacement: '[TOKEN]' },
+        ],
       });
 
       const response = 'Session: token_abc123XYZ';
@@ -442,7 +448,9 @@ describe('applySanitizers', () => {
     });
 
     it('should sanitize ISO dates', () => {
-      const result = applySanitizers('Date: 2025-01-15T10:30:00Z', ['iso-date']);
+      const result = applySanitizers('Date: 2025-01-15T10:30:00Z', [
+        'iso-date',
+      ]);
       expect(result).toBe('Date: [ISO_DATE]');
     });
 
@@ -498,10 +506,9 @@ describe('applySanitizers', () => {
 
   describe('field removal sanitizers', () => {
     it('should remove top-level fields', () => {
-      const result = applySanitizers(
-        { name: 'Alice', secret: 'password123' },
-        [{ remove: ['secret'] }]
-      );
+      const result = applySanitizers({ name: 'Alice', secret: 'password123' }, [
+        { remove: ['secret'] },
+      ]);
       expect(result).toEqual({ name: 'Alice' });
     });
 

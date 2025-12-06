@@ -7,7 +7,11 @@
  */
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import type { LLMProvider, LLMToolCall, LLMHostConfig } from './llmHostTypes.js';
+import type {
+  LLMProvider,
+  LLMToolCall,
+  LLMHostConfig,
+} from './llmHostTypes.js';
 
 /**
  * Result from an LLM chat call
@@ -115,7 +119,10 @@ const adapters = new Map<LLMProvider, AdapterFactory>();
 /**
  * Registers an adapter factory for a provider
  */
-export function registerAdapter(provider: LLMProvider, factory: AdapterFactory): void {
+export function registerAdapter(
+  provider: LLMProvider,
+  factory: AdapterFactory
+): void {
   adapters.set(provider, factory);
 }
 

@@ -47,7 +47,9 @@ describe('anthropicJudge', () => {
 
       expect(() => {
         createAnthropicJudge({ provider: 'anthropic' });
-      }).toThrow('Anthropic API key not found in environment variable: ANTHROPIC_API_KEY');
+      }).toThrow(
+        'Anthropic API key not found in environment variable: ANTHROPIC_API_KEY'
+      );
     });
 
     it('throws error for custom API key env var when not found', () => {
@@ -58,7 +60,9 @@ describe('anthropicJudge', () => {
           provider: 'anthropic',
           apiKeyEnvVar: 'CUSTOM_ANTHROPIC_KEY',
         });
-      }).toThrow('Anthropic API key not found in environment variable: CUSTOM_ANTHROPIC_KEY');
+      }).toThrow(
+        'Anthropic API key not found in environment variable: CUSTOM_ANTHROPIC_KEY'
+      );
     });
 
     it('uses custom API key env var when provided', () => {
@@ -230,7 +234,9 @@ describe('anthropicJudge', () => {
 
       await expect(
         judge.evaluate('candidate', 'reference', 'rubric')
-      ).rejects.toThrow('Anthropic judge evaluation failed: No text content in Anthropic response');
+      ).rejects.toThrow(
+        'Anthropic judge evaluation failed: No text content in Anthropic response'
+      );
     });
 
     it('throws error when API call fails', async () => {
@@ -238,7 +244,9 @@ describe('anthropicJudge', () => {
 
       await expect(
         judge.evaluate('candidate', 'reference', 'rubric')
-      ).rejects.toThrow('Anthropic judge evaluation failed: Rate limit exceeded');
+      ).rejects.toThrow(
+        'Anthropic judge evaluation failed: Rate limit exceeded'
+      );
     });
 
     it('throws error when JSON parsing fails', async () => {

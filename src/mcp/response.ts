@@ -59,7 +59,9 @@ export interface NormalizedToolResponse {
  * console.log(normalized.contentBlocks);  // [{ type: 'text', text: 'Hello World' }]
  * ```
  */
-export function normalizeToolResponse(result: CallToolResult): NormalizedToolResponse {
+export function normalizeToolResponse(
+  result: CallToolResult
+): NormalizedToolResponse {
   const isError = result.isError ?? false;
   const contentBlocks: ContentBlock[] = [];
   const textParts: string[] = [];
@@ -188,7 +190,11 @@ export function extractText(response: unknown): string {
   }
 
   // Primitives (number, boolean, bigint, symbol)
-  if (typeof response === 'number' || typeof response === 'boolean' || typeof response === 'bigint') {
+  if (
+    typeof response === 'number' ||
+    typeof response === 'boolean' ||
+    typeof response === 'bigint'
+  ) {
     return String(response);
   }
 

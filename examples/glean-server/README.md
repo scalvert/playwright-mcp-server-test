@@ -27,6 +27,7 @@ npm install
 ```
 
 This installs:
+
 - `@mcp-testing/server-tester` - Evaluation framework (includes Playwright)
 - `dotenv` - Environment variable management
 - `typescript` - TypeScript support
@@ -130,6 +131,7 @@ test('should search for documents', async ({ mcp }) => {
 ```
 
 **Glean tools tested:**
+
 - `search` - Document search
 - `code_search` - Code repository search
 - `employee_search` - People directory
@@ -140,6 +142,7 @@ test('should search for documents', async ({ mcp }) => {
 ### 3. Advanced Features (5 tests)
 
 Tests demonstrating advanced testing patterns:
+
 - Text extraction and validation
 - Date filtering
 - Pagination (num_results)
@@ -149,6 +152,7 @@ Tests demonstrating advanced testing patterns:
 ### 4. Glean Tool Availability (2 tests)
 
 Glean-specific conformance checks:
+
 - Verify all 7 expected Glean tools are present
 - Run conformance suite with Glean requirements
 
@@ -200,7 +204,7 @@ Glean MCP server returns **structured markdown** responses, not JSON. Use text-b
 import { extractTextFromResponse } from '@mcp-testing/server-tester';
 
 const result = await mcp.callTool('search', {
-  query: 'API documentation'
+  query: 'API documentation',
 });
 
 const text = extractTextFromResponse(result);
@@ -228,6 +232,7 @@ After running tests, view the interactive UI report:
 ```
 
 The UI shows:
+
 - 📊 Test pass/fail rates
 - 🔍 Detailed tool call logs
 - ✅ Expectation validation results
@@ -236,20 +241,24 @@ The UI shows:
 ## Expected Results
 
 ### MCP Protocol Conformance
+
 - **Expected**: 100% pass rate
 - Standard baseline tests that all MCP servers should pass
 - Validates basic protocol compliance
 
 ### Direct Mode Tests
+
 - **Expected**: 100% pass rate for Glean-specific tests
 - Tests are deterministic and should always pass with valid credentials
 
 ### Eval Dataset
+
 - **Expected**: 75-100% pass rate
 - Direct mode cases: 100%
 - LLM host mode cases: Variable (requires API keys)
 
 ### LLM Host Mode
+
 - **Expected**: Variable pass rate
 - Non-deterministic due to AI variability
 - Requires `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
@@ -263,6 +272,7 @@ Error: Failed to connect to MCP server
 ```
 
 **Solutions:**
+
 - Verify `GLEAN_MCP_SERVER_URL` is correct
 - Check network connectivity
 - Ensure firewall allows outbound HTTPS
@@ -274,6 +284,7 @@ Error: 401 Unauthorized
 ```
 
 **Solutions:**
+
 - Verify `GLEAN_API_TOKEN` is valid
 - Check token hasn't expired
 - Ensure token has required permissions
@@ -294,6 +305,7 @@ Error: OpenAI Agents SDK is not installed
 ```
 
 **Solution:**
+
 ```bash
 npm install @openai/agents openai @anthropic-ai/sdk
 ```
@@ -351,12 +363,14 @@ glean-server/
 ## Key Differences from Other Examples
 
 ### vs. filesystem-server
+
 - **Transport**: HTTP instead of stdio
 - **Data**: Production Glean data instead of fixtures
 - **Tools**: Cloud service instead of local filesystem
 - **Validation**: Text-based (markdown) instead of JSON schema
 
 ### vs. sqlite-server
+
 - **Transport**: HTTP instead of stdio
 - **Data**: Real-time search instead of static database
 - **Validation**: Text-based (markdown) instead of strict JSON schema

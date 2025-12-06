@@ -31,12 +31,15 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { open: 'never' }],
-    ['@mcp-testing/server-tester/reporters/mcpReporter', {
-      outputDir: '.mcp-test-results',
-      autoOpen: !process.env.CI,
-      historyLimit: 10,
-      quiet: true
-    }]
+    [
+      '@mcp-testing/server-tester/reporters/mcpReporter',
+      {
+        outputDir: '.mcp-test-results',
+        autoOpen: !process.env.CI,
+        historyLimit: 10,
+        quiet: true,
+      },
+    ],
   ],
 
   // Shared settings for all the projects below

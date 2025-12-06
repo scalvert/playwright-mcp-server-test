@@ -10,9 +10,7 @@
       "args": {
         "query": "API documentation"
       },
-      "expectedTextContains": [
-        "API"
-      ]
+      "expectedTextContains": ["API"]
     },
     {
       "id": "search-with-date-filter",
@@ -32,9 +30,7 @@
       "args": {
         "query": "engineering documentation"
       },
-      "expectedTextContains": [
-        "engineering"
-      ]
+      "expectedTextContains": ["engineering"]
     },
     {
       "id": "code-search-function",
@@ -44,9 +40,7 @@
       "args": {
         "query": "function"
       },
-      "expectedTextContains": [
-        "function"
-      ]
+      "expectedTextContains": ["function"]
     },
     {
       "id": "code-search-class",
@@ -56,9 +50,7 @@
       "args": {
         "query": "class"
       },
-      "expectedTextContains": [
-        "class"
-      ]
+      "expectedTextContains": ["class"]
     },
     {
       "id": "code-search-import",

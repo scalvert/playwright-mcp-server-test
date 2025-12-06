@@ -122,16 +122,22 @@ describe('token command', () => {
 
       expect(consoleOutput[0]).toContain('# Run these commands');
       expect(consoleOutput).toContainEqual(
-        expect.stringContaining('gh secret set MCP_ACCESS_TOKEN --body "test-access-token"')
+        expect.stringContaining(
+          'gh secret set MCP_ACCESS_TOKEN --body "test-access-token"'
+        )
       );
       expect(consoleOutput).toContainEqual(
-        expect.stringContaining('gh secret set MCP_REFRESH_TOKEN --body "test-refresh-token"')
+        expect.stringContaining(
+          'gh secret set MCP_REFRESH_TOKEN --body "test-refresh-token"'
+        )
       );
       expect(consoleOutput).toContainEqual(
         expect.stringContaining('gh secret set MCP_TOKEN_TYPE --body "Bearer"')
       );
       expect(consoleOutput).toContainEqual(
-        expect.stringContaining('gh secret set MCP_TOKEN_EXPIRES_AT --body "1234567890000"')
+        expect.stringContaining(
+          'gh secret set MCP_TOKEN_EXPIRES_AT --body "1234567890000"'
+        )
       );
     });
   });

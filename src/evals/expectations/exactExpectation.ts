@@ -4,7 +4,10 @@
  * Validates that the tool response exactly matches the expected value.
  */
 
-import { createRawExpectation, type ValidationResult } from './createExpectation.js';
+import {
+  createRawExpectation,
+  type ValidationResult,
+} from './createExpectation.js';
 
 /**
  * Creates an exact match expectation
