@@ -218,7 +218,7 @@ async function completeLoginForm(
  * typically created by `performOAuthSetup` in globalSetup.
  *
  * **Note:** This does NOT work with tokens stored by the CLI (`mcp-test login`).
- * For CLI-stored tokens, use `hasValidCLITokens(serverUrl)` instead.
+ * For CLI-stored tokens, use `hasValidTokens(serverUrl)` instead.
  *
  * @param storagePath - Path to the auth state file (e.g., 'playwright/.auth/oauth-state.json')
  * @returns true if valid auth state exists
