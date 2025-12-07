@@ -127,53 +127,8 @@ export default class MCPReporter implements Reporter {
           isError: boolean;
         };
 
-        // Create a synthetic EvalCaseResult from the MCP call data
-        // For test results, use the describe block name as the suite identifier
         const suiteName = test.parent?.title || 'Uncategorized Tests';
-
-        // Smart detection: Check if test expects an error based on naming conventions
-        // Use specific patterns that indicate error expectation, avoiding false positives
-        // like "handles error gracefully" or "error message format"
-        const titleLower = test.title.toLowerCase();
-
-        // Patterns that strongly indicate expecting an error
-        const errorExpectingPatterns = [
-          /\b(returns?|throws?|rejects?|fails?)\s+(an?\s+)?error\b/,
-          /\bshould\s+(fail|error|throw|reject)\b/,
-          /\b(fails?|rejects?)\s+with\b/,
-          /\b(fails?|rejects?)\s+when\b/,
-          /\binvalid\b.*\b(returns?|fails?|rejects?|throws?)\b/,
-          /\bmissing\b.*\b(returns?|fails?|rejects?|throws?)\b/,
-          /\bexpects?\s+(an?\s+)?error\b/,
-        ];
-
-        // Patterns that indicate NOT expecting an error (even if "error" appears in title)
-        const successPatterns = [
-          /\bhandles?\s+(the\s+)?error\b/,
-          /\bshould\s+not\s+(fail|error|throw|reject)\b/,
-          /\bwithout\s+(an?\s+)?error\b/,
-          /\bno\s+error\b/,
-          /\berror\s+(message|format|text|handling)\b/,
-        ];
-
-        // Check for success patterns first (they override error patterns)
-        const matchesSuccessPattern = successPatterns.some((pattern) =>
-          pattern.test(titleLower)
-        );
-
-        // Check if any error-expecting pattern matches
-        const matchesErrorPattern = errorExpectingPatterns.some((pattern) =>
-          pattern.test(titleLower)
-        );
-
-        const expectsError = matchesErrorPattern && !matchesSuccessPattern;
-
-        // For error case tests, flip the pass logic:
-        // - If expects error and got error: pass
-        // - If expects error and no error: fail
-        // - If no expectation and got error: fail
-        // - If no expectation and no error: pass
-        const pass = expectsError ? callData.isError : !callData.isError;
+        const testPassed = result.status === 'passed';
 
         const syntheticResult: EvalCaseResult = {
           id: `${test.title}-${callData.toolName}`,
@@ -181,19 +136,16 @@ export default class MCPReporter implements Reporter {
           toolName: callData.toolName,
           mode: 'direct',
           source: 'test',
-          pass,
+          pass: testPassed,
           response: callData.result,
-          error:
-            callData.isError && !expectsError
-              ? 'Tool call returned error'
-              : undefined,
-          expectations: expectsError
+          error: !testPassed ? 'Test failed' : undefined,
+          expectations: callData.isError
             ? {
                 error: {
-                  pass,
-                  details: pass
-                    ? 'Tool correctly returned error as expected'
-                    : 'Expected error but tool succeeded',
+                  pass: testPassed,
+                  details: testPassed
+                    ? 'Tool returned error as expected by test'
+                    : 'Tool returned unexpected error',
                 },
               }
             : {},
