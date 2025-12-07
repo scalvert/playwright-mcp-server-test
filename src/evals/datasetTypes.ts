@@ -133,19 +133,32 @@ export interface EvalCase {
    * Expected error response
    *
    * When set, the test expects the tool to return `isError: true`.
-   * This is useful for testing error handling (e.g., missing required params).
+   * This is useful for testing that tools properly validate input and return
+   * appropriate errors for invalid or missing parameters.
    *
-   * - `true`: Expects any error
-   * - `string`: Expects error message to contain this substring
-   * - `string[]`: Expects error message to contain all substrings
+   * - `true`: Expects any error (just validates `isError: true`)
+   * - `string`: Expects error AND message to contain this substring
+   * - `string[]`: Expects error AND message to contain all substrings
+   *
+   * Note: `args` is still required for the eval case, but you can omit
+   * tool-specific required parameters to test validation errors.
    *
    * @example
    * ```json
+   * // Test that search requires a query parameter
    * {
    *   "id": "search-missing-query",
    *   "toolName": "search",
-   *   "args": {},
-   *   "expectedError": true
+   *   "args": { "limit": 10 },
+   *   "expectedError": "query"
+   * }
+   *
+   * // Test that empty values are rejected with specific message
+   * {
+   *   "id": "search-empty-query",
+   *   "toolName": "search",
+   *   "args": { "query": "" },
+   *   "expectedError": ["query", "required"]
    * }
    * ```
    */

@@ -5,8 +5,10 @@
  * This is useful for testing error handling, e.g., missing required params.
  */
 
-import type { EvalExpectation, EvalExpectationResult } from '../evalRunner.js';
-import type { EvalCase } from '../datasetTypes.js';
+import {
+  createRawExpectation,
+  type ValidationResult,
+} from './createExpectation.js';
 import { extractTextFromResponse, findMissingSubstrings } from './textUtils.js';
 
 /**
@@ -31,7 +33,7 @@ interface MCPToolResponse {
  * {
  *   "id": "search-missing-query",
  *   "toolName": "search",
- *   "args": {},
+ *   "args": { "limit": 10 },
  *   "expectedError": true
  * }
  *
@@ -49,23 +51,16 @@ interface MCPToolResponse {
  * };
  * ```
  */
-export const createErrorExpectation = (): EvalExpectation => {
-  return async (
-    _context,
-    evalCase: EvalCase,
-    response: unknown
-  ): Promise<EvalExpectationResult> => {
+export const createErrorExpectation = createRawExpectation<
+  boolean | string | string[]
+>({
+  name: 'error',
+
+  getExpected: (evalCase) => evalCase.expectedError,
+
+  validate: (response, expectedError): ValidationResult => {
     const result = response as MCPToolResponse;
     const hasError = result?.isError === true;
-    const expectedError = evalCase.expectedError;
-
-    // If no expectedError is set in the case, skip this expectation
-    if (expectedError === undefined) {
-      return {
-        pass: true,
-        details: 'No error expectation defined, skipping',
-      };
-    }
 
     // Check if tool returned an error
     if (!hasError) {
@@ -111,5 +106,5 @@ export const createErrorExpectation = (): EvalExpectation => {
       pass: true,
       details: 'Tool correctly returned an error as expected',
     };
-  };
-};
+  },
+});

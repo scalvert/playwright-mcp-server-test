@@ -132,15 +132,41 @@ export default class MCPReporter implements Reporter {
         const suiteName = test.parent?.title || 'Uncategorized Tests';
 
         // Smart detection: Check if test expects an error based on naming conventions
-        // Tests with these patterns in the title are expected to return errors
+        // Use specific patterns that indicate error expectation, avoiding false positives
+        // like "handles error gracefully" or "error message format"
         const titleLower = test.title.toLowerCase();
-        const expectsError =
-          titleLower.includes('error') ||
-          titleLower.includes('invalid') ||
-          titleLower.includes('missing') ||
-          titleLower.includes('fails') ||
-          titleLower.includes('rejects') ||
-          titleLower.includes('throws');
+
+        // Patterns that strongly indicate expecting an error
+        const errorExpectingPatterns = [
+          /\b(returns?|throws?|rejects?|fails?)\s+(an?\s+)?error\b/,
+          /\bshould\s+(fail|error|throw|reject)\b/,
+          /\b(fails?|rejects?)\s+with\b/,
+          /\b(fails?|rejects?)\s+when\b/,
+          /\binvalid\b.*\b(returns?|fails?|rejects?|throws?)\b/,
+          /\bmissing\b.*\b(returns?|fails?|rejects?|throws?)\b/,
+          /\bexpects?\s+(an?\s+)?error\b/,
+        ];
+
+        // Patterns that indicate NOT expecting an error (even if "error" appears in title)
+        const successPatterns = [
+          /\bhandles?\s+(the\s+)?error\b/,
+          /\bshould\s+not\s+(fail|error|throw|reject)\b/,
+          /\bwithout\s+(an?\s+)?error\b/,
+          /\bno\s+error\b/,
+          /\berror\s+(message|format|text|handling)\b/,
+        ];
+
+        // Check for success patterns first (they override error patterns)
+        const matchesSuccessPattern = successPatterns.some((pattern) =>
+          pattern.test(titleLower)
+        );
+
+        // Check if any error-expecting pattern matches
+        const matchesErrorPattern = errorExpectingPatterns.some((pattern) =>
+          pattern.test(titleLower)
+        );
+
+        const expectsError = matchesErrorPattern && !matchesSuccessPattern;
 
         // For error case tests, flip the pass logic:
         // - If expects error and got error: pass
