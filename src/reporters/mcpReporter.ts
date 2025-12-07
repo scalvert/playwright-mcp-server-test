@@ -8,7 +8,6 @@ import type {
 } from '@playwright/test/reporter';
 import { mkdir, writeFile, readdir, readFile, unlink, cp } from 'fs/promises';
 import { join, resolve, dirname } from 'path';
-import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import type {
   MCPEvalReporterConfig,
@@ -139,16 +138,7 @@ export default class MCPReporter implements Reporter {
           pass: testPassed,
           response: callData.result,
           error: !testPassed ? 'Test failed' : undefined,
-          expectations: callData.isError
-            ? {
-                error: {
-                  pass: testPassed,
-                  details: testPassed
-                    ? 'Tool returned error as expected by test'
-                    : 'Tool returned unexpected error',
-                },
-              }
-            : {},
+          expectations: {},
           durationMs: callData.durationMs,
         };
 
@@ -239,17 +229,8 @@ export default class MCPReporter implements Reporter {
   }
 
   private buildRunData(durationMs: number): MCPEvalRunData {
-    const passed = this.allResults.filter((r) => r.pass).length;
-    const failed = this.allResults.filter((r) => !r.pass).length;
-
-    // Group by dataset name
+    const total = this.allResults.length;
     const datasetBreakdown: Record<string, number> = {};
-    this.allResults.forEach((r) => {
-      const datasetName = r.datasetName || 'Unknown Dataset';
-      datasetBreakdown[datasetName] = (datasetBreakdown[datasetName] || 0) + 1;
-    });
-
-    // Count expectation types used
     const expectationBreakdown = {
       exact: 0,
       schema: 0,
@@ -260,7 +241,13 @@ export default class MCPReporter implements Reporter {
       error: 0,
     };
 
-    this.allResults.forEach((r) => {
+    let passed = 0;
+    for (const r of this.allResults) {
+      if (r.pass) passed++;
+
+      const datasetName = r.datasetName || 'Unknown Dataset';
+      datasetBreakdown[datasetName] = (datasetBreakdown[datasetName] || 0) + 1;
+
       if (r.expectations.exact) expectationBreakdown.exact++;
       if (r.expectations.schema) expectationBreakdown.schema++;
       if (r.expectations.textContains) expectationBreakdown.textContains++;
@@ -268,7 +255,9 @@ export default class MCPReporter implements Reporter {
       if (r.expectations.snapshot) expectationBreakdown.snapshot++;
       if (r.expectations.judge) expectationBreakdown.judge++;
       if (r.expectations.error) expectationBreakdown.error++;
-    });
+    }
+
+    const failed = total - passed;
 
     return {
       timestamp: new Date().toISOString(),
@@ -279,10 +268,10 @@ export default class MCPReporter implements Reporter {
         platform: process.platform,
       },
       metrics: {
-        total: this.allResults.length,
+        total,
         passed,
         failed,
-        passRate: passed / this.allResults.length,
+        passRate: passed / total,
         datasetBreakdown,
         expectationBreakdown,
       },
@@ -292,16 +281,11 @@ export default class MCPReporter implements Reporter {
 
   private async loadHistoricalData(): Promise<Array<MCPEvalHistoricalSummary>> {
     try {
-      if (!existsSync(this.config.outputDir)) {
-        return [];
-      }
-
       const files = await readdir(this.config.outputDir);
       const runFiles = files
         .filter((f) => f.startsWith('run-') && f.endsWith('.json'))
         .sort()
-        .reverse()
-        .slice(0, this.config.historyLimit - 1); // -1 to make room for current run
+        .slice(-(this.config.historyLimit - 1)); // Keep most recent, leave room for current run
 
       const historical: Array<MCPEvalHistoricalSummary> = [];
 
@@ -326,12 +310,8 @@ export default class MCPReporter implements Reporter {
         }
       }
 
-      return historical.sort(
-        (a, b) =>
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-    } catch (error) {
-      this.logError('[MCP Reporter] Failed to load historical data:', error);
+      return historical;
+    } catch {
       return [];
     }
   }
