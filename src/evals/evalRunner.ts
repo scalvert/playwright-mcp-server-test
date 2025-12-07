@@ -128,6 +128,14 @@ export interface EvalCaseResult {
   };
 
   /**
+   * Authentication type used for this test
+   * - 'oauth': OAuth 2.1 with PKCE
+   * - 'bearer-token': Static bearer token
+   * - 'none': No authentication
+   */
+  authType?: 'oauth' | 'bearer-token' | 'none';
+
+  /**
    * Execution time in milliseconds
    */
   durationMs: number;
@@ -361,6 +369,7 @@ export async function runEvalCase(
     response,
     error,
     expectations: expectationResults,
+    authType: evalCase.authType,
     durationMs: Date.now() - startTime,
   };
 }

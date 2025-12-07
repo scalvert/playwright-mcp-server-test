@@ -124,6 +124,7 @@ export default class MCPReporter implements Reporter {
           result: unknown;
           durationMs: number;
           isError: boolean;
+          authType?: 'oauth' | 'bearer-token' | 'none';
         };
 
         const suiteName = test.parent?.title || 'Uncategorized Tests';
@@ -139,6 +140,7 @@ export default class MCPReporter implements Reporter {
           response: callData.result,
           error: !testPassed ? 'Test failed' : undefined,
           expectations: {},
+          authType: callData.authType,
           durationMs: callData.durationMs,
         };
 
