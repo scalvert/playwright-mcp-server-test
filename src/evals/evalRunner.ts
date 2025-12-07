@@ -65,6 +65,7 @@ export type ExpectationMap = {
   regex?: EvalExpectation;
   snapshot?: EvalExpectation;
   judge?: EvalExpectation;
+  error?: EvalExpectation;
 };
 
 /**
@@ -123,6 +124,7 @@ export interface EvalCaseResult {
     regex?: EvalExpectationResult;
     snapshot?: EvalExpectationResult;
     judge?: EvalExpectationResult;
+    error?: EvalExpectationResult;
   };
 
   /**
@@ -248,6 +250,12 @@ async function executeToolCall(
       }
 
       const result = await mcp.callTool(evalCase.toolName, evalCase.args);
+
+      // For error expectations, return the full result so isError can be checked
+      // For other expectations, return the content (backwards compatible)
+      if (evalCase.expectedError !== undefined) {
+        return { response: result };
+      }
       return { response: result.structuredContent ?? result.content };
     }
   } catch (err) {
@@ -346,7 +354,7 @@ export async function runEvalCase(
   return {
     id: evalCase.id,
     datasetName: options.datasetName ?? 'single-case',
-    toolName: evalCase.toolName || evalCase.scenario || 'llm_host',
+    toolName: evalCase.toolName ?? evalCase.scenario ?? 'unknown',
     mode,
     source: 'eval',
     pass: didCasePass(error, expectationResults),
@@ -429,14 +437,13 @@ export async function runEvalDataset(
     }
   }
 
-  // Aggregate results
+  const total = caseResults.length;
   const passed = caseResults.filter((r) => r.pass).length;
-  const failed = caseResults.filter((r) => !r.pass).length;
 
   const result: EvalRunnerResult = {
-    total: caseResults.length,
+    total,
     passed,
-    failed,
+    failed: total - passed,
     caseResults,
     durationMs: Date.now() - startTime,
   };
