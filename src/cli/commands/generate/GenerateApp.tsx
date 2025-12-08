@@ -8,25 +8,30 @@ import {
   createMCPClientForConfig,
   closeMCPClient,
 } from '../../../mcp/clientFactory.js';
-import { type MCPConfig, validateMCPConfig } from '../../../config/mcpConfig.js';
+import { type MCPConfig, validateMCPConfig, isHttpConfig } from '../../../config/mcpConfig.js';
+import { createFileOAuthStorage, listKnownServers, type KnownServer } from '../../../auth/storage.js';
 import type {
   EvalDataset,
   EvalCase,
   SerializedEvalDataset,
 } from '../../../evals/datasetTypes.js';
 import { suggestExpectations } from '../../utils/expectationSuggester.js';
-import { writeFile, readFile, stat } from 'fs/promises';
-import { resolve } from 'path';
+import { writeFile, readFile, stat, mkdir } from 'fs/promises';
+import { resolve, dirname } from 'path';
 
 type Step =
+  | 'loadingServers'
+  | 'selectServer'
   | 'configTransport'
   | 'configStdio'
   | 'configHttp'
   | 'connecting'
+  | 'authRequired'
   | 'datasetName'
   | 'appendPrompt'
   | 'selectTool'
-  | 'enterArgs'
+  | 'enterArgField'
+  | 'enterRawArgs'
   | 'callingTool'
   | 'reviewResponse'
   | 'caseId'
@@ -39,6 +44,29 @@ type Step =
   | 'saving'
   | 'done'
   | 'error';
+
+/**
+ * Schema property for form generation
+ */
+interface SchemaProperty {
+  name: string;
+  type: string;
+  description?: string;
+  required: boolean;
+}
+
+/**
+ * Check if an error indicates authentication is required
+ */
+function isAuthError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('401') ||
+    message.includes('Authorization') ||
+    message.includes('Unauthorized') ||
+    message.includes('authentication required')
+  );
+}
 
 export interface GenerateOptions {
   config?: string;
@@ -53,8 +81,11 @@ interface GenerateAppProps {
 export function GenerateApp({ options }: GenerateAppProps) {
   const { exit } = useApp();
 
-  // State machine
-  const [step, setStep] = useState<Step>(options.config ? 'connecting' : 'configTransport');
+  // State machine - start by loading known servers if no config provided
+  const [step, setStep] = useState<Step>(options.config ? 'connecting' : 'loadingServers');
+
+  // Known servers state
+  const [knownServers, setKnownServers] = useState<KnownServer[]>([]);
 
   // Configuration state
   const [mcpConfig, setMcpConfig] = useState<MCPConfig | null>(null);
@@ -63,9 +94,13 @@ export function GenerateApp({ options }: GenerateAppProps) {
   const [client, setClient] = useState<Client | null>(null);
   const [tools, setTools] = useState<Tool[]>([]);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
-  const [args, setArgs] = useState<string>('{}');
   const [response, setResponse] = useState<unknown>(null);
   const [callError, setCallError] = useState<string | null>(null);
+
+  // Schema form state
+  const [schemaProperties, setSchemaProperties] = useState<SchemaProperty[]>([]);
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0);
+  const [argValues, setArgValues] = useState<Record<string, unknown>>({});
 
   // Dataset state
   const [dataset, setDataset] = useState<EvalDataset>({
@@ -87,6 +122,25 @@ export function GenerateApp({ options }: GenerateAppProps) {
 
   // Track mounted state for async cleanup
   const isMountedRef = useRef(true);
+
+  // Load known servers on mount
+  useEffect(() => {
+    if (step === 'loadingServers') {
+      loadKnownServers();
+    }
+
+    async function loadKnownServers() {
+      const servers = await listKnownServers();
+      const authenticatedServers = servers.filter((s) => s.hasTokens);
+      setKnownServers(authenticatedServers);
+
+      if (authenticatedServers.length > 0) {
+        setStep('selectServer');
+      } else {
+        setStep('configTransport');
+      }
+    }
+  }, [step]);
 
   // Load config if provided
   useEffect(() => {
@@ -117,7 +171,20 @@ export function GenerateApp({ options }: GenerateAppProps) {
       if (!mcpConfig) return;
 
       try {
-        const c = await createMCPClientForConfig(mcpConfig);
+        // For HTTP configs, check for stored OAuth tokens
+        let configWithAuth = mcpConfig;
+        if (isHttpConfig(mcpConfig)) {
+          const storage = createFileOAuthStorage({ serverUrl: mcpConfig.serverUrl });
+          const tokens = await storage.loadTokens();
+          if (tokens?.accessToken) {
+            configWithAuth = {
+              ...mcpConfig,
+              auth: { accessToken: tokens.accessToken },
+            };
+          }
+        }
+
+        const c = await createMCPClientForConfig(configWithAuth);
 
         // Check if still mounted before updating state
         if (!isMountedRef.current) {
@@ -151,8 +218,12 @@ export function GenerateApp({ options }: GenerateAppProps) {
         }
       } catch (err) {
         if (isMountedRef.current) {
-          setError(`Failed to connect: ${err instanceof Error ? err.message : String(err)}`);
-          setStep('error');
+          if (isAuthError(err)) {
+            setStep('authRequired');
+          } else {
+            setError(`Failed to connect: ${err instanceof Error ? err.message : String(err)}`);
+            setStep('error');
+          }
         }
       }
     }
@@ -162,10 +233,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
     if (!client || !selectedTool) return;
 
     try {
-      const parsedArgs = JSON.parse(args);
       const result = await client.callTool({
         name: selectedTool.name,
-        arguments: parsedArgs,
+        arguments: argValues,
       });
       const responseData = result.structuredContent ?? result.content;
       setResponse(responseData);
@@ -178,7 +248,7 @@ export function GenerateApp({ options }: GenerateAppProps) {
       // Initialize current case
       setCurrentCase({
         toolName: selectedTool.name,
-        args: parsedArgs,
+        args: argValues,
       });
 
       setStep('reviewResponse');
@@ -200,6 +270,8 @@ export function GenerateApp({ options }: GenerateAppProps) {
         },
       };
 
+      // Create directory if it doesn't exist
+      await mkdir(dirname(outputPath), { recursive: true });
       await writeFile(outputPath, JSON.stringify(serialized, null, 2));
       setStep('done');
     } catch (err) {
@@ -233,6 +305,13 @@ export function GenerateApp({ options }: GenerateAppProps) {
     }
   });
 
+  // Exit after rendering done/error/authRequired
+  useEffect(() => {
+    if (step === 'done' || step === 'error' || step === 'authRequired') {
+      handleExit();
+    }
+  }, [step, handleExit]);
+
   // Handle step transitions when suggestions are empty (instead of setState in render)
   useEffect(() => {
     if (step === 'useTextContains' && suggestions.textContains.length === 0) {
@@ -249,10 +328,39 @@ export function GenerateApp({ options }: GenerateAppProps) {
   // Render based on step
   return (
     <Box flexDirection="column" padding={1}>
-      <Text bold color="cyan">
-        {'\uD83E\uDD16'} MCP Dataset Generator
-      </Text>
-      <Text> </Text>
+      {/* Loading known servers */}
+      {step === 'loadingServers' && <Spinner label="Loading known servers..." />}
+
+      {/* Select from known servers */}
+      {step === 'selectServer' && (
+        <Box flexDirection="column">
+          <Text>Select MCP server:</Text>
+          <Select
+            options={[
+              ...knownServers.map((s) => ({
+                label: s.url,
+                value: s.url,
+              })),
+              { label: 'Other (configure manually)', value: '__other__' },
+            ]}
+            onChange={(value) => {
+              if (value === '__other__') {
+                setStep('configTransport');
+              } else {
+                // Use the selected server URL
+                setMcpConfig(
+                  validateMCPConfig({
+                    transport: 'http',
+                    serverUrl: value,
+                    capabilities: { roots: { listChanged: true } },
+                  })
+                );
+                setStep('connecting');
+              }
+            }}
+          />
+        </Box>
+      )}
 
       {/* Transport Selection */}
       {step === 'configTransport' && (
@@ -315,6 +423,27 @@ export function GenerateApp({ options }: GenerateAppProps) {
       {/* Connecting */}
       {step === 'connecting' && <Spinner label="Connecting to MCP server..." />}
 
+      {/* Auth Required */}
+      {step === 'authRequired' && mcpConfig && (
+        <Box flexDirection="column">
+          <StatusMessage status="error">Authentication required</StatusMessage>
+          <Text> </Text>
+          <Text>This server requires OAuth authentication.</Text>
+          {'serverUrl' in mcpConfig && (
+            <>
+              <Text>Run: <Text color="cyan">mcp-test login {mcpConfig.serverUrl}</Text></Text>
+              <Text> </Text>
+              <Text dimColor>Then retry: mcp-test generate</Text>
+            </>
+          )}
+          {'command' in mcpConfig && (
+            <Text dimColor>
+              Note: stdio servers typically don&apos;t require OAuth authentication.
+            </Text>
+          )}
+        </Box>
+      )}
+
       {/* Append prompt */}
       {step === 'appendPrompt' && (
         <Box flexDirection="column">
@@ -368,30 +497,133 @@ export function GenerateApp({ options }: GenerateAppProps) {
           <Text>Select tool to test:</Text>
           <Select
             options={tools.map((t) => ({
-              label: `${t.name} - ${t.description ?? '(no description)'}`,
+              label: t.name,
               value: t.name,
             }))}
             onChange={(value) => {
               const tool = tools.find((t) => t.name === value);
               setSelectedTool(tool || null);
-              setStep('enterArgs');
+
+              // Extract schema properties from tool's inputSchema
+              if (tool?.inputSchema) {
+                const schema = tool.inputSchema as {
+                  properties?: Record<string, { type?: string; description?: string }>;
+                  required?: string[];
+                };
+                const props = schema.properties ?? {};
+                const required = schema.required ?? [];
+
+                const properties: SchemaProperty[] = Object.entries(props).map(
+                  ([name, prop]) => ({
+                    name,
+                    type: prop.type ?? 'string',
+                    description: prop.description,
+                    required: required.includes(name),
+                  })
+                );
+
+                setSchemaProperties(properties);
+                setCurrentPropertyIndex(0);
+                setArgValues({});
+
+                if (properties.length > 0) {
+                  setStep('enterArgField');
+                } else {
+                  // No properties defined - fall back to raw JSON entry
+                  setStep('enterRawArgs');
+                }
+              } else {
+                // No schema - fall back to raw JSON entry
+                setSchemaProperties([]);
+                setArgValues({});
+                setStep('enterRawArgs');
+              }
             }}
           />
         </Box>
       )}
 
-      {/* Arguments */}
-      {step === 'enterArgs' && (
+      {/* Argument Field Entry */}
+      {step === 'enterArgField' && schemaProperties.length > 0 && (
+        <Box flexDirection="column">
+          {(() => {
+            const prop = schemaProperties[currentPropertyIndex];
+            if (!prop) return null;
+
+            return (
+              <>
+                <Text dimColor>
+                  Field {currentPropertyIndex + 1} of {schemaProperties.length}
+                </Text>
+                <Text>
+                  <Text bold>{prop.name}</Text>
+                  <Text dimColor> ({prop.type})</Text>
+                  {prop.required && <Text color="red">*</Text>}
+                </Text>
+                {prop.description && (
+                  <Text dimColor>{prop.description}</Text>
+                )}
+                <TextInput
+                  key={prop.name}
+                  defaultValue=""
+                  onSubmit={(value) => {
+                    // Don't allow empty values for required fields
+                    if (prop.required && value.trim() === '') {
+                      return; // Stay on this field
+                    }
+
+                    // Parse value based on type
+                    let parsedValue: unknown = value;
+                    if (prop.type === 'number' || prop.type === 'integer') {
+                      parsedValue = value === '' ? undefined : Number(value);
+                    } else if (prop.type === 'boolean') {
+                      parsedValue = value.toLowerCase() === 'true';
+                    } else if (prop.type === 'array' || prop.type === 'object') {
+                      try {
+                        parsedValue = value === '' ? undefined : JSON.parse(value);
+                      } catch {
+                        parsedValue = value;
+                      }
+                    } else {
+                      parsedValue = value === '' ? undefined : value;
+                    }
+
+                    // Update arg values (skip undefined for optional fields)
+                    const newValues = { ...argValues };
+                    if (parsedValue !== undefined) {
+                      newValues[prop.name] = parsedValue;
+                    }
+                    setArgValues(newValues);
+
+                    // Move to next property or call tool
+                    if (currentPropertyIndex < schemaProperties.length - 1) {
+                      setCurrentPropertyIndex(currentPropertyIndex + 1);
+                    } else {
+                      setStep('callingTool');
+                      setTimeout(() => callTool(), 0);
+                    }
+                  }}
+                />
+              </>
+            );
+          })()}
+        </Box>
+      )}
+
+      {/* Raw JSON Args Entry (fallback when no schema properties) */}
+      {step === 'enterRawArgs' && (
         <Box flexDirection="column">
           <Text>Tool arguments (JSON):</Text>
+          {selectedTool?.description && (
+            <Text dimColor>{selectedTool.description}</Text>
+          )}
           <TextInput
             defaultValue="{}"
             onSubmit={(value) => {
               try {
-                JSON.parse(value);
-                setArgs(value);
+                const parsed = JSON.parse(value);
+                setArgValues(parsed);
                 setStep('callingTool');
-                // Start tool call after state update
                 setTimeout(() => callTool(), 0);
               } catch {
                 // Invalid JSON, stay on this step
@@ -589,7 +821,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
             onConfirm={() => {
               setCurrentCase({});
               setSelectedTool(null);
-              setArgs('{}');
+              setSchemaProperties([]);
+              setCurrentPropertyIndex(0);
+              setArgValues({});
               setResponse(null);
               setCallError(null);
               setSuggestions({ textContains: [], regex: [] });

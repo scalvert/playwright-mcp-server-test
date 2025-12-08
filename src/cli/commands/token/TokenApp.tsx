@@ -70,11 +70,8 @@ export function TokenApp({ serverUrl, options }: TokenAppProps) {
   // Exit after rendering success/error
   useEffect(() => {
     if (step === 'success' || step === 'error') {
-      // Small delay to ensure output is flushed
-      const timer = setTimeout(() => exit(), 50);
-      return () => clearTimeout(timer);
+      exit();
     }
-    return undefined;
   }, [step, exit]);
 
   const format = options.format ?? 'env';

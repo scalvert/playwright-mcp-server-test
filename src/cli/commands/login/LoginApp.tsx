@@ -100,11 +100,8 @@ export function LoginApp({ serverUrl, options }: LoginAppProps) {
   // Exit after rendering done/error
   useEffect(() => {
     if (step === 'done' || step === 'error') {
-      // Small delay to ensure output is flushed
-      const timer = setTimeout(() => exit(), 50);
-      return () => clearTimeout(timer);
+      exit();
     }
-    return undefined;
   }, [step, exit]);
 
   // Render based on step

@@ -67,6 +67,13 @@ export function InitApp({ options }: InitAppProps) {
     }
   });
 
+  // Exit after rendering done/error
+  useEffect(() => {
+    if (step === 'done' || step === 'error') {
+      exit();
+    }
+  }, [step, exit]);
+
   const createProject = useCallback(async () => {
     setStep('creating');
 
@@ -136,14 +143,23 @@ export function InitApp({ options }: InitAppProps) {
         stdio: 'pipe',
       });
 
+      let stderrOutput = '';
+      npm.stderr?.on('data', (data: Buffer) => {
+        stderrOutput += data.toString();
+      });
+
       npm.on('close', (code) => {
         if (code === 0) {
           setStep('done');
           resolvePromise();
         } else {
-          setError(`npm install exited with code ${code}`);
+          // Include stderr in error message for debugging
+          const errorMsg = stderrOutput.trim()
+            ? `npm install failed: ${stderrOutput.trim().split('\n')[0]}`
+            : `npm install exited with code ${code}`;
+          setError(errorMsg);
           setStep('error');
-          reject(new Error(`npm install failed`));
+          reject(new Error(errorMsg));
         }
       });
 
@@ -174,11 +190,6 @@ export function InitApp({ options }: InitAppProps) {
   // Render based on step
   return (
     <Box flexDirection="column" padding={1}>
-      <Text bold color="cyan">
-        {'\uD83C\uDFAD'} Playwright MCP Evals - Project Initializer
-      </Text>
-      <Text> </Text>
-
       {/* Project name */}
       {step === 'projectName' && (
         <Box flexDirection="column">
