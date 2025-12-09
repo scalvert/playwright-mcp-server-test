@@ -120,13 +120,21 @@ export function TokenApp({ serverUrl, options }: TokenAppProps) {
 function EnvFormat({ tokens }: { tokens: TokenData }) {
   return (
     <Box flexDirection="column">
-      <Text>{ENV_VAR_NAMES.accessToken}={tokens.accessToken}</Text>
+      <Text>
+        {ENV_VAR_NAMES.accessToken}={tokens.accessToken}
+      </Text>
       {tokens.refreshToken && (
-        <Text>{ENV_VAR_NAMES.refreshToken}={tokens.refreshToken}</Text>
+        <Text>
+          {ENV_VAR_NAMES.refreshToken}={tokens.refreshToken}
+        </Text>
       )}
-      <Text>{ENV_VAR_NAMES.tokenType}={tokens.tokenType}</Text>
+      <Text>
+        {ENV_VAR_NAMES.tokenType}={tokens.tokenType}
+      </Text>
       {tokens.expiresAt && (
-        <Text>{ENV_VAR_NAMES.expiresAt}={tokens.expiresAt}</Text>
+        <Text>
+          {ENV_VAR_NAMES.expiresAt}={tokens.expiresAt}
+        </Text>
       )}
     </Box>
   );
@@ -159,13 +167,25 @@ function GhFormat({ tokens }: { tokens: TokenData }) {
   return (
     <Box flexDirection="column">
       <Text dimColor># Run these commands to set GitHub Actions secrets:</Text>
-      <Text>gh secret set {ENV_VAR_NAMES.accessToken} --body &quot;{tokens.accessToken}&quot;</Text>
+      <Text>
+        gh secret set {ENV_VAR_NAMES.accessToken} --body &quot;
+        {tokens.accessToken}&quot;
+      </Text>
       {tokens.refreshToken && (
-        <Text>gh secret set {ENV_VAR_NAMES.refreshToken} --body &quot;{tokens.refreshToken}&quot;</Text>
+        <Text>
+          gh secret set {ENV_VAR_NAMES.refreshToken} --body &quot;
+          {tokens.refreshToken}&quot;
+        </Text>
       )}
-      <Text>gh secret set {ENV_VAR_NAMES.tokenType} --body &quot;{tokens.tokenType}&quot;</Text>
+      <Text>
+        gh secret set {ENV_VAR_NAMES.tokenType} --body &quot;{tokens.tokenType}
+        &quot;
+      </Text>
       {tokens.expiresAt && (
-        <Text>gh secret set {ENV_VAR_NAMES.expiresAt} --body &quot;{tokens.expiresAt}&quot;</Text>
+        <Text>
+          gh secret set {ENV_VAR_NAMES.expiresAt} --body &quot;
+          {tokens.expiresAt}&quot;
+        </Text>
       )}
     </Box>
   );

@@ -8,7 +8,11 @@ import {
   createMCPClientForConfig,
   closeMCPClient,
 } from '../../../mcp/clientFactory.js';
-import { type MCPConfig, validateMCPConfig, isHttpConfig } from '../../../config/mcpConfig.js';
+import {
+  type MCPConfig,
+  validateMCPConfig,
+  isHttpConfig,
+} from '../../../config/mcpConfig.js';
 import { listKnownServers, type KnownServer } from '../../../auth/storage.js';
 import { CLIOAuthClient } from '../../../auth/cli.js';
 import type {
@@ -83,7 +87,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
   const { exit } = useApp();
 
   // State machine - start by loading known servers if no config provided
-  const [step, setStep] = useState<Step>(options.config ? 'connecting' : 'loadingServers');
+  const [step, setStep] = useState<Step>(
+    options.config ? 'connecting' : 'loadingServers'
+  );
 
   // Known servers state
   const [knownServers, setKnownServers] = useState<KnownServer[]>([]);
@@ -99,7 +105,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
   const [callError, setCallError] = useState<string | null>(null);
 
   // Schema form state
-  const [schemaProperties, setSchemaProperties] = useState<SchemaProperty[]>([]);
+  const [schemaProperties, setSchemaProperties] = useState<SchemaProperty[]>(
+    []
+  );
   const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0);
   const [argValues, setArgValues] = useState<Record<string, unknown>>({});
 
@@ -157,7 +165,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
       setMcpConfig(validateMCPConfig(config));
       setStep('connecting');
     } catch (err) {
-      setError(`Failed to load config: ${err instanceof Error ? err.message : String(err)}`);
+      setError(
+        `Failed to load config: ${err instanceof Error ? err.message : String(err)}`
+      );
       setStep('error');
     }
   }
@@ -175,7 +185,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
         // For HTTP configs, get a valid OAuth token (with automatic refresh)
         let configWithAuth = mcpConfig;
         if (isHttpConfig(mcpConfig)) {
-          const oauthClient = new CLIOAuthClient({ mcpServerUrl: mcpConfig.serverUrl });
+          const oauthClient = new CLIOAuthClient({
+            mcpServerUrl: mcpConfig.serverUrl,
+          });
           const tokenResult = await oauthClient.tryGetAccessToken();
 
           if (tokenResult) {
@@ -224,7 +236,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
           if (isAuthError(err)) {
             setStep('authRequired');
           } else {
-            setError(`Failed to connect: ${err instanceof Error ? err.message : String(err)}`);
+            setError(
+              `Failed to connect: ${err instanceof Error ? err.message : String(err)}`
+            );
             setStep('error');
           }
         }
@@ -278,7 +292,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
       await writeFile(outputPath, JSON.stringify(serialized, null, 2));
       setStep('done');
     } catch (err) {
-      setError(`Failed to save: ${err instanceof Error ? err.message : String(err)}`);
+      setError(
+        `Failed to save: ${err instanceof Error ? err.message : String(err)}`
+      );
       setStep('error');
     }
   }
@@ -295,7 +311,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
 
   const handleExit = useCallback(() => {
     if (client) {
-      closeMCPClient(client).then(() => exit()).catch(() => exit());
+      closeMCPClient(client)
+        .then(() => exit())
+        .catch(() => exit());
     } else {
       exit();
     }
@@ -332,7 +350,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
   return (
     <Box flexDirection="column" padding={1}>
       {/* Loading known servers */}
-      {step === 'loadingServers' && <Spinner label="Loading known servers..." />}
+      {step === 'loadingServers' && (
+        <Spinner label="Loading known servers..." />
+      )}
 
       {/* Select from known servers */}
       {step === 'selectServer' && (
@@ -435,14 +455,18 @@ export function GenerateApp({ options }: GenerateAppProps) {
           <Text>This server requires OAuth authentication.</Text>
           {'serverUrl' in mcpConfig && (
             <>
-              <Text>Run: <Text color="cyan">mcp-test login {mcpConfig.serverUrl}</Text></Text>
+              <Text>
+                Run:{' '}
+                <Text color="cyan">mcp-test login {mcpConfig.serverUrl}</Text>
+              </Text>
               <Text> </Text>
               <Text dimColor>Then retry: mcp-test generate</Text>
             </>
           )}
           {'command' in mcpConfig && (
             <Text dimColor>
-              Note: stdio servers typically don&apos;t require OAuth authentication.
+              Note: stdio servers typically don&apos;t require OAuth
+              authentication.
             </Text>
           )}
         </Box>
@@ -451,7 +475,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
       {/* Append prompt */}
       {step === 'appendPrompt' && (
         <Box flexDirection="column">
-          <StatusMessage status="success">Connected! Found {tools.length} tools</StatusMessage>
+          <StatusMessage status="success">
+            Connected! Found {tools.length} tools
+          </StatusMessage>
           <Text> </Text>
           <Text>Dataset file exists at {outputPath}. Append to it?</Text>
           <ConfirmInput
@@ -479,7 +505,9 @@ export function GenerateApp({ options }: GenerateAppProps) {
       {step === 'datasetName' && (
         <Box flexDirection="column">
           {client && (
-            <StatusMessage status="success">Connected! Found {tools.length} tools</StatusMessage>
+            <StatusMessage status="success">
+              Connected! Found {tools.length} tools
+            </StatusMessage>
           )}
           <Text> </Text>
           <Text>Dataset name:</Text>
@@ -512,7 +540,10 @@ export function GenerateApp({ options }: GenerateAppProps) {
               // Extract schema properties from tool's inputSchema
               if (tool?.inputSchema) {
                 const schema = tool.inputSchema as {
-                  properties?: Record<string, { type?: string; description?: string }>;
+                  properties?: Record<
+                    string,
+                    { type?: string; description?: string }
+                  >;
                   required?: string[];
                 };
                 const props = schema.properties ?? {};
@@ -565,9 +596,7 @@ export function GenerateApp({ options }: GenerateAppProps) {
                   <Text dimColor> ({prop.type})</Text>
                   {prop.required && <Text color="red">*</Text>}
                 </Text>
-                {prop.description && (
-                  <Text dimColor>{prop.description}</Text>
-                )}
+                {prop.description && <Text dimColor>{prop.description}</Text>}
                 <TextInput
                   key={prop.name}
                   defaultValue=""
@@ -583,9 +612,13 @@ export function GenerateApp({ options }: GenerateAppProps) {
                       parsedValue = value === '' ? undefined : Number(value);
                     } else if (prop.type === 'boolean') {
                       parsedValue = value.toLowerCase() === 'true';
-                    } else if (prop.type === 'array' || prop.type === 'object') {
+                    } else if (
+                      prop.type === 'array' ||
+                      prop.type === 'object'
+                    ) {
                       try {
-                        parsedValue = value === '' ? undefined : JSON.parse(value);
+                        parsedValue =
+                          value === '' ? undefined : JSON.parse(value);
                       } catch {
                         parsedValue = value;
                       }
@@ -649,10 +682,14 @@ export function GenerateApp({ options }: GenerateAppProps) {
       {step === 'reviewResponse' && (
         <Box flexDirection="column">
           {callError ? (
-            <StatusMessage status="error">Tool call failed: {callError}</StatusMessage>
+            <StatusMessage status="error">
+              Tool call failed: {callError}
+            </StatusMessage>
           ) : (
             <>
-              <StatusMessage status="success">Tool called successfully</StatusMessage>
+              <StatusMessage status="success">
+                Tool called successfully
+              </StatusMessage>
               <Text> </Text>
               <Text dimColor>Response preview:</Text>
               <JsonPreview data={response} maxLines={10} />
@@ -660,7 +697,8 @@ export function GenerateApp({ options }: GenerateAppProps) {
                 <Box flexDirection="column" marginTop={1}>
                   <Text color="cyan">Suggested expectations:</Text>
                   <Text dimColor>
-                    Text contains: {suggestions.textContains.map((t) => `"${t}"`).join(', ')}
+                    Text contains:{' '}
+                    {suggestions.textContains.map((t) => `"${t}"`).join(', ')}
                   </Text>
                 </Box>
               )}
@@ -850,19 +888,24 @@ export function GenerateApp({ options }: GenerateAppProps) {
       {/* Done */}
       {step === 'done' && (
         <Box flexDirection="column">
-          <StatusMessage status="success">Dataset generation complete!</StatusMessage>
+          <StatusMessage status="success">
+            Dataset generation complete!
+          </StatusMessage>
           <Text> </Text>
           <Text color="cyan">Total test cases: {dataset.cases.length}</Text>
           <Text dimColor>Output: {outputPath}</Text>
           <Text> </Text>
           <Text color="cyan">Next steps:</Text>
-          <Text dimColor>  npx playwright test</Text>
+          <Text dimColor> npx playwright test</Text>
           {dataset.cases.some((c) => c.expectedSnapshot) && (
             <>
               <Text> </Text>
               <Text color="cyan">Snapshot testing:</Text>
-              <Text dimColor>  First run will capture snapshots</Text>
-              <Text dimColor>  Update: npx playwright test --update-snapshots</Text>
+              <Text dimColor> First run will capture snapshots</Text>
+              <Text dimColor>
+                {' '}
+                Update: npx playwright test --update-snapshots
+              </Text>
             </>
           )}
         </Box>

@@ -4,12 +4,7 @@ import { Spinner, StatusMessage } from '../../components/index.js';
 import { CLIOAuthClient } from '../../../auth/cli.js';
 import { getStateDir } from '../../../auth/storage.js';
 
-type Step =
-  | 'validating'
-  | 'clearing'
-  | 'authenticating'
-  | 'done'
-  | 'error';
+type Step = 'validating' | 'clearing' | 'authenticating' | 'done' | 'error';
 
 export interface LoginOptions {
   force?: boolean;
@@ -97,9 +92,7 @@ export function LoginApp({ serverUrl, options }: LoginAppProps) {
 
   return (
     <Box flexDirection="column" padding={1}>
-      {step === 'validating' && (
-        <Spinner label="Validating server URL..." />
-      )}
+      {step === 'validating' && <Spinner label="Validating server URL..." />}
 
       {step === 'clearing' && (
         <Spinner label="Clearing existing credentials..." />

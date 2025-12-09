@@ -11,12 +11,16 @@ import { JsonPreview } from './JsonPreview.js';
 
 describe('Spinner', () => {
   it('renders with label', () => {
-    const { lastFrame } = render(React.createElement(Spinner, { label: 'Loading...' }));
+    const { lastFrame } = render(
+      React.createElement(Spinner, { label: 'Loading...' })
+    );
     expect(lastFrame()).toContain('Loading...');
   });
 
   it('renders with different labels', () => {
-    const { lastFrame } = render(React.createElement(Spinner, { label: 'Connecting to server...' }));
+    const { lastFrame } = render(
+      React.createElement(Spinner, { label: 'Connecting to server...' })
+    );
     expect(lastFrame()).toContain('Connecting to server...');
   });
 });
@@ -24,7 +28,11 @@ describe('Spinner', () => {
 describe('StatusMessage', () => {
   it('renders success status with checkmark', () => {
     const { lastFrame } = render(
-      React.createElement(StatusMessage, { status: 'success' }, 'Operation completed')
+      React.createElement(
+        StatusMessage,
+        { status: 'success' },
+        'Operation completed'
+      )
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u2713'); // checkmark
@@ -33,7 +41,11 @@ describe('StatusMessage', () => {
 
   it('renders error status with X', () => {
     const { lastFrame } = render(
-      React.createElement(StatusMessage, { status: 'error' }, 'Something went wrong')
+      React.createElement(
+        StatusMessage,
+        { status: 'error' },
+        'Something went wrong'
+      )
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u2717'); // X mark
@@ -42,7 +54,11 @@ describe('StatusMessage', () => {
 
   it('renders info status with info icon', () => {
     const { lastFrame } = render(
-      React.createElement(StatusMessage, { status: 'info' }, 'Information message')
+      React.createElement(
+        StatusMessage,
+        { status: 'info' },
+        'Information message'
+      )
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u2139'); // info icon
@@ -51,7 +67,11 @@ describe('StatusMessage', () => {
 
   it('renders warning status with warning icon', () => {
     const { lastFrame } = render(
-      React.createElement(StatusMessage, { status: 'warning' }, 'Warning message')
+      React.createElement(
+        StatusMessage,
+        { status: 'warning' },
+        'Warning message'
+      )
     );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('\u26A0'); // warning icon
@@ -90,20 +110,26 @@ describe('JsonPreview', () => {
 
   it('respects maxLines limit', () => {
     const data = { a: 1, b: 2, c: 3, d: 4, e: 5 };
-    const { lastFrame } = render(React.createElement(JsonPreview, { data, maxLines: 3 }));
+    const { lastFrame } = render(
+      React.createElement(JsonPreview, { data, maxLines: 3 })
+    );
     const frame = lastFrame() ?? '';
     // Should show truncation indicator
     expect(frame).toContain('...');
   });
 
   it('handles null data', () => {
-    const { lastFrame } = render(React.createElement(JsonPreview, { data: null }));
+    const { lastFrame } = render(
+      React.createElement(JsonPreview, { data: null })
+    );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('null');
   });
 
   it('handles string data', () => {
-    const { lastFrame } = render(React.createElement(JsonPreview, { data: 'hello world' }));
+    const { lastFrame } = render(
+      React.createElement(JsonPreview, { data: 'hello world' })
+    );
     const frame = lastFrame() ?? '';
     expect(frame).toContain('hello world');
   });

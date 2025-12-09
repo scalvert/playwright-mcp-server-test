@@ -42,7 +42,9 @@ export function InitApp({ options }: InitAppProps) {
   const [step, setStep] = useState<Step>('projectName');
 
   // Form state
-  const [projectName, setProjectName] = useState(options.name || 'my-mcp-tests');
+  const [projectName, setProjectName] = useState(
+    options.name || 'my-mcp-tests'
+  );
   const [transportType, setTransportType] = useState<'stdio' | 'http'>('stdio');
   const [serverCommand, setServerCommand] = useState('node server.js');
   const [serverUrl, setServerUrl] = useState('http://localhost:3000/mcp');
@@ -134,7 +136,14 @@ export function InitApp({ options }: InitAppProps) {
       setError(err instanceof Error ? err.message : String(err));
       setStep('error');
     }
-  }, [projectPath, projectName, transportType, serverCommand, serverUrl, installDeps]);
+  }, [
+    projectPath,
+    projectName,
+    transportType,
+    serverCommand,
+    serverUrl,
+    installDeps,
+  ]);
 
   const installDependencies = useCallback(async () => {
     return new Promise<void>((resolvePromise, reject) => {
@@ -296,12 +305,12 @@ export function InitApp({ options }: InitAppProps) {
           </StatusMessage>
           <Text> </Text>
           <Text color="cyan">Next steps:</Text>
-          <Text dimColor>  cd {projectName}</Text>
-          {!installDeps && <Text dimColor>  npm install</Text>}
-          <Text dimColor>  npm test</Text>
+          <Text dimColor> cd {projectName}</Text>
+          {!installDeps && <Text dimColor> npm install</Text>}
+          <Text dimColor> npm test</Text>
           <Text> </Text>
           <Text color="cyan">To generate a dataset:</Text>
-          <Text dimColor>  npx mcp-test generate</Text>
+          <Text dimColor> npx mcp-test generate</Text>
         </Box>
       )}
 
