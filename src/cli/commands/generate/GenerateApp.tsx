@@ -229,13 +229,13 @@ export function GenerateApp({ options }: GenerateAppProps) {
     }
   }, [step, mcpConfig, outputPath]);
 
-  async function callTool() {
+  async function callTool(finalArgs: Record<string, unknown>) {
     if (!client || !selectedTool) return;
 
     try {
       const result = await client.callTool({
         name: selectedTool.name,
-        arguments: argValues,
+        arguments: finalArgs,
       });
       const responseData = result.structuredContent ?? result.content;
       setResponse(responseData);
@@ -248,7 +248,7 @@ export function GenerateApp({ options }: GenerateAppProps) {
       // Initialize current case
       setCurrentCase({
         toolName: selectedTool.name,
-        args: argValues,
+        args: finalArgs,
       });
 
       setStep('reviewResponse');
@@ -336,6 +336,7 @@ export function GenerateApp({ options }: GenerateAppProps) {
         <Box flexDirection="column">
           <Text>Select MCP server:</Text>
           <Select
+            visibleOptionCount={10}
             options={[
               ...knownServers.map((s) => ({
                 label: s.url,
@@ -496,6 +497,7 @@ export function GenerateApp({ options }: GenerateAppProps) {
           <Text> </Text>
           <Text>Select tool to test:</Text>
           <Select
+            visibleOptionCount={15}
             options={tools.map((t) => ({
               label: t.name,
               value: t.name,
@@ -588,19 +590,20 @@ export function GenerateApp({ options }: GenerateAppProps) {
                       parsedValue = value === '' ? undefined : value;
                     }
 
-                    // Update arg values (skip undefined for optional fields)
-                    const newValues = { ...argValues };
+                    // Build final arg values (skip undefined for optional fields)
+                    const finalArgs = { ...argValues };
                     if (parsedValue !== undefined) {
-                      newValues[prop.name] = parsedValue;
+                      finalArgs[prop.name] = parsedValue;
                     }
-                    setArgValues(newValues);
+                    setArgValues(finalArgs);
 
                     // Move to next property or call tool
                     if (currentPropertyIndex < schemaProperties.length - 1) {
                       setCurrentPropertyIndex(currentPropertyIndex + 1);
                     } else {
+                      // Pass finalArgs directly to avoid stale state
                       setStep('callingTool');
-                      setTimeout(() => callTool(), 0);
+                      setTimeout(() => callTool(finalArgs), 0);
                     }
                   }}
                 />
@@ -621,10 +624,11 @@ export function GenerateApp({ options }: GenerateAppProps) {
             defaultValue="{}"
             onSubmit={(value) => {
               try {
-                const parsed = JSON.parse(value);
+                const parsed = JSON.parse(value) as Record<string, unknown>;
                 setArgValues(parsed);
                 setStep('callingTool');
-                setTimeout(() => callTool(), 0);
+                // Pass parsed args directly to avoid stale state
+                setTimeout(() => callTool(parsed), 0);
               } catch {
                 // Invalid JSON, stay on this step
               }
