@@ -209,6 +209,73 @@ export class CLIOAuthClient {
   }
 
   /**
+   * Try to get a valid access token without triggering browser auth
+   *
+   * Returns null if no valid token is available (no stored tokens,
+   * expired without refresh token, or refresh failed). Unlike getAccessToken(),
+   * this will NOT open a browser for authentication.
+   *
+   * Use this for CLI commands that should prompt the user to run `login`
+   * instead of automatically starting the OAuth flow.
+   */
+  async tryGetAccessToken(): Promise<CLIOAuthResult | null> {
+    // 1. Check environment variables first (CI/CD support)
+    const envTokens = loadTokensFromEnv();
+    if (envTokens) {
+      debug('Using tokens from environment variables');
+      return {
+        accessToken: envTokens.accessToken,
+        tokenType: envTokens.tokenType,
+        expiresAt: envTokens.expiresAt,
+        refreshed: false,
+        fromEnv: true,
+      };
+    }
+
+    // 2. Check file storage for cached tokens
+    const storedTokens = await this.storage.loadTokens();
+
+    if (storedTokens?.accessToken) {
+      // Check if token is still valid
+      const isValid = await this.storage.hasValidToken();
+
+      if (isValid) {
+        debug('Using cached tokens from storage');
+        return {
+          accessToken: storedTokens.accessToken,
+          tokenType: storedTokens.tokenType,
+          expiresAt: storedTokens.expiresAt,
+          refreshed: false,
+          fromEnv: false,
+        };
+      }
+
+      // 3. Try to refresh if we have a refresh token
+      if (storedTokens.refreshToken) {
+        debug('Token expired, attempting refresh');
+        try {
+          const refreshedTokens = await this.refreshStoredToken(storedTokens);
+          return {
+            accessToken: refreshedTokens.accessToken,
+            tokenType: refreshedTokens.tokenType,
+            expiresAt: refreshedTokens.expiresAt,
+            refreshed: true,
+            fromEnv: false,
+          };
+        } catch (error) {
+          debug('Token refresh failed:', error);
+          // Return null - don't fall through to browser auth
+          return null;
+        }
+      }
+    }
+
+    // No valid token available - return null instead of opening browser
+    debug('No valid token available');
+    return null;
+  }
+
+  /**
    * Force a new authentication flow
    */
   async authenticate(): Promise<CLIOAuthResult> {

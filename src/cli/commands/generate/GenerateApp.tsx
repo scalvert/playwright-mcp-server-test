@@ -9,7 +9,8 @@ import {
   closeMCPClient,
 } from '../../../mcp/clientFactory.js';
 import { type MCPConfig, validateMCPConfig, isHttpConfig } from '../../../config/mcpConfig.js';
-import { createFileOAuthStorage, listKnownServers, type KnownServer } from '../../../auth/storage.js';
+import { listKnownServers, type KnownServer } from '../../../auth/storage.js';
+import { CLIOAuthClient } from '../../../auth/cli.js';
 import type {
   EvalDataset,
   EvalCase,
@@ -171,17 +172,19 @@ export function GenerateApp({ options }: GenerateAppProps) {
       if (!mcpConfig) return;
 
       try {
-        // For HTTP configs, check for stored OAuth tokens
+        // For HTTP configs, get a valid OAuth token (with automatic refresh)
         let configWithAuth = mcpConfig;
         if (isHttpConfig(mcpConfig)) {
-          const storage = createFileOAuthStorage({ serverUrl: mcpConfig.serverUrl });
-          const tokens = await storage.loadTokens();
-          if (tokens?.accessToken) {
+          const oauthClient = new CLIOAuthClient({ mcpServerUrl: mcpConfig.serverUrl });
+          const tokenResult = await oauthClient.tryGetAccessToken();
+
+          if (tokenResult) {
             configWithAuth = {
               ...mcpConfig,
-              auth: { accessToken: tokens.accessToken },
+              auth: { accessToken: tokenResult.accessToken },
             };
           }
+          // If no token available, try to connect anyway - server may not require auth
         }
 
         const c = await createMCPClientForConfig(configWithAuth);
