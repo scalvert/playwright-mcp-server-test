@@ -330,7 +330,9 @@ export function ResultsTable({ results, onSelectResult }: ResultsTableProps) {
                                     : 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-400'
                                 }`}
                               >
-                                {result.authType === 'oauth' ? 'OAuth' : 'Token'}
+                                {result.authType === 'oauth'
+                                  ? 'OAuth'
+                                  : 'Token'}
                               </span>
                             )}
 

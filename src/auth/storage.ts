@@ -182,6 +182,79 @@ export function getStateDir(serverUrl: string, customDir?: string): string {
 }
 
 /**
+ * Get the base directory for all MCP token storage
+ */
+export function getBaseStateDir(): string {
+  if (process.platform === 'win32') {
+    const localAppData = process.env.LOCALAPPDATA;
+    if (localAppData) {
+      return path.join(localAppData, 'mcp-tests');
+    }
+    return path.join(homedir(), 'AppData', 'Local', 'mcp-tests');
+  }
+
+  if (process.platform === 'linux' && process.env.XDG_STATE_HOME) {
+    return path.join(process.env.XDG_STATE_HOME, 'mcp-tests');
+  }
+
+  return path.join(homedir(), '.local', 'state', 'mcp-tests');
+}
+
+/**
+ * Known server info
+ */
+export interface KnownServer {
+  /** The server key (directory name) */
+  key: string;
+  /** Reconstructed URL (best effort) */
+  url: string;
+  /** Whether valid tokens exist */
+  hasTokens: boolean;
+}
+
+/**
+ * List all known authenticated servers from the token storage directory
+ *
+ * @returns Array of known servers with their URLs and token status
+ */
+export async function listKnownServers(): Promise<KnownServer[]> {
+  const baseDir = getBaseStateDir();
+  const servers: KnownServer[] = [];
+
+  try {
+    const entries = await fs.readdir(baseDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+
+      const serverKey = entry.name;
+      const tokensPath = path.join(baseDir, serverKey, 'tokens.json');
+
+      let hasTokens = false;
+      try {
+        await fs.access(tokensPath);
+        hasTokens = true;
+      } catch {
+        // No tokens file
+      }
+
+      // Reconstruct URL from server key (best effort)
+      // Format: hostname_port_path or hostname_path
+      const parts = serverKey.split('_');
+      const hostname = parts[0];
+      const rest = parts.slice(1).join('/');
+      const url = `https://${hostname}/${rest}`;
+
+      servers.push({ key: serverKey, url, hasTokens });
+    }
+  } catch {
+    // Directory doesn't exist or not readable
+  }
+
+  return servers;
+}
+
+/**
  * Reads tokens from environment variables (for CI/CD)
  *
  * @returns StoredTokens if MCP_ACCESS_TOKEN is set, null otherwise

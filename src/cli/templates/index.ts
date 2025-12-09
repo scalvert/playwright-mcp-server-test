@@ -215,7 +215,7 @@ export function getPackageJsonTemplate(projectName: string): string {
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@playwright/test": "^1.49.0",
-    "@mcp-testing/server-tester": "^0.1.0",
+    "@mcp-testing/server-tester": "^0.9.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
