@@ -1,3 +1,15 @@
+
+## v0.10.0 (2025-12-10)
+
+#### :rocket: Enhancement
+* [#10](https://github.com/mcp-testing/server-tester/pull/10) feat: Migrate CLI commands to Ink ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#9](https://github.com/mcp-testing/server-tester/pull/9) feat: Add authType metadata for test result filtering ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#8](https://github.com/mcp-testing/server-tester/pull/8) feat: Add error expectation support for testing error cases ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.9.0 (2025-12-06)
 
 #### :boom: Breaking Change
