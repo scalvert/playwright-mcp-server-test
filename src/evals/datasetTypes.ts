@@ -188,21 +188,6 @@ export interface EvalCase {
   snapshotSanitizers?: SnapshotSanitizer[];
 
   /**
-   * Authentication type used for this test case
-   *
-   * @deprecated This field is no longer used. The authType is now automatically
-   * determined from the Playwright test context (MCPFixtureApi.authType), which
-   * derives it from the mcpConfig.auth settings. This ensures consistency between
-   * test execution and reporting.
-   *
-   * Used for filtering and categorizing tests by auth method in the reporter:
-   * - 'oauth': OAuth 2.1 with PKCE
-   * - 'bearer-token': Static bearer token
-   * - 'none': No authentication
-   */
-  authType?: 'oauth' | 'bearer-token' | 'none';
-
-  /**
    * Additional metadata for this test case
    *
    * For 'llm_host' mode, can include 'expectedToolCalls' for validation
@@ -292,7 +277,6 @@ export const EvalCaseSchema = z.object({
     .union([z.boolean(), z.string(), z.array(z.string())])
     .optional(),
   snapshotSanitizers: z.array(SnapshotSanitizerSchema).optional(),
-  authType: z.enum(['oauth', 'bearer-token', 'none']).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 
