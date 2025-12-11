@@ -1,5 +1,15 @@
 
 
+
+## v0.10.2 (2025-12-11)
+
+#### :bug: Bug Fix
+* [#12](https://github.com/mcp-testing/server-tester/pull/12) feat: Use Playwright context as single source of truth for reporter metadata ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.10.1 (2025-12-10)
 
 #### :bug: Bug Fix
