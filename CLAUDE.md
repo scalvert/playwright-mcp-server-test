@@ -60,6 +60,39 @@ Public API is defined in `src/index.ts`. The package has multiple export paths:
 - `./fixtures/mcpAuth` - Auth-specific fixtures for OAuth/token auth
 - `./reporters/mcpReporter` - Custom reporter
 
+## Type Architecture
+
+### Single Source of Truth
+
+Types are organized in a canonical hierarchy to prevent duplication and drift:
+
+- **`src/types/index.ts`** - Core shared types: `AuthType`, `ResultSource`, `ExpectationType`, `EvalExpectationResult`
+- **`src/types/reporter.ts`** - Reporter-specific types: `MCPEvalRunData`, `EvalCaseResult`, `MCPConformanceResultData`, `MCPServerCapabilitiesData`
+
+### Import Guidelines
+
+1. **For new code**: Always import from `src/types/` first
+2. **For existing modules**: Import from their own domain, which re-exports from canonical source
+3. **Never define** `AuthType`, `ExpectationType`, or other core types inline - import them
+
+```typescript
+// Correct: Import from canonical source
+import type { AuthType, ExpectationType } from '../types/index.js';
+
+// Correct: Import from domain module (which re-exports)
+import type { EvalCaseResult } from '../types/reporter.js';
+
+// Wrong: Inline type literal
+authType?: 'oauth' | 'api-token' | 'none';  // Don't do this!
+```
+
+### UI Type Synchronization
+
+The UI types in `src/reporters/ui-src/types.ts` must manually stay in sync with backend types. When updating backend types, also update:
+
+1. `src/types/reporter.ts` (canonical backend)
+2. `src/reporters/ui-src/types.ts` (UI copy)
+
 ## Code Style
 
 - Use function declarations, not arrow function expressions for exports

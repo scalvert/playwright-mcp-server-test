@@ -1,8 +1,8 @@
 import React from 'react';
-import type { MCPEvalResult } from '../../types';
+import type { EvalCaseResult } from '../../types';
 
 interface DetailModalProps {
-  result: MCPEvalResult | null;
+  result: EvalCaseResult | null;
   onClose: () => void;
 }
 
@@ -48,11 +48,8 @@ export function DetailModal({ result, onClose }: DetailModalProps) {
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto scrollbar-thin p-6 space-y-6">
-            {/* Status */}
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                Status
-              </h3>
+            {/* Status and Metadata */}
+            <div className="flex flex-wrap items-center gap-3">
               <span
                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${
                   result.pass
@@ -62,6 +59,43 @@ export function DetailModal({ result, onClose }: DetailModalProps) {
               >
                 {result.pass ? '✓ Pass' : '✗ Fail'}
               </span>
+
+              {/* Source badge */}
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  result.source === 'eval'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                }`}
+              >
+                {result.source === 'eval' ? 'Eval Dataset' : 'Test Suite'}
+              </span>
+
+              {/* Auth type badge */}
+              {result.authType && (
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${
+                    result.authType === 'oauth'
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                      : result.authType === 'api-token'
+                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  }`}
+                >
+                  {result.authType === 'api-token'
+                    ? 'API Token'
+                    : result.authType === 'oauth'
+                      ? 'OAuth'
+                      : 'No Auth'}
+                </span>
+              )}
+
+              {/* Project badge */}
+              {result.project && (
+                <span className="px-2 py-1 rounded text-xs font-medium bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300">
+                  {result.project}
+                </span>
+              )}
             </div>
 
             {/* Error */}

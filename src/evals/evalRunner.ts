@@ -3,6 +3,12 @@ import type { LLMJudgeClient } from '../judge/judgeTypes.js';
 import type { EvalDataset, EvalCase } from './datasetTypes.js';
 import type { TestInfo, Expect } from '@playwright/test';
 import { simulateLLMHost } from './llmHost/llmHostSimulation.js';
+import type {
+  AuthType,
+  ResultSource,
+  ExpectationType,
+  EvalExpectationResult,
+} from '../types/index.js';
 
 /**
  * Context passed to expectation functions
@@ -31,20 +37,9 @@ export interface EvalExpectationContext {
   expect?: Expect;
 }
 
-/**
- * Result of an expectation check
- */
-export interface EvalExpectationResult {
-  /**
-   * Whether the expectation passed
-   */
-  pass: boolean;
-
-  /**
-   * Optional details about the result
-   */
-  details?: string;
-}
+// EvalExpectationResult is now imported from '../types/index.js'
+// Re-export for backwards compatibility
+export type { EvalExpectationResult } from '../types/index.js';
 
 /**
  * Expectation function type
@@ -98,7 +93,7 @@ export interface EvalCaseResult {
    * - 'eval': From runEvalDataset() using JSON eval datasets
    * - 'test': From direct API test tracking (MCP fixture calls)
    */
-  source: 'eval' | 'test';
+  source: ResultSource;
 
   /**
    * Overall pass/fail status
@@ -118,23 +113,12 @@ export interface EvalCaseResult {
   /**
    * Expectation results
    */
-  expectations: {
-    exact?: EvalExpectationResult;
-    schema?: EvalExpectationResult;
-    textContains?: EvalExpectationResult;
-    regex?: EvalExpectationResult;
-    snapshot?: EvalExpectationResult;
-    judge?: EvalExpectationResult;
-    error?: EvalExpectationResult;
-  };
+  expectations: Partial<Record<ExpectationType, EvalExpectationResult>>;
 
   /**
    * Authentication type used for this test
-   * - 'oauth': OAuth 2.1 with PKCE
-   * - 'bearer-token': Static bearer token
-   * - 'none': No authentication
    */
-  authType?: 'oauth' | 'bearer-token' | 'none';
+  authType?: AuthType;
 
   /**
    * Playwright project name this test belongs to

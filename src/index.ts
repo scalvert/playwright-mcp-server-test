@@ -82,9 +82,21 @@ export type { ContentBlock, NormalizedToolResponse } from './mcp/response.js';
 export { normalizeToolResponse, extractText } from './mcp/response.js';
 
 // Fixtures
-export type { MCPFixtureApi } from './mcp/fixtures/mcpFixture.js';
+export type {
+  MCPFixtureApi,
+  MCPFixtureOptions,
+  AuthType,
+} from './mcp/fixtures/mcpFixture.js';
 export { createMCPFixture } from './mcp/fixtures/mcpFixture.js';
 export { test, expect } from './fixtures/mcp.js';
+
+// Canonical Types (single source of truth)
+export type {
+  ResultSource,
+  ExpectationType,
+  ExpectationBreakdown,
+  ExpectationResultMap,
+} from './types/index.js';
 
 // Backwards compatibility (deprecated)
 /** @deprecated Use createMCPFixture instead */
@@ -195,4 +207,7 @@ export type {
   MCPEvalReporterConfig,
   MCPEvalRunData,
   MCPEvalHistoricalSummary,
+  MCPConformanceResultData,
+  MCPServerCapabilitiesData,
+  MCPEvalData,
 } from './reporters/types.js';

@@ -5,6 +5,10 @@ import type {
   CallToolResult,
   ListToolsResult,
 } from '@modelcontextprotocol/sdk/types.js';
+import type { AuthType } from '../../types/index.js';
+
+// Re-export AuthType for backwards compatibility
+export type { AuthType } from '../../types/index.js';
 
 // Dynamic import of test for conditional step tracking
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,18 +29,13 @@ try {
 }
 
 /**
- * Authentication type for test categorization
- */
-export type AuthType = 'oauth' | 'bearer-token' | 'none';
-
-/**
  * Options for creating an MCP fixture
  */
 export interface MCPFixtureOptions {
   /**
    * Authentication type used for this test
-   * - 'oauth': OAuth 2.1 with PKCE
-   * - 'bearer-token': Static bearer token
+   * - 'oauth': Interactive OAuth 2.1 with PKCE (browser-based authentication)
+   * - 'api-token': Static API token (e.g., from a dashboard or environment variable)
    * - 'none': No authentication
    */
   authType?: AuthType;

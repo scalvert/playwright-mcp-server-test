@@ -9,12 +9,16 @@ import type {
 import { mkdir, writeFile, readdir, readFile, unlink, cp } from 'fs/promises';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import type { MCPEvalReporterConfig } from './types.js';
+import type { AuthType } from '../types/index.js';
 import type {
-  MCPEvalReporterConfig,
   MCPEvalRunData,
   MCPEvalHistoricalSummary,
-} from './types.js';
-import type { EvalCaseResult } from '../evals/evalRunner.js';
+  MCPConformanceResultData,
+  MCPServerCapabilitiesData,
+  EvalCaseResult,
+} from '../types/reporter.js';
+import type { MCPConformanceCheck } from '../spec/conformanceChecks.js';
 
 /**
  * Custom Playwright reporter for MCP eval results
@@ -39,6 +43,8 @@ export default class MCPReporter implements Reporter {
   private config: Required<MCPEvalReporterConfig>;
   private startTime: number = 0;
   private allResults: Array<EvalCaseResult> = [];
+  private conformanceChecks: Array<MCPConformanceResultData> = [];
+  private serverCapabilities: Array<MCPServerCapabilitiesData> = [];
 
   constructor(options: MCPEvalReporterConfig = {}) {
     this.config = {
@@ -65,6 +71,8 @@ export default class MCPReporter implements Reporter {
   async onBegin(_config: FullConfig, _suite: Suite): Promise<void> {
     this.startTime = Date.now();
     this.allResults = [];
+    this.conformanceChecks = [];
+    this.serverCapabilities = [];
 
     // Ensure output directory exists
     await mkdir(this.config.outputDir, { recursive: true });
@@ -99,7 +107,83 @@ export default class MCPReporter implements Reporter {
       }
     }
 
-    // Strategy 2: Extract MCP tool calls from auto-tracking attachments
+    // Strategy 2: Extract conformance check results
+    // These are created by runConformanceChecks() when testInfo is passed
+    const conformanceAttachment = result.attachments.find(
+      (a) =>
+        a.name === 'mcp-conformance-checks' &&
+        a.contentType === 'application/json'
+    );
+
+    if (conformanceAttachment && conformanceAttachment.body) {
+      try {
+        const conformanceData = JSON.parse(
+          conformanceAttachment.body.toString('utf-8')
+        ) as {
+          operation: string;
+          pass: boolean;
+          checks: MCPConformanceCheck[];
+          serverInfo?: { name?: string; version?: string };
+          toolCount: number;
+          authType?: AuthType;
+          project?: string;
+        };
+
+        // Only push if checks array is valid
+        if (Array.isArray(conformanceData.checks)) {
+          this.conformanceChecks.push({
+            testTitle: test.title,
+            pass: conformanceData.pass,
+            checks: conformanceData.checks,
+            serverInfo: conformanceData.serverInfo,
+            toolCount: conformanceData.toolCount,
+            authType: conformanceData.authType,
+            project: conformanceData.project,
+          });
+        }
+      } catch (error) {
+        this.logError(
+          `[MCP Reporter] Failed to parse conformance check attachment for "${test.title}":`,
+          error
+        );
+      }
+    }
+
+    // Strategy 2b: Extract server capabilities from mcp-list-tools attachments
+    // These are created by createMCPFixture().listTools()
+    const listToolsAttachment = result.attachments.find(
+      (a) => a.name === 'mcp-list-tools' && a.contentType === 'application/json'
+    );
+
+    if (listToolsAttachment && listToolsAttachment.body) {
+      try {
+        const listToolsData = JSON.parse(
+          listToolsAttachment.body.toString('utf-8')
+        ) as {
+          operation: string;
+          toolCount: number;
+          tools: Array<{ name: string; description?: string }>;
+        };
+
+        // Only push if tools array is valid
+        if (Array.isArray(listToolsData.tools)) {
+          this.serverCapabilities.push({
+            testTitle: test.title,
+            tools: listToolsData.tools,
+            toolCount: listToolsData.toolCount,
+            // Note: authType and project are available from the mcp fixture
+            // but not currently included in the listTools attachment
+          });
+        }
+      } catch (error) {
+        this.logError(
+          `[MCP Reporter] Failed to parse mcp-list-tools attachment for "${test.title}":`,
+          error
+        );
+      }
+    }
+
+    // Strategy 3: Extract MCP tool calls from auto-tracking attachments
     // These are created by createMCPFixture()
     // Skip if:
     // - This test already has eval dataset results (to avoid duplicates)
@@ -127,7 +211,7 @@ export default class MCPReporter implements Reporter {
           result: unknown;
           durationMs: number;
           isError: boolean;
-          authType?: 'oauth' | 'bearer-token' | 'none';
+          authType?: AuthType;
           project?: string;
         };
 
@@ -282,6 +366,12 @@ export default class MCPReporter implements Reporter {
         expectationBreakdown,
       },
       results: this.allResults,
+      conformanceChecks:
+        this.conformanceChecks.length > 0 ? this.conformanceChecks : undefined,
+      serverCapabilities:
+        this.serverCapabilities.length > 0
+          ? this.serverCapabilities
+          : undefined,
     };
   }
 

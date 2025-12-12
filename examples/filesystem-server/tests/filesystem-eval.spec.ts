@@ -82,7 +82,11 @@ const test = base.extend<FilesystemFixtures>({
     };
 
     const client = await createMCPClientForConfig(config);
-    const mcpApi = createMCPFixture(client, testInfo);
+    // Include project name for reporter metadata
+    const mcpApi = createMCPFixture(client, testInfo, {
+      authType: 'none',
+      project: testInfo.project.name,
+    });
 
     await use(mcpApi);
 
@@ -91,12 +95,17 @@ const test = base.extend<FilesystemFixtures>({
 });
 
 test.describe('Protocol Conformance', () => {
-  test('passes conformance checks', async ({ mcp }) => {
-    const result = await runConformanceChecks(mcp, {
-      requiredTools: ['read_file', 'list_directory', 'directory_tree'],
-      validateSchemas: false,
-      checkServerInfo: true,
-    });
+  test('passes conformance checks', async ({ mcp }, testInfo) => {
+    // Pass testInfo to attach conformance results to the MCP reporter
+    const result = await runConformanceChecks(
+      mcp,
+      {
+        requiredTools: ['read_file', 'list_directory', 'directory_tree'],
+        validateSchemas: false,
+        checkServerInfo: true,
+      },
+      testInfo
+    );
 
     expect(JSON.stringify(result.checks, null, 2)).toMatchSnapshot();
   });
