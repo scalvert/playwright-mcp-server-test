@@ -5,6 +5,8 @@ import { Layout } from './components/Layout';
 import { MetricsCards } from './components/Dashboard/MetricsCards';
 import { ResultsTable } from './components/Results/ResultsTable';
 import { DetailModal } from './components/Results/DetailModal';
+import { ConformancePanel } from './components/Conformance/ConformancePanel';
+import { ServerCapabilities } from './components/ServerInfo/ServerCapabilities';
 
 function App() {
   const data: MCPEvalData = window.MCP_EVAL_DATA || {
@@ -17,6 +19,16 @@ function App() {
         passed: 0,
         failed: 0,
         passRate: 0,
+        datasetBreakdown: {},
+        expectationBreakdown: {
+          exact: 0,
+          schema: 0,
+          textContains: 0,
+          regex: 0,
+          snapshot: 0,
+          judge: 0,
+          error: 0,
+        },
       },
       results: [],
     },
@@ -26,6 +38,12 @@ function App() {
   const [selectedResult, setSelectedResult] = useState<MCPEvalResult | null>(
     null
   );
+
+  const hasConformanceChecks =
+    data.runData.conformanceChecks && data.runData.conformanceChecks.length > 0;
+  const hasServerCapabilities =
+    data.runData.serverCapabilities &&
+    data.runData.serverCapabilities.length > 0;
 
   return (
     <>
@@ -37,6 +55,22 @@ function App() {
         <div className="max-w-[1600px] mx-auto p-6 h-full flex flex-col gap-6">
           {/* Dashboard */}
           <MetricsCards results={data.runData.results} />
+
+          {/* Conformance Checks and Server Capabilities */}
+          {(hasConformanceChecks || hasServerCapabilities) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {hasConformanceChecks && (
+                <ConformancePanel
+                  conformanceChecks={data.runData.conformanceChecks!}
+                />
+              )}
+              {hasServerCapabilities && (
+                <ServerCapabilities
+                  serverCapabilities={data.runData.serverCapabilities!}
+                />
+              )}
+            </div>
+          )}
 
           {/* Results Table */}
           <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex-1 min-h-0">

@@ -1,4 +1,32 @@
-import type { EvalCaseResult } from '../evals/evalRunner.js';
+/**
+ * Reporter types - re-exported from canonical source
+ *
+ * This module re-exports types from the canonical types module for backwards compatibility.
+ * All type definitions now live in src/types/.
+ *
+ * @packageDocumentation
+ */
+
+// Re-export reporter types from canonical source
+export type {
+  MCPConformanceResultData,
+  MCPServerCapabilitiesData,
+  EvalCaseResult,
+  MCPEvalRunData,
+  MCPEvalHistoricalSummary,
+  MCPEvalData,
+} from '../types/reporter.js';
+
+// Re-export core types
+export type {
+  AuthType,
+  ExpectationType,
+  EvalExpectationResult,
+  ExpectationBreakdown,
+} from '../types/index.js';
+
+// Re-export conformance check type
+export type { MCPConformanceCheck } from '../spec/conformanceChecks.js';
 
 /**
  * Configuration options for MCP Eval Reporter
@@ -36,87 +64,4 @@ export interface MCPEvalReporterConfig {
    * @default true
    */
   includeAutoTracking?: boolean;
-}
-
-/**
- * Aggregated MCP eval run data
- */
-export interface MCPEvalRunData {
-  /**
-   * Run timestamp (ISO 8601)
-   */
-  timestamp: string;
-
-  /**
-   * Total duration in milliseconds
-   */
-  durationMs: number;
-
-  /**
-   * Environment info
-   */
-  environment: {
-    ci: boolean;
-    node: string;
-    platform: string;
-  };
-
-  /**
-   * Aggregate metrics
-   */
-  metrics: {
-    /**
-     * Total number of eval cases
-     */
-    total: number;
-
-    /**
-     * Number of passed cases
-     */
-    passed: number;
-
-    /**
-     * Number of failed cases
-     */
-    failed: number;
-
-    /**
-     * Pass rate (0-1)
-     */
-    passRate: number;
-
-    /**
-     * Dataset breakdown: dataset name -> count
-     */
-    datasetBreakdown: Record<string, number>;
-
-    /**
-     * Expectation type breakdown: type -> count
-     */
-    expectationBreakdown: {
-      exact: number;
-      schema: number;
-      textContains: number;
-      regex: number;
-      snapshot: number;
-      judge: number;
-    };
-  };
-
-  /**
-   * All eval results from this run
-   */
-  results: Array<EvalCaseResult>;
-}
-
-/**
- * Historical summary (for trend charts)
- */
-export interface MCPEvalHistoricalSummary {
-  timestamp: string;
-  total: number;
-  passed: number;
-  failed: number;
-  passRate: number;
-  durationMs: number;
 }

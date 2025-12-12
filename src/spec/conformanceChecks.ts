@@ -1,4 +1,5 @@
 import type { MCPFixtureApi } from '../mcp/fixtures/mcpFixture.js';
+import type { TestInfo } from '@playwright/test';
 import type {
   Tool,
   Resource,
@@ -117,12 +118,16 @@ export interface MCPConformanceResult {
  * Validates that the MCP server conforms to expected protocol behavior.
  * Returns both assertion results and raw MCP responses for snapshotting.
  *
+ * When testInfo is provided, results are automatically attached for the MCP reporter.
+ *
  * @param mcp - MCP fixture API
  * @param options - Conformance check options
+ * @param testInfo - Optional Playwright TestInfo for reporter integration
  * @returns Conformance check results with raw responses
  *
  * @example
  * ```typescript
+ * // Basic usage
  * const result = await runConformanceChecks(mcp, {
  *   requiredTools: ['get_weather', 'search_docs'],
  *   validateSchemas: true,
@@ -131,6 +136,11 @@ export interface MCPConformanceResult {
  * // Check assertions
  * expect(result.pass).toBe(true);
  *
+ * // With reporter integration (recommended in Playwright tests)
+ * const result = await runConformanceChecks(mcp, {
+ *   requiredTools: ['search'],
+ * }, testInfo);
+ *
  * // Snapshot raw responses
  * expect(result.raw.tools).toMatchSnapshot();
  * expect(result.raw.capabilities).toMatchSnapshot();
@@ -138,7 +148,8 @@ export interface MCPConformanceResult {
  */
 export async function runConformanceChecks(
   mcp: MCPFixtureApi,
-  options: MCPConformanceOptions = {}
+  options: MCPConformanceOptions = {},
+  testInfo?: TestInfo
 ): Promise<MCPConformanceResult> {
   const {
     requiredTools = [],
@@ -319,7 +330,30 @@ export async function runConformanceChecks(
 
   const pass = checks.every((check) => check.pass);
 
-  return { pass, checks, raw };
+  const result: MCPConformanceResult = { pass, checks, raw };
+
+  // Attach results for MCP reporter if testInfo is provided
+  if (testInfo) {
+    await testInfo.attach('mcp-conformance-checks', {
+      contentType: 'application/json',
+      body: JSON.stringify(
+        {
+          operation: 'conformanceChecks',
+          pass,
+          checks,
+          serverInfo: raw.serverInfo,
+          capabilities: raw.capabilities,
+          toolCount: raw.tools.length,
+          authType: mcp.authType,
+          project: mcp.project,
+        },
+        null,
+        2
+      ),
+    });
+  }
+
+  return result;
 }
 
 /**

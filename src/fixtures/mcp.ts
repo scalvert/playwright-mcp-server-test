@@ -113,9 +113,9 @@ export const test = base.extend<MCPFixtures>({
     // Build effective config - may add CLI tokens if no auth is configured
     let effectiveConfig = mcpConfig;
 
-    // Check for explicit static token
+    // Check for explicit static API token
     if (mcpConfig.auth?.accessToken) {
-      resolvedAuthType = 'bearer-token';
+      resolvedAuthType = 'api-token';
     }
 
     // If HTTP transport with no explicit auth, try to use CLI-stored tokens

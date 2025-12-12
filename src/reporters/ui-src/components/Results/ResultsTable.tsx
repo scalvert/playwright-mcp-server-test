@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import type { MCPEvalResult } from '../../types';
 
-type AuthFilterType = 'all' | 'oauth' | 'bearer-token' | 'none';
+type AuthFilterType = 'all' | 'oauth' | 'api-token' | 'none';
 
 interface ResultsTableProps {
   results: MCPEvalResult[];
@@ -208,7 +208,7 @@ export function ResultsTable({ results, onSelectResult }: ResultsTableProps) {
           >
             <option value="all">All Auth</option>
             <option value="oauth">OAuth</option>
-            <option value="bearer-token">Token</option>
+            <option value="api-token">API Token</option>
             <option value="none">No Auth</option>
           </select>
         </div>
@@ -367,7 +367,7 @@ export function ResultsTable({ results, onSelectResult }: ResultsTableProps) {
                               >
                                 {result.authType === 'oauth'
                                   ? 'OAuth'
-                                  : 'Token'}
+                                  : 'API Token'}
                               </span>
                             )}
 
