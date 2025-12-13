@@ -8,8 +8,11 @@
 
 - **📊 Dual Test Tracking** - Automatically captures both Playwright test results and eval dataset executions
 - **🎯 Tab-Based Filtering** - Switch between All Results, Eval Datasets, and Test Suites views
-- **📈 Real-Time Metrics** - Pass rate, total tests, duration, and expectation breakdowns
+- **📈 Real-Time Metrics** - Pass rate, total tests, duration with source breakdowns
+- **✅ MCP Conformance Checks** - Protocol compliance validation with per-check details
+- **🔧 Server Capabilities** - View available tools and their descriptions
 - **🔍 Detailed Inspection** - Click any result to see full tool call details, responses, and validation results
+- **📁 Multi-Project Support** - Filter results by Playwright project when running multiple configurations
 - **🌓 Dark Mode** - Automatic theme detection with manual toggle
 - **📱 Responsive Design** - Works on desktop and mobile browsers
 
@@ -61,15 +64,37 @@ npx playwright test --ui
 
 High-level summary at the top of the page:
 
+- **Pass Rate** - Percentage of passed tests (green if ≥80%, red otherwise)
 - **Total Tests** - Total number of test cases executed
 - **Passed** - Number of successful tests
 - **Failed** - Number of failed tests
-- **Pass Rate** - Percentage of passed tests
-- **Duration** - Total execution time
+
+### Source Breakdown
+
+Below the metrics cards, two cards show breakdowns by source:
+
+- **Test Suites** - Pass rate, total, passed, and failed for Playwright tests
+- **Eval Datasets** - Pass rate, total, passed, and failed for dataset-driven evals
+
+### MCP Conformance Checks
+
+A collapsible panel showing MCP protocol compliance:
+
+- **Header** - Shows server name/version and pass count (e.g., "6/6 passed")
+- **Check List** - Expands to show individual conformance checks with pass/fail status
+- Checks include: `server_info_present`, `capabilities_valid`, `list_tools_succeeds`, `required_tools_present`, etc.
+
+### Server Capabilities
+
+A collapsible panel showing available MCP tools:
+
+- **Header** - Shows total tool count (e.g., "9 tools available")
+- **Tool List** - Expands to show each tool name with its description
+- Tools are deduplicated across multiple test runs
 
 ### Tabs
 
-Filter results by type:
+Filter results by source type:
 
 - **All Results** - Show both eval datasets and test suites
 - **Eval Datasets** - Show only dataset-driven evals (icon: BarChart3)
@@ -77,44 +102,49 @@ Filter results by type:
 
 ### Results Table
 
-Comprehensive table with:
+Grouped results organized by dataset/test file:
 
-- **ID/Name** - Test case or dataset identifier
-- **Type** - Eval Dataset or Test Suite (with icons)
-- **Status** - Pass/Fail badge
-- **Expectations** - Count of passed/total expectations
-- **Duration** - Execution time
-- **Timestamp** - When the test ran
+- **Group Headers** - Collapsible sections showing dataset name and pass count
+- **Result Rows** - Individual test cases with:
+  - **Status** - Pass/Fail badge
+  - **Type Icon** - BarChart3 for evals, FlaskConical for tests
+  - **Case ID** - Test case identifier
+  - **Tool Name** - The MCP tool being tested
+  - **Project Badge** - Shown when multiple projects exist
+  - **Duration** - Execution time in milliseconds
 
 Features:
 
-- **Sorting** - Click column headers to sort
-- **Search** - Filter by name or ID
-- **Click to Expand** - See full details in modal
+- **Search** - Filter by case ID or response content
+- **Project Filter** - Filter by Playwright project (when multiple exist)
+- **Pass/Fail Filter** - Show All, Passed only, or Failed only
+- **Collapsible Groups** - Click group headers to expand/collapse
+- **Click to Expand** - Click any row to see full details in modal
 
 ### Detail Modal
 
 Click any result row to see:
 
-1. **Test Information**
-   - Test case ID
-   - Tool name
-   - Status and duration
+1. **Status and Metadata**
+   - Pass/Fail status badge
+   - Source badge (Eval Dataset or Test Suite)
+   - Auth type badge (OAuth, API Token, or No Auth)
+   - Project badge (when applicable)
 
-2. **Tool Call Details**
-   - Arguments sent to the tool
-   - Formatted JSON display
+2. **Error Details** (if failed)
+   - Error message with full stack trace
 
 3. **Response Preview**
-   - Full tool response
-   - Syntax highlighting for JSON
-   - Markdown rendering for text
+   - Full tool response as formatted JSON
+   - Scrollable for large responses
 
 4. **Expectation Results**
-   - Each expectation type (exact, schema, regex, etc.)
-   - Pass/fail status
+   - Each expectation type (exact, schema, textContains, regex, snapshot, judge)
+   - Pass/fail status with visual indicators
    - Detailed failure messages
-   - Diff views for mismatches
+
+5. **Performance**
+   - Execution duration in milliseconds
 
 ### Theme Toggle
 
